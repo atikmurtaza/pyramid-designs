@@ -1,0 +1,32 @@
+# Dependencies and builds
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Environment and generated configuration
+.env
+.env.*
+!.env.example
+.vercel/
+*.pem
+*.key
+
+# Local data, logs, and temporary files
+*.sqlite
+*.sqlite3
+*.db
+*.log
+logs/
+tmp/
+temp/
+
+# Editor and operating-system state
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
