@@ -1,6 +1,6 @@
 # Phase 0D1 and Phase 0D2: Production Provider Evaluation
 
-**Status:** Phase 0D1 historical research; its paid-provider recommendation is **SUPERSEDED BY OWNER COST/HOSTING CONSTRAINT — PHASE 0D2**. Phase 0D2 is **PASS WITH ISSUES — owner approval required**.
+**Status:** Phase 0D1 historical research; its paid-provider recommendation is **SUPERSEDED BY OWNER COST/HOSTING CONSTRAINT — PHASE 0D2**. The Phase 0D2 Hostinger/Supabase/Google Drive direction and manual-quarantine policy were **APPROVED by the owner/reviewer on 2026-08-27**. Remaining legal, operational, backup/restore, and implementation-verification items are production-intake gates, not approval to create resources.
 **Research date:** 2026-08-27
 **Price basis:** Public list prices checked on the research date; USD, excluding tax, exchange-rate effects, domain fees, and staff productivity-suite licences.
 **Scope:** Architecture decision support only. No provider account, resource, secret, environment, deployment, DNS record, package, or application code was created.
@@ -901,4 +901,4 @@ Reconsider the free architecture only on evidence: database approaches 400 MB; p
 - The absence of a free credible malware scanner is stated as residual risk; it is not hidden behind MIME/magic-byte checks.
 - Scaling and paid escalation triggers are explicit, and no provider account/resource was created.
 
-Phase 0E data modelling may proceed **only after owner/reviewer approval of Phase 0D2 and the listed owner decisions**. Candidate-document upload implementation remains separately blocked by the malware decision.
+Phase 0E data modelling may proceed under the owner/reviewer approval recorded on 2026-08-27. Candidate-document implementation remains separately gated until the named manual-review operator, managed endpoint/tool, detailed procedure, residual-risk acceptance, and logical-backup/restore procedure are documented and verified.
