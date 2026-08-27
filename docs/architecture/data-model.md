@@ -419,7 +419,31 @@ Prisma remains the intended ORM, but migrations must retain these database-level
 | Staff deactivation | Local disabled state overrides valid provider sessions and all role assignments immediately. |
 | Cron concurrency | Transactional leases/claim tokens, bounded attempts, and idempotent handlers prevent overlapping workers from duplicating effects. |
 
-## 22. Open decisions
+## 22. Phase 0F implementation boundaries
+
+### Accommodation requests
+
+MVP stores an optional `accommodationContactRequested` boolean, not an open medical-details field. Public wording must invite a recruitment-process accommodation contact request and explicitly ask candidates not to provide medical or health information. Only `HIRING_MANAGER`/`ADMIN` with `application.accommodation.read` may see the flag and manage the approved private follow-up process. Do not copy the flag or follow-up detail into analytics, general notes, email or broad metadata listings.
+
+If HR/legal later approves a minimal scheduling or contact-preference value, add only the bounded value required for that process. Do not add diagnosis, condition, medication, disability-document or medical-evidence fields.
+
+### Constrained rich text
+
+Only project challenge/approach/outcome, job responsibilities/required qualifications/preferred qualifications/hiring-process content and culture-story bodies need constrained rich text in the MVP. Store a versioned structured document/AST, never raw HTML.
+
+Initial allowed nodes are document, paragraph, heading levels 2-4, ordered list, unordered list, list item, block quote, text, hard break and link. Allowed text marks are bold and emphasis. Links permit `https:` and approved `mailto:` only, with bounded labels/URLs and safe external-link rendering. Reject raw HTML, scripts, styles, iframes, embeds, tables, images, executable URLs and unsupported nodes. Apply maximum document size, depth and node count during Phase 2 implementation; validate on write and render through one server-owned allowlisted renderer. Editor/library choice is not an architecture decision.
+
+### Compensation publication
+
+`Job` supports three publication modes without inventing business policy:
+
+1. `HIDDEN` — no compensation is published;
+2. `NUMERIC_RANGE` — `compensationMinMinor`, `compensationMaxMinor`, ISO `compensationCurrency` and approved `compensationPeriod` are all present; or
+3. `APPROVED_TEXT` — bounded `compensationText` is present and approved by HR.
+
+Numeric minimum and maximum use integer minor units, the same currency/period and `min <= max`. Partial numeric ranges are invalid. HR/business configuration decides whether either public mode may be used and which period values are allowed.
+
+## 23. Open decisions
 
 These are genuine pre-implementation or pre-intake decisions, not reasons to redesign the model:
 

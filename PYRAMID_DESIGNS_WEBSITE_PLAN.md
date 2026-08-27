@@ -1,5 +1,7 @@
 # Pyramid Designs Website Plan
 
+**Phase 0F architecture note (2026-08-27):** This remains a planning document and implementation has not started. Provider recommendations in the original plan are historical where superseded by ADRs 0009-0013 and `docs/discovery/phase-0-final-gate.md`. The current baseline is existing qualifying Hostinger managed Next.js/Node.js hosting; Supabase Free PostgreSQL and Supabase Auth in Mumbai; private candidate PDFs in a dedicated company-controlled Google Drive account; PostgreSQL-backed jobs; business-mail SMTP; and free external uptime checking, targeting £0 incremental recurring infrastructure cost.
+
 Status: Planning only. No implementation, deployment, production configuration, or publishing is included in this phase.
 
 ## Design read
@@ -440,7 +442,9 @@ Additional adaptations:
 - Keyboard: every menu, filter, gallery control, dialog, and form is fully operable.
 - Touch targets: minimum 44 by 44 CSS pixels.
 
-## 8. Recommended production architecture
+## 8. Original production architecture proposal
+
+Provider-neutral choices in this section remain useful planning context. Provider-specific hosting, database, identity, candidate-storage, queue, scanner, email and monitoring choices are **SUPERSEDED** by ADRs 0009-0013 and the Phase 0F gate. Do not implement the older paid topology as the current baseline.
 
 ### Front end
 
@@ -469,7 +473,9 @@ Suggested core records:
 - `Application`, `ApplicationAnswer`, `CandidateFile`, `CandidateConsent`
 - `ApplicationStatusEvent`, `InternalNote`, `AuditEvent`
 
-### Deployment topology
+### Deployment topology — historical proposal, **SUPERSEDED**
+
+The Vercel/managed-PITR/S3/Redis/automated-scanner topology below is retained as original planning evidence. It is not the approved production stack. ADRs 0009-0013 and the Phase 0 final gate supersede it. Vercel Pro is **SUPERSEDED**; paid managed PostgreSQL/PITR, S3 plus GuardDuty, managed Redis/queues, paid email and paid observability are **PAID FALLBACKS** unless a later ADR approves them.
 
 - Vercel for the Next.js application and edge delivery.
 - Managed PostgreSQL with point-in-time recovery.

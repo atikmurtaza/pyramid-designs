@@ -1,6 +1,10 @@
 # Pyramid Designs Threat Model
 
-**Status:** Proposed — Phase 0C, 2026-08-27
+**Phase 0F status:** Accepted architecture threat model through Phase 0F, 2026-08-27; mitigations remain implementation and production gates.
+
+**Phase 0F scanner update:** Microsoft Defender Antivirus is the provisional approved manual scanner under `docs/operations/candidate-file-security-review.md`. This reduces but does not eliminate malicious-PDF risk and is not equivalent to automated sandboxing. Candidate intake remains gated on synthetic end-to-end testing, a named operator and owner residual-risk acceptance.
+
+**Historical Phase 0C status:** Proposed on 2026-08-27; superseded by the Phase 0F accepted status above.
 **Scope:** Public portfolio/careers site, staff administration and private candidate-data flow. Trust boundaries and data classes are defined in [system architecture](../architecture/system-architecture.md).
 
 ## Scope and protected assets

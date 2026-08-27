@@ -1,5 +1,7 @@
 # Phase 0D1 and Phase 0D2: Production Provider Evaluation
 
+**Phase 0F update:** Microsoft Defender Antivirus is now the **PROVISIONAL APPROVED MANUAL SCANNER** under `docs/operations/candidate-file-security-review.md`; paid GuardDuty/S3 remains a fallback. Any later Phase 0D2 wording saying no scanner/manual process is adopted is superseded. Candidate intake still requires the production gate, not merely this documentation decision.
+
 **Status:** Phase 0D1 historical research; its paid-provider recommendation is **SUPERSEDED BY OWNER COST/HOSTING CONSTRAINT — PHASE 0D2**. The Phase 0D2 Hostinger/Supabase/Google Drive direction and manual-quarantine policy were **APPROVED by the owner/reviewer on 2026-08-27**. Remaining legal, operational, backup/restore, and implementation-verification items are production-intake gates, not approval to create resources.
 **Research date:** 2026-08-27
 **Price basis:** Public list prices checked on the research date; USD, excluding tax, exchange-rate effects, domain fees, and staff productivity-suite licences.
@@ -712,6 +714,26 @@ Avoid Vercel-only APIs and operational assumptions: no Vercel Edge Functions, Bl
 Official references: [Hostinger Node.js options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/), [Hostinger Node.js web-app deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/), [Hostinger cron](https://www.hostinger.com/support/1583465-how-to-set-up-a-cron-job-at-hostinger/), [Hostinger cron limits](https://www.hostinger.com/support/1583765-how-many-cron-jobs-can-you-set-up-in-hostinger/), [Hostinger web-hosting plans](https://www.hostinger.com/web-hosting).
 
 ## 32. Phase 0D1 services reassessed
+
+### Phase 0F authoritative classification
+
+This table supersedes the earlier Phase 0D2 shorthand retained below as historical evidence.
+
+| Phase 0D1 service | Classification | Current position |
+| --- | --- | --- |
+| Vercel Pro | **SUPERSEDED** | Existing qualifying Hostinger hosting is the approved production host. |
+| Neon Scale | **PAID FALLBACK** | Supabase Free PostgreSQL in Mumbai is approved initially. |
+| Clerk Pro | **PAID FALLBACK** | Supabase Auth basic TOTP MFA is approved initially. |
+| Cloudflare R2 | **PAID FALLBACK** | Hostinger storage/CDN is approved for public media. |
+| AWS S3 | **PAID FALLBACK** | Private Google Drive is approved for candidate PDFs. |
+| GuardDuty Malware Protection | **PAID FALLBACK** | The MVP uses controlled Microsoft Defender manual review; automated scanning remains an upgrade trigger. |
+| QStash | **REJECTED** | PostgreSQL-backed jobs plus one Hostinger cron are sufficient initially. |
+| Upstash Redis | **REJECTED** | PostgreSQL owns idempotency and persistent rate controls initially. |
+| Postmark Pro | **PAID FALLBACK** | Existing business-mail SMTP is approved initially. |
+| Sentry Team | **PAID FALLBACK** | Free scrubbed error monitoring is sufficient initially. |
+| Better Stack paid plans | **PAID FALLBACK** | One free external uptime check is sufficient initially. |
+
+The older `REMOVE`, `FREE-TIER ONLY`, and `PAID FALLBACK ONLY` labels immediately below record the Phase 0D2 discussion; they are not the final classification.
 
 | Phase 0D1 service | Classification | Phase 0D2 reasoning |
 | --- | --- | --- |

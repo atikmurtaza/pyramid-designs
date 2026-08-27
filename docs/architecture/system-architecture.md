@@ -1,6 +1,8 @@
 # Pyramid Designs System Architecture
 
-**Status:** Proposed — Phase 0C, 2026-08-27
+**Phase 0F status:** Accepted architecture baseline through Phase 0F, 2026-08-27. Provider-neutral sections are retained; the provider-specific revision and ADRs 0009-0013 are authoritative where they differ.
+
+**Historical Phase 0C status:** Proposed on 2026-08-27; superseded by the Phase 0F accepted status above.
 **Scope:** Provider-neutral production architecture. No application, account, cloud resource, provider selection, secret, or production configuration is created by this record.
 
 ## 1. Executive summary

@@ -141,6 +141,8 @@ Composite mapping:
 
 ## Manual malware/security workflow
 
+**Phase 0F update:** Microsoft Defender Antivirus is the provisional approved manual scanner and `docs/operations/candidate-file-security-review.md` is the operating SOP. The older unresolved-tool sentence retained below is superseded. Production intake remains disabled until a named operator is assigned, the controlled endpoint is implemented, the SOP passes end to end with synthetic files and the owner accepts the documented residual risk.
+
 The approved MVP workflow is:
 
 1. Server receives a bounded PDF stream, validates extension/MIME/signature/size, assigns an opaque filename, writes it to private Drive quarantine, and records checksum/state.
@@ -151,6 +153,21 @@ The approved MVP workflow is:
 6. `CLEARED` makes the application eligible for `SUBMITTED`; `REJECTED` makes it technically failed; `INDETERMINATE`/tool failure becomes `REVIEW_FAILED` and remains quarantined for retry/escalation.
 
 The exact managed endpoint/tool, named operator, operating instructions, evidence, escalation timing, and residual-risk acceptance remain pre-intake decisions. Until they are documented and verified, the model exists but production candidate-file intake stays disabled.
+
+## Phase 0F manual-review outcome mapping
+
+The operational SOP uses human-facing outcomes while preserving the existing stored enums:
+
+| SOP outcome | Stored review outcome | Current security status | Rule |
+| --- | --- | --- | --- |
+| `CLEAN` | `CLEARED` | `CLEARED` | Requires matching SHA-256 and successful explicit approved scan. |
+| `MALICIOUS_OR_SUSPICIOUS` | `REJECTED` | `REJECTED` | File remains unavailable. |
+| `SCAN_FAILED` | `FAILED` or `INDETERMINATE` | `REVIEW_FAILED` | Retry/escalate; never available. |
+| `FILE_CORRUPT_OR_INVALID` | validation `FAILED`, or review `FAILED` if discovered during review | never `CLEARED` | Replacement uses a new file row. |
+| `REVIEW_CANCELLED` before review starts | no review outcome | prior state retained | Audit cancellation only. |
+| incomplete review after retrieval/start | `FAILED` | `REVIEW_FAILED` | No ambiguous in-progress state may be treated as clean. |
+
+`CLEAN` is an SOP label only; it does not add a new enum. The authoritative application state remains `CLEARED`.
 
 ## Hiring lifecycle
 
