@@ -44,3 +44,16 @@ Protected assets: staff identities/sessions, authorization decisions, private CV
 8. Test CSP, CSRF/origin, rich-text sanitization and dependency/secret scanning.
 
 Provider access controls/encryption/audit, database least privilege/PITR, queue durability, scanner-result authenticity, upload restrictions, production CSP, telemetry redaction, end-to-end deletion/restore, accessibility/no-JS fallback and alert ownership must be verified before the relevant production gate. This document accepts no residual risk on behalf of the owner.
+
+## Phase 0D2: Google Drive and free-tier risks
+
+| Priority | Threat | Prevention | Detection/recovery | Residual risk / gate |
+| --- | --- | --- | --- | --- |
+| P0 | Drive OAuth refresh-token or dedicated-account compromise exposes candidate documents | Server-only environment secret, narrow scope, company-owned account with MFA/two recovery contacts, no browser token, no staff Drive membership. | Revoke token, disable account, rotate credential, audit application and Drive access, notify/escalate under approved incident process. | Google account/provider compromise remains; owner must name account/recovery owners. |
+| P0 | Accidental `anyoneWithLink` sharing or Drive permission drift bypasses app authorization | Private dedicated folder, application creates files, no public links, no general staff membership, server-streamed attachment access only. | Periodic permission/reconciliation check; remove share immediately; audit affected records. | Direct owner-account use can bypass app policy; restrict account access and review quarterly. |
+| P0 | Unscanned PDF is opened by staff | PDF-only validation, attachment disposition, private quarantine and no review/download state without approved scanner/manual clean record. | Quarantined-state reporting and alert on attempted bypass. | No credible zero-cost automated scanner is selected. CV intake stays disabled or requires explicit owner-approved manual-risk process. |
+| P1 | Supabase Free pause/no-PITR causes candidate/admin unavailability or unrecoverable loss | Fail closed, named encrypted exports, restoration drill, separate migration credential/least privilege. | Health monitor, restore into isolation, replay deletion ledger before exposure. | One-week inactivity pause and no provider automatic backup/PITR are owner-acceptance gates. |
+| P1 | Drive API quota/failure or external write inconsistency creates orphan/missing file state | Idempotent upload correlation, Drive ID/checksum persistence, reconciliation jobs, generic retry response. | Job retry/terminal alert; delete or quarantine orphan files safely. | Drive standard API is quota-limited; files are not the authoritative candidate record. |
+| P1 | Hostinger cron authentication/overlap is weak | One protected invocation, secret handling confirmed in implementation spike, atomic PostgreSQL lease and bounded batches. | Job attempt/lease monitoring and duplicate-safe outcome audit. | Exact Hostinger cron-to-app invocation must be tested; no long-lived worker is assumed. |
+
+The Phase 0C requirements for BOLA/IDOR prevention, private files, PII-safe telemetry, default-deny authorization, state separation, session/MFA controls and retention/deletion remain unchanged. This record does not accept any of the above residual risks on the owner's behalf.

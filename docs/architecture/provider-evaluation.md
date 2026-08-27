@@ -1,6 +1,6 @@
-# Phase 0D1: Production Provider Evaluation
+# Phase 0D1 and Phase 0D2: Production Provider Evaluation
 
-**Status:** PROPOSED — owner approval required in Phase 0D2
+**Status:** Phase 0D1 historical research; its paid-provider recommendation is **SUPERSEDED BY OWNER COST/HOSTING CONSTRAINT — PHASE 0D2**. Phase 0D2 is **PASS WITH ISSUES — owner approval required**.
 **Research date:** 2026-08-27
 **Price basis:** Public list prices checked on the research date; USD, excluding tax, exchange-rate effects, domain fees, and staff productivity-suite licences.
 **Scope:** Architecture decision support only. No provider account, resource, secret, environment, deployment, DNS record, package, or application code was created.
@@ -677,3 +677,228 @@ No provider resource should be created until these decisions are approved at the
 - Security was not traded away for a trivial monthly saving; the preferred stack uses Neon Scale, Clerk Pro, managed S3 scanning, paid transactional email retention controls and paid error/log monitoring.
 - The architecture remains one modular monolith with managed capabilities; Kubernetes, service mesh, Kafka, unnecessary microservices and self-administered ClamAV infrastructure were not introduced.
 - This record proposes provider decisions; it does not create ADRs or adopt providers.
+
+---
+
+# Phase 0D2: Zero-Incremental-Cost Hostinger Revision
+
+**Research date:** 2026-08-27
+**Scope:** Replaces only the concrete provider strategy. The accepted server-first, default-deny, private-candidate-data, environment-isolation, state-separation and fail-closed principles remain unchanged. No account, credential, database, Google Cloud project, Drive folder, deployment, DNS setting, environment variable or application code was created.
+
+## 30. Decision summary
+
+Use the owner's existing **Hostinger Business Web or Cloud** hosting as the normal Node.js host, subject to confirming that the actual hPanel subscription exposes **Deploy Web App**. Use **Supabase Free** for the initial low-volume PostgreSQL system of record and staff authentication, and a dedicated existing company Google Drive account for private candidate documents. Use the application server, not browsers, to send candidate files to Drive. Use Hostinger storage/CDN for initial public media; Hostinger SMTP only when an already-paid mailbox exists, otherwise a reputable free transactional tier; Turnstile Free; Hostinger logs plus free Sentry and one free uptime check.
+
+The resulting recurring incremental infrastructure cost is **£0/month** at the stated modest scale. It is a constrained MVP architecture, not a claim that free tiers offer paid-tier backup, support, uptime or recovery guarantees.
+
+## 31. Hostinger-first findings
+
+Hostinger's current support documentation states that managed Node.js web apps are available on **Business Web Hosting and every Cloud plan**. It lists Next.js as a supported backend framework, supports Node 18, 20, 22 and 24, GitHub deployments with automatic builds on push, uploaded source archives, hPanel environment variables, deployment logs/resource graphs and restart controls for server-side applications. Hostinger cron supports custom commands on UTC schedules; Premium and higher plans have unlimited cron jobs, but CPU and memory limits still apply.
+
+Hostinger's public web-hosting page also advertises included CDN, SSL, backups and security controls, but plan names/features shown publicly and the Node.js eligibility page do not perfectly use the same plan labels. The actual owner subscription and hPanel capabilities are therefore the authority. Do not assume that a lower existing plan can run this application at no extra cost.
+
+| Requirement | Phase 0D2 position |
+| --- | --- |
+| Next.js App Router, React Server Components, SSR, route handlers and server actions | Normal Node.js Next.js deployment is the intended portable mode. Hostinger confirms Next.js server-side support, but an implementation spike must prove the selected exact Next.js release, App Router build, Server Actions and route handlers on the owner's plan. |
+| ISR/revalidation | Do not promise it from generic framework support. Test cache persistence, on-demand revalidation and deploy invalidation before relying on ISR for mutable public pages. Safe fallback: short server-rendered cache headers or explicit rebuild/publish. |
+| GitHub deployment/environment variables/logs/health | Supported through hPanel web-app controls. Expose a coarse health endpoint; never put candidate or database details in it. |
+| Scheduled work | Use one Hostinger UTC cron to invoke a protected, idempotent application worker route. Confirm the exact authenticated invocation mechanism before implementation; do not put database credentials in a cron command. |
+| Background processes | No separate continuously running worker is assumed. Keep work bounded and claimed from PostgreSQL by the cron-triggered application route. |
+| Uploads | Browser uploads terminate at the application server, which validates and streams to Drive. This is deliberate: Drive credentials never reach a browser. |
+| CDN, SSL, WAF, backups | Use included SSL and public-media CDN only after plan verification. Treat Hostinger network protections as supplemental; server authorization, validation and Turnstile remain mandatory. Hostinger website backups do not back up the external PostgreSQL database or Drive files. |
+
+Avoid Vercel-only APIs and operational assumptions: no Vercel Edge Functions, Blob, KV, Cron, runtime-specific middleware behaviour or proprietary image pipeline. The application must run via ordinary `next build`/`next start` semantics.
+
+Official references: [Hostinger Node.js options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/), [Hostinger Node.js web-app deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/), [Hostinger cron](https://www.hostinger.com/support/1583465-how-to-set-up-a-cron-job-at-hostinger/), [Hostinger cron limits](https://www.hostinger.com/support/1583765-how-many-cron-jobs-can-you-set-up-in-hostinger/), [Hostinger web-hosting plans](https://www.hostinger.com/web-hosting).
+
+## 32. Phase 0D1 services reassessed
+
+| Phase 0D1 service | Classification | Phase 0D2 reasoning |
+| --- | --- | --- |
+| Vercel Pro | **REMOVE** | Existing Hostinger is the required host and now supports the portable Node.js deployment needed here. |
+| Neon Scale | **PAID FALLBACK ONLY** | Neon Free is credible for a small prototype but has 0.5 GB storage, 100 CU-hours/project/month, five-minute scale-to-zero and only six-hour restore history. Use a paid PostgreSQL tier only when the free recovery/availability limits become unacceptable. |
+| Clerk Pro | **REMOVE** | Clerk Hobby lacks MFA. Supabase Free includes basic TOTP MFA and avoids a separate identity vendor; an existing managed workforce IdP with Auth.js/OIDC remains an alternative. |
+| Cloudflare R2 | **FREE-TIER ONLY** | Optional future public-media offload; it is not required while Hostinger storage/CDN meets the modest portfolio requirement. Do not store candidate files in R2. |
+| AWS S3 | **PAID FALLBACK ONLY** | Replaced initially by the existing private Drive arrangement. Reconsider with a managed scanner or stronger object lifecycle/audit requirement. |
+| GuardDuty Malware Protection | **PAID FALLBACK ONLY** | Credible managed scanner, but not adopted silently. Its absence means documents remain unavailable under the current fail-closed policy. |
+| QStash | **REMOVE** | A PostgreSQL job table and a single Hostinger cron are sufficient at this volume. |
+| Upstash Redis | **REMOVE** | PostgreSQL is authoritative for idempotency and low-rate persistent submission limits; an in-process prefilter is only supplemental. |
+| Postmark Pro | **PAID FALLBACK ONLY** | Use an already-paid Hostinger mailbox SMTP if available, otherwise a sustainable free transactional tier. Escalate only when its delivery, volume or audit needs require it. |
+| Cloudflare Turnstile | **FREE-TIER ONLY** | Retain the production Free plan with server-side Siteverify, action/hostname checks and layered server controls. |
+| Sentry Team | **FREE-TIER ONLY** | Use the free tier only for scrubbed errors at low volume; Hostinger logs and database audit records remain authoritative. |
+| Better Stack | **FREE-TIER ONLY** | Use one free external health/uptime check only if its current free allowance fits. It is not a log store or source of truth. |
+
+## 33. Zero-cost database and staff identity
+
+### Compared free PostgreSQL choices
+
+| Provider | Current free capacity and behaviour | Suitability |
+| --- | --- | --- |
+| Neon Free | 0.5 GB/project, 100 CU-hours/project/month, 5 GB public transfer, five-minute mandatory scale-to-zero, one manual snapshot and six-hour instant-restore history. Singapore is available; the project region cannot later be changed. Standard PostgreSQL and Prisma are supported. | Portable and viable for synthetic/low-risk use, but a cold start and six-hour recovery window make it the weaker initial choice when staff authentication must share the same operational database. |
+| Supabase Free | 500 MB PostgreSQL, shared CPU/500 MB RAM, 5 GB egress, two active projects, one-week inactivity pausing, no automatic backups/PITR, basic MFA, 1 GB Storage and community support. Prisma can connect through the normal PostgreSQL connection options. Singapore and Mumbai (`ap-south-1`) are available regions. | **Preferred at £0.** It consolidates standard PostgreSQL and TOTP-capable staff authentication without placing candidate files in Supabase Storage. The pause and backup limits are real operational constraints. |
+
+No third free PostgreSQL provider adds a material advantage for this low-volume, Hostinger-first design, so none is adopted.
+
+### Recommendation and limitations
+
+Choose **Supabase Free in Mumbai** for the initial database/auth project, subject to an owner-approved privacy/legal assessment of the selected region and a measured Hostinger-to-Supabase connection test. Mumbai is selected for likely Pakistan latency; it is not a legal-residency conclusion. Use Prisma with a pooled runtime connection and a direct migration connection where the selected Supabase connection configuration requires it.
+
+The free plan is genuinely £0 rather than a temporary trial, but it is explicitly marketed for simple sites and pauses after one week of inactivity. It has no automatic backups or point-in-time recovery. A daily application/health cron should not be used to disguise an unavailable system as a production guarantee. Candidate/admin operations fail closed during a pause or outage and display no ambiguous success.
+
+Before production candidate intake, the owner must accept: (1) the one-week-pause risk, (2) no provider-managed backup/PITR, and (3) a named operator for encrypted logical exports and restore testing. If any is unacceptable, use a paid PostgreSQL plan as the first paid escalation.
+
+Official references: [Neon plans](https://neon.com/docs/introduction/plans), [Neon regions](https://neon.com/docs/introduction/regions), [Supabase pricing](https://supabase.com/pricing), [Supabase regions](https://supabase.com/docs/guides/platform/regions), [Supabase Prisma integration](https://supabase.com/partners/integrations/prisma).
+
+## 34. Google Drive candidate-document architecture
+
+### Selected flow
+
+```text
+Candidate browser
+  -> validated PDF form submission to Hostinger application
+  -> bounded server-side validation and streaming upload
+  -> private Google Drive recruitment folder
+  -> PostgreSQL CandidateFile record: Drive file ID, checksum, byte size,
+     technical state, hiring state and retention state
+  -> server-authorized attachment download only when a future approved
+     clean/review state allows it
+```
+
+Applicants need no Google account. No candidate receives a Drive URL. The browser never receives a Drive access token, OAuth client secret, refresh token or service-account key. The application uses a confidential OAuth web-server client with **offline access** authorized once by a dedicated company-owned Google account. Store the refresh token only as a server-side environment secret, restrict hPanel access and scope the integration to the smallest practical Drive scope, initially `drive.file`, with folders/files created by the application.
+
+Use a purpose-limited existing company account, not a personal staff account. Create the conceptual private hierarchy under `Pyramid Designs Recruitment/`:
+
+```text
+quarantine-pending/
+reviewable-clean/       (empty until a scanner process is approved)
+rejected-invalid/
+archived/
+```
+
+Folder placement is operational organisation only. PostgreSQL is authoritative for technical validation/scan state, candidate identity, hiring state, retention/deletion and audit state. Names on Drive use generated opaque IDs plus a `.pdf` extension; no name, email, phone or job title belongs in an object name.
+
+### OAuth versus service account
+
+| Approach | Result |
+| --- | --- |
+| Dedicated company account + OAuth refresh token | **Preferred.** Works with ordinary existing My Drive storage, makes that account the owner and keeps general staff out of Drive. Requires secure refresh-token storage, owner MFA/recovery and a documented transfer/exit procedure. |
+| Service account + Shared Drive | Use only if the owner already has suitable Workspace Shared Drive capacity. Google states service accounts have no Drive storage quota and cannot own files; they must upload to a Shared Drive or act through OAuth on behalf of a human user. Members of a Shared Drive can access all its content at their role level, so do not add hiring staff merely for convenience. |
+
+Drive API standard use is currently no additional cost. As of the current Google documentation, API calls are quota-limited and Google plans potential charges for usage over a future daily threshold with at least 90 days' notice. The stated candidate volume is far below the published per-minute and daily limits, but Drive storage itself must fit the owner's existing account; exceeding that storage is a paid escalation, not an invisible architectural assumption.
+
+### Staff access options
+
+| Option | Security and operations | Decision |
+| --- | --- | --- |
+| A. Application server streams/downloads after fresh authorization | The app checks active identity, role, state, retention and scope; records every grant/denial; responds as attachment and never reveals a permanent Drive URL. General staff have no Drive membership. | **Preferred.** One authorization model and no Drive permission drift. |
+| B. Grant Drive access to authorised staff | Creates a second, broad access-control surface. Shared Drive membership can bypass application role/state checks and exported links are harder to audit/revoke. | Do not use for MVP. Consider only when a separately approved operational requirement outweighs the weaker application control. |
+
+Drive risks and recovery: OAuth credential compromise, accidental link sharing, staff Drive membership drift, owner-account loss, API quota/failure, Drive trash/deletion behaviour and application/Drive deletion mismatch are all recorded in the threat model. The account must disable public/`anyoneWithLink` sharing; the application must periodically reconcile Drive IDs/state and never treat Drive folder names or links as the authority.
+
+Official references: [Drive API authentication/scopes](https://developers.google.com/workspace/drive/api/guides/about-auth), [OAuth web-server flow](https://developers.google.com/identity/protocols/oauth2/web-server), [Shared Drives and service accounts](https://developers.google.com/workspace/drive/api/guides/about-shareddrives), [Drive usage limits and pricing](https://developers.google.com/workspace/drive/api/guides/limits).
+
+## 35. File policy and malware residual risk
+
+The MVP file allowlist is **one PDF up to 5 MB** per application. The limit and allowlist remain policy/configuration values, not hard-coded business assumptions. The application must enforce all of the following before a Drive upload:
+
+- extension exactly `.pdf`;
+- declared MIME exactly `application/pdf`, treated only as a hint;
+- PDF magic header (`%PDF-`) from the received bytes;
+- bounded stream/known content length at or below 5 MB;
+- generated opaque filename; and
+- rejection of empty files, archives, executables, scripts, macro-enabled documents and every non-PDF format.
+
+DOCX is deferred: it adds macro/container parsing and scanning obligations without an MVP need. A PDF may still contain malicious or exploit-bearing content. MIME, extension and magic-byte validation are **not malware scanning**.
+
+No credible £0 automated malware scanner is evidenced for Hostinger's managed Node.js runtime. Hostinger's dependency-vulnerability feature is not a candidate-file scanner, and its managed environment does not establish a supported ClamAV installation/definition-update/health model. Candidate documents must therefore remain `QUARANTINED_UNSCANNED` and unavailable under the accepted fail-closed rule. The public CV-upload feature stays disabled until one of these is explicitly approved:
+
+1. a paid managed scanner such as GuardDuty Malware Protection with private object storage; or
+2. a documented, owner-approved manual scanning procedure on a managed endpoint, including who may retrieve a quarantined attachment, which trusted endpoint protection scans it, how a clean result is independently recorded, and how the residual risk is accepted.
+
+This is the central Phase 0D2 issue. It preserves the security control rather than quietly claiming that £0 validation removes malware risk.
+
+## 36. Authentication and authorization
+
+Use **Supabase Auth Free** for staff-only identity with basic TOTP MFA required for every privileged staff member. No candidate account is created. Store the external authentication subject on a local staff record and retain all Pyramid roles and scope decisions in PostgreSQL: `CONTENT_EDITOR`, `HIRING_REVIEWER`, `HIRING_MANAGER`, `ADMIN`, `AUDITOR`; default deny continues.
+
+Clerk Hobby is not selected because current pricing puts MFA on Pro. Auth.js/OIDC is the preferred alternative only if the owner already operates a Google Workspace or Microsoft Entra workforce identity with enforced MFA, prompt offboarding and named administrators. Do not add local password storage, custom MFA or custom cryptography to avoid a provider fee.
+
+Free identity-tier limits, recovery, session revocation and offboarding must be tested before real staff access. The application still verifies identity and authorization server-side on each sensitive read, mutation and candidate-document action.
+
+Official references: [Supabase pricing and basic MFA](https://supabase.com/pricing), [Supabase MFA](https://supabase.com/docs/guides/auth/auth-mfa), [Clerk pricing](https://clerk.com/pricing), [Auth.js](https://authjs.dev/).
+
+## 37. Jobs, abuse protection and idempotency
+
+Use one PostgreSQL `Job` table with opaque payload IDs, `runAt`, attempt count, bounded retry metadata, terminal state and claim/lock fields. A single Hostinger cron invokes a protected worker route; each invocation claims a small batch transactionally, uses `SKIP LOCKED`-style semantics or an equivalent atomic lease, executes idempotently and releases/records the outcome. It covers email retry, retention/deletion, stale-submission cleanup and Drive reconciliation. The queue is not the source of truth and no Redis is required.
+
+Future managed-queue trigger: sustained cron overlap, jobs repeatedly exceeding the Hostinger request/resource limits, more than one worker instance, a strict delivery-latency SLA, or a measured retry/backlog problem.
+
+Abuse controls remain layered:
+
+- Turnstile Free is verified server-side with expected action/hostname;
+- honeypot, minimum completion time, origin checks and generic failures run before expensive work;
+- small in-process short-window counters reduce single-instance floods but are never the distributed authority;
+- PostgreSQL records persistent limits only for submission/upload-intent attempts after cheap controls, using a short-lived keyed hash rather than raw PII; and
+- unique constraints, transactions and a server-issued opaque idempotency key prevent duplicate durable submissions.
+
+Hostinger/WAF controls, where the confirmed plan exposes them, are supplemental only. If the application later runs multiple instances, in-memory limits become weaker; PostgreSQL limits and Turnstile remain effective, and a managed rate store becomes a paid-fallback trigger.
+
+## 38. Email, monitoring, media and recovery
+
+| Area | Initial zero-cost position | Escalation trigger |
+| --- | --- | --- |
+| Transactional email | Use existing Hostinger business-mailbox SMTP only when the owner already has an active mailbox and authenticated domain. Otherwise use a reputable free transactional tier such as Resend Free within its current 3,000/month and 100/day allowance. Send only a reference and operational text—never CVs, answers or Drive links. Configure SPF, DKIM and DMARC. | Existing mailbox unavailable, sustained delivery/bounce issue, volume beyond free allowance, or required retention/audit controls. |
+| Errors/logs | Hostinger deployment/runtime logs and resource graphs; Sentry Free for aggressively scrubbed errors only. Application/database audit records remain separate and append-only. | Free event/retention limits, need team alerting/log search, or privacy/compliance needs exceed its controls. |
+| Uptime | One free external health check plus a coarse `/api/health` endpoint. It exposes no dependency names, regions, credentials or candidate data. | Need multiple monitors, incident escalation/on-call integration or independent durable job heartbeat monitoring. |
+| Portfolio media | Optimized approved assets on Hostinger storage/CDN initially. Keep source/derivative recipes in the CMS/application records. | Storage/bandwidth/performance measurement shows Hostinger is insufficient; first offload is R2 Free within its allowance, then paid R2 or a media service only when measured. |
+| PostgreSQL recovery | Named operator makes encrypted logical exports before migrations and at an owner-approved cadence; store them privately, retain a restoration ledger and rehearse restore into a non-production environment. | Owner requires automated backups/PITR, free-tier pause/recovery becomes unacceptable, or data volume/cadence makes manual exports unsafe. |
+| Drive recovery | PostgreSQL remains authoritative; use Drive's private trash/version behaviours only as a convenience, not the retention policy. Reconcile file IDs, record deletion requests, and test restore/deletion replay before exposure. | Drive storage, account ownership, retention/legal hold or recovery requirements exceed an existing account's capabilities. |
+
+Free tiers are not trials in this plan. Existing Hostinger/domain/mailbox costs are excluded from the incremental calculation. Some services may require account/identity verification; no automatic paid overage is assumed, and any plan that enables overage billing must have a zero/strict spend control where available.
+
+## 39. Simplified stack options
+
+| Option | Stack | Incremental cost | Strengths | Material limitation |
+| --- | --- | ---: | --- | --- |
+| A | Hostinger + **Supabase Free** (PostgreSQL/Auth/TOTP) + private Google Drive + Turnstile + Hostinger SMTP/Resend Free | **£0** | Fewest new providers; Mumbai option; standard PostgreSQL; MFA at no extra charge. | One-week pause, no automatic database backup/PITR; scanner remains unresolved. |
+| B | Hostinger + Neon Free + Auth.js with an already-owned workforce IdP + private Google Drive + Turnstile | **£0** | Strong PostgreSQL portability and low application lock-in if an MFA-enforced workforce IdP already exists. | 0.5 GB/100 CU-hours/mandatory cold sleep/six-hour history; requires a confirmed existing IdP. |
+| C | Hostinger + Supabase Free PostgreSQL + Clerk Hobby + private Google Drive + Turnstile | **£0** | Familiar identity UX and PostgreSQL portability. | Clerk Hobby has no MFA, so it fails the privileged-staff security requirement. Not recommended. |
+
+**Preferred: Option A.** It best uses existing Hostinger investment, keeps new recurring spend at £0, avoids unnecessary infrastructure, preserves standard PostgreSQL portability and offers a free TOTP MFA route. It is accepted only as a low-volume architecture with explicit database-recovery and malware-scanning gates; it does not authorise real candidate CV intake by itself.
+
+## 40. Cost ceiling and future triggers
+
+| Component | Initial recurring incremental cost | Cost type |
+| --- | ---: | --- |
+| Existing Hostinger Node.js hosting, SSL, CDN, cron and logs | £0 incremental | Existing paid service; exact qualifying plan must be confirmed. |
+| Supabase Free PostgreSQL/Auth | £0 | Genuine free tier; not a trial; pauses after one inactive week and has no automatic backups. |
+| Google Drive API and existing Drive storage | £0 incremental | Standard API use currently has no extra cost; existing account storage must be sufficient. |
+| Candidate malware scanner | £0 | **Not adopted.** Candidate CV intake remains fail-closed pending an approved scanner/manual process. |
+| Turnstile Free | £0 | Free tier. |
+| Email | £0 incremental | Existing mailbox if already paid; otherwise a free tier within its published allowance. |
+| Error/uptime monitoring | £0 | Free tiers only; scrubbed telemetry. |
+| Public portfolio media | £0 incremental | Existing Hostinger allocation; R2 Free is optional future offload. |
+| Jobs/rate limiting/idempotency | £0 | PostgreSQL plus Hostinger cron; no managed queue/Redis. |
+| **Expected incremental monthly infrastructure** | **£0** | Excludes existing Hostinger/domain/productivity-suite charges and any owner-approved escalation. |
+
+Reconsider the free architecture only on evidence: database approaches 400 MB; provider pauses/cold starts cause an operational failure; monthly applications exceed roughly 100–300 or cron work starts overlapping; candidate/public media exhausts existing Drive/Hostinger allocation; delivery exceeds a free email allowance; persistent abuse makes PostgreSQL limits costly; free monitoring retention/alerts are insufficient; more staff need concurrency/audit controls; a legal/security requirement mandates managed backups/PITR or automated malware scanning.
+
+## 41. Owner, legal and implementation gates
+
+1. Confirm the owner's Hostinger subscription is Business Web or Cloud and exposes the Node.js Web App facility without an incremental upgrade.
+2. Confirm the legal entity, candidate-data jurisdiction/cross-border notice, Drive account ownership/recovery contacts, retention/deletion/legal-hold policy and approved privacy contact.
+3. Accept or reject the Supabase Free pause/no-PITR recovery risk and name the encrypted-export/restore-test owner.
+4. Decide whether candidate document intake remains disabled until a paid scanner, or approve a detailed manual scanning procedure and its residual risk. No document may be treated as clean without one.
+5. Confirm an existing Hostinger business mailbox or select a free transactional-email account; approve sender domain/SPF/DKIM/DMARC and alert ownership.
+6. Before implementation, prove Hostinger's exact Next.js App Router/SSR/route-handler/Server Action/ISR behaviour, cron authentication path, Supabase connection behaviour, non-public Drive permissions and server-only credentials with synthetic data.
+
+## 42. Phase 0D2 verification
+
+- The adopted MVP services show £0 incremental recurring cost; paid products are recorded solely as fallbacks.
+- Hostinger is the production direction subject to the verified plan gate, not Vercel.
+- Applicants need no Google account; Drive credentials remain server-only; candidate files have no public links and staff do not receive Drive membership in the preferred access model.
+- Default-deny server authorization, environment isolation, PostgreSQL state/idempotency, private candidate data and fail-closed processing remain mandatory.
+- The absence of a free credible malware scanner is stated as residual risk; it is not hidden behind MIME/magic-byte checks.
+- Scaling and paid escalation triggers are explicit, and no provider account/resource was created.
+
+Phase 0E data modelling may proceed **only after owner/reviewer approval of Phase 0D2 and the listed owner decisions**. Candidate-document upload implementation remains separately blocked by the malware decision.

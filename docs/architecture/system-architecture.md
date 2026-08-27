@@ -99,16 +99,16 @@ flowchart TB
   PublicUI --> Bot
 ```
 
-The browser can write only one pre-authorised quarantine key; it cannot list/read a cleared key. Preview has no production database, candidate storage, queue, email delivery, credential or unrestricted staff-identity access.
+The browser sends one bounded PDF stream only to the application server; it has no Drive credential, upload permission, listing ability or download access. Preview has no production database, candidate storage, queue, email delivery, credential or unrestricted staff-identity access.
 
 ## 6. Trust-boundary contract
 
 | Boundary | Data and controls | Failure behaviour |
 | --- | --- | --- |
 | Browser → app | TLS; validate every field, idempotency key, origin and abuse signal. Staff mutations require session, CSRF/origin protection and policy. | Reject safely with generic public response. |
-| Browser → quarantine | Short-lived, single-object permission after intent validation; random key, private encryption, size/type conditions where available. | Expiry/partial/invalid upload is never reviewable. |
+| Browser → application upload | Bounded server-received PDF stream after intent validation; size/extension/MIME/signature controls; no Drive credential reaches the browser. | Partial/invalid upload is never reviewable. |
 | App → PostgreSQL | Encrypted/private transport, least-privilege credential, parameterized data access, transactions for state/audit changes. | Fail closed for candidate/admin work; public reads degrade safely. |
-| Storage → worker/scanner | Authenticated job with opaque object ID and version/checksum; worker revalidates extension, MIME, magic bytes and size. | No result/mismatch/timeout remains quarantined; alert and retry. |
+| Drive → application reconciliation/scanner | Opaque Drive ID/checksum/state; application revalidates extension, MIME, magic bytes and size. | No approved clean result, mismatch or timeout remains quarantined; alert and retry. |
 | App → email | Receipt/reference and safe operational text only; never a CV, attachment or signed URL. | Durable submission state remains authoritative; queue/retry mail. |
 | App/worker → monitoring | Only opaque IDs and safe request context. | Alert on unavailable monitoring; do not leak data to fallback sinks. |
 | Preview → production | Separate secrets/databases/storage; email sink; synthetic data only. | Block by provider/access policy, not convention. |
@@ -127,10 +127,10 @@ Never put CV contents, identifying filenames, names, emails, phone numbers, free
 ## 8. Candidate submission flow
 
 1. The candidate opens a job or evergreen form; server provides validated submission context. There is no candidate account (FR-019).
-2. Server validates structured data, consent version, anti-abuse controls and idempotency, then authorises upload intent.
-3. Browser uploads directly to a random private **quarantine** key using a narrow, short-lived permission.
-4. A durable job binds the object version/checksum. Worker validates extension allowlist, MIME, magic signature and configured size again, then scans.
-5. Clean result moves/copies to restricted cleared storage atomically with the clean state. Suspicious, infected, failed, mismatched or timed-out files stay unavailable.
+2. Server validates structured data, consent version, anti-abuse controls and idempotency, then accepts one bounded PDF stream.
+3. The application server writes the generated opaque filename into private Google Drive **quarantine** using its server-only credential; the browser has no Drive access.
+4. A durable job binds Drive file ID/checksum and revalidates extension allowlist, MIME, magic signature and configured size. At Phase 0D2 it records `QUARANTINED_UNSCANNED`; it cannot automatically promote a file to clean.
+5. A future approved scanner/manual clean process may make a separate reviewable state available. Suspicious, infected, failed, mismatched, timed-out and unscanned files stay unavailable.
 6. Only accepted structured applications with all required clean documents become eligible for review. Receipt has opaque reference only.
 7. Staff document request performs a fresh policy check and creates short-lived download access; the outcome is audited.
 8. Policy-versioned retention/deletion removes records and objects; correction/deletion requests have an owner.
@@ -219,3 +219,22 @@ Phase 0D needs legal entity/jurisdictions; residency/processor constraints; rete
 - No application code, package manifest/install, provider, cloud resource, secret or production configuration was created.
 - The architecture is one modular monolith plus managed capabilities; no unnecessary independent services were introduced.
 - Candidate security paths fail closed; public presentation degrades gracefully.
+
+## Phase 0D2 provider-specific revision
+
+The concrete initial deployment is a normal Node.js Next.js application on the owner's qualifying Hostinger Business Web or Cloud plan. PostgreSQL and staff identity use Supabase Free initially; candidate documents use server-mediated private Google Drive uploads owned by a dedicated company account. Public portfolio media stays on Hostinger storage/CDN. These choices do not change the server-first modular-monolith or server-side default-deny model.
+
+The previous direct browser-to-object-store quarantine design is replaced for Drive: the browser sends a bounded PDF stream to the trusted application server, and only the server uses its private Drive credential. The database writes the application/file state and Drive file ID transactionally as far as the external API boundary permits; reconciliation handles partial external failures. The browser receives no Drive permission and cannot read/list Drive content.
+
+```text
+browser -> Hostinger form route -> validation/size cap -> private Drive quarantine
+        -> PostgreSQL CandidateFile (Drive ID + state) -> future authorised attachment stream
+```
+
+The Drive folder is not a security state. `CandidateFile` technical state, validation state, scan/manual-review state, retention state and hiring state remain separate PostgreSQL fields. Use opaque `.pdf` filenames only. General staff are not Drive members; an authorised document request streams from Drive through the application as an attachment after fresh role, target, state and retention checks and writes an audit event.
+
+At £0, no credible supported automated malware scanner exists for Hostinger-managed Node.js. Files remain `QUARANTINED_UNSCANNED` and are not downloadable/reviewable until a separate approved scanner or explicitly accepted manual scanning control records a clean outcome. MIME/header/extension checks are validation controls only. This keeps the accepted fail-closed candidate path intact.
+
+Background work is a PostgreSQL job table invoked by one protected Hostinger UTC cron route, not a dedicated worker/Redis/managed queue. Each handler atomically claims a small batch, is idempotent, records retries/terminal failure and only contains opaque IDs. Turnstile, a honeypot/timing/origin checks, small in-process prefiltering and PostgreSQL-backed submission limits provide layered abuse control; in-process memory is never a multi-instance authority.
+
+Supabase Free is a deliberate low-volume compromise: 500 MB database, basic TOTP MFA, no automatic backups/PITR and a project pause after one inactive week. Candidate/admin paths fail closed when unavailable. Named-owner encrypted logical exports, a restoration exercise and owner acceptance of these limits are required before real candidate intake. Development/preview still use separate synthetic projects, Drive folders/credentials and email sinks.
