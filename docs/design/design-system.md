@@ -3,7 +3,7 @@
 > **Phase 1B addendum:** The responsive shell, component contracts, native-dialog navigation, theme decision, form/status foundations, and client/server boundary are documented in `docs/design/component-system.md`. No public pages, providers, workflows, or deployment configuration are added by Phase 1B.
 
 **Phase:** 1A — Brand Asset Normalisation and Design-System Foundation
-**Status:** Proposed for visual review; not a public-page implementation
+**Status:** Foundation established; owner-approved logo master integrated in Phase 1C-L
 **Research date:** September 1, 2026
 
 ## APPROVED FROM SOURCE MATERIAL
@@ -11,11 +11,12 @@
 - Brand charcoal is `#30323D`; brand yellow is `#E8C547`.
 - The identity combines interlocking `P` and `D` forms with three pyramid forms and controlled diagonal geometry.
 - Major media/project panels use a 16px radius; fields use 8px; primary actions are pills.
-- Nexa Light is the wordmark reference. No Nexa font file or licence evidence was supplied, so it is not embedded or used as live UI type.
+- The owner-approved SVG contains the complete symbol and `Pyramid Designs` wordmark as vector outlines.
+- Nexa Light remains the editable wordmark/type reference. No Nexa font file or licence evidence was supplied, so it is not embedded or used as live UI type.
 - The visual direction is geometric, editorial, clean, premium and intentionally low-density (`VISUAL_DENSITY: 3`).
 - Light and dark themes remain subject to the plan's brand and accessibility review gate.
 
-## PROPOSED FOR REVIEW
+## BRAND ASSET STATUS
 
 ### Brand source and logo status
 
@@ -27,9 +28,9 @@ All four supplied raster references were inspected and remain unchanged at the r
 | `pyramid-bgremove.png` | Reference only | Transparent full-logo comparison source. |
 | `pyramid-colour.jpg` | Reference only | Yellow-surface treatment source. |
 | `pyramiddesigns.jpg` | Reference only | Brand board confirming colours and Nexa Light reference. |
-| `public/brand/proposed/pyramid-mark-proposed.svg` | **REQUIRES OWNER VISUAL APPROVAL** | Proposed mark-only SVG trace for review. It intentionally excludes the wordmark. |
+| `public/brand/approved/pyramid-designs-master.svg` | **OWNER APPROVED MASTER** | Complete symbol and outlined wordmark. SVG contents are preserved exactly as supplied. |
 
-No horizontal, stacked, wordmark, or favicon master is claimed final. The supplied raster is sufficiently clear to propose a mark trace, but no editable vector master is available; exact geometry requires owner approval. The wordmark remains raster artwork until licensed Nexa source files or an approved SVG master are supplied.
+The approved master resolves the complete stacked logo artwork used by the website. It does not provide a separate mark-only, horizontal, inverse/dark-background or favicon variant. The supplied charcoal/yellow artwork is placed on a light holding surface when used on the dark-first interface; no filter or recolouring is applied. The outlined wordmark does not require the site to embed Nexa, but a Nexa licence/source file is still required if Nexa is later used as editable live text.
 
 ### Stack baseline
 
@@ -102,7 +103,7 @@ No icon library was installed because Phase 1A needs no repeated production icon
 - `TextLink`: native anchor with a durable underline.
 - `Container`: page-width constraint.
 - `Surface`: semantic panel treatment.
-- `PyramidMark`: review-only proposed SVG mark trace.
+- `PyramidLogo`: reusable reference to the unchanged owner-approved complete SVG master.
 
 ### Review route and production exclusion
 
@@ -110,11 +111,10 @@ No icon library was installed because Phase 1A needs no repeated production icon
 
 ### Open visual decisions
 
-1. Approve or replace the proposed mark-only SVG trace against an editable brand master.
-2. Supply Nexa Light licence/source evidence or approve a wordmark SVG/master for web use.
-3. Approve whether both themes ship publicly after visual and accessibility review.
-4. Approve Manrope as the UI family, or provide a licensed approved alternative.
+1. Supply a separate approved inverse/dark-background, horizontal, mark-only or favicon variant if future placements require one.
+2. Supply Nexa Light licence/source evidence if Nexa is to be used as editable live text.
+3. Approve any future public light-theme control after visual and accessibility review.
 
 ### Phase 1B inputs
 
-Phase 1B can use these primitives and tokens to prototype individual public page layouts only after owner/reviewer approval. It still needs approved logo output, real content/media rights and any page-specific visual decision required by the plan.
+The owner-approved logo master is integrated. Later phases still require real content/media rights and each explicit owner/reviewer gate defined by the plan.

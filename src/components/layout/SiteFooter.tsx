@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PyramidMark } from "@/components/brand/PyramidMark";
+import { PyramidLogo } from "@/components/brand/PyramidLogo";
 import { joinUs, primaryNavigation } from "./navigation";
 
 const socialLinks = [
@@ -13,7 +13,9 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container site-footer__grid">
         <div>
-          <PyramidMark className="site-footer__mark" title="Pyramid Designs proposed brand mark" />
+          <Link className="site-footer__brand-link" href="/" aria-label="Pyramid Designs home">
+            <PyramidLogo className="site-footer__mark" decorative />
+          </Link>
         </div>
         <nav aria-label="Footer navigation">
           <p className="eyebrow">Explore</p>

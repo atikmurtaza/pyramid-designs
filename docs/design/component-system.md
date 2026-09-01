@@ -5,7 +5,7 @@
 
 ## Global shell
 
-`RootLayout` provides a skip link, `SiteHeader`, page content, and `SiteFooter`. The currently proposed mark is isolated in `PyramidMark` so an approved master asset can replace it without changing shell layout.
+`RootLayout` provides a skip link, `SiteHeader`, page content, and `SiteFooter`. `PyramidLogo` is the single reusable reference to `public/brand/approved/pyramid-designs-master.svg`, the owner-approved complete logo master.
 
 ## Header and mobile navigation
 
@@ -13,7 +13,7 @@ The desktop header uses semantic primary navigation in the approved order, with 
 
 ## Footer
 
-The footer supports the supplied social URLs, the supplied MAD Alpha Designers domain, approved parent attribution wording, Pakistan context, and structured future legal/contact routes. It intentionally does not publish an address, phone number, legal claim, or invented social handle.
+The footer links the owner-approved complete logo to Home with an accessible link name. It also supports the supplied social URLs, the supplied MAD Alpha Designers domain, approved parent attribution wording, Pakistan context, and structured future legal/contact routes. It intentionally does not publish an address, phone number, legal claim, or invented social handle.
 
 ## Theme behaviour
 
@@ -41,4 +41,4 @@ Desktop navigation is single-line at 768px and above; the mobile dialog is used 
 
 ## Phase 1C inputs
 
-Phase 1C should start only after owner review of the provisional mark, Nexa/source resolution, public-theme decision, and supplied/reviewable real content or media. It must be explicitly authorized before any page implementation.
+Phase 1C-L integrated the owner-approved complete logo master. Nexa licensing remains open only for future editable live-text use. Every later phase still requires explicit owner or reviewer authorization.

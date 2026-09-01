@@ -12,13 +12,13 @@ This phase refines the existing Home visual prototype. It does not redesign the 
 
 The current approved direction is:
 
-- Manrope is the working primary website typeface. Nexa remains relevant only if a genuine licensed brand or wordmark source is supplied.
+- Manrope is the working primary website typeface. The approved logo contains an outlined wordmark; Nexa remains relevant only if licensed editable live text is later required.
 - Dark is the intentional public default. Functional semantic light tokens remain available. There is no public theme toggle.
 - `Creative work, technical depth.` is the provisionally approved H1.
 - The Selected Work asymmetric editorial composition and logical DOM order are approved.
 - The global yellow balance is approved.
 - The two recruitment paths are approved conceptually: published vacancies and general freelance, project, portfolio or future permanent introductions.
-- The proposed SVG mark remains provisional pending comparison with a genuine approved master.
+- `public/brand/approved/pyramid-designs-master.svg` is the **OWNER APPROVED MASTER** for the complete symbol and outlined wordmark.
 - The Culture structure is approved. Final visual quality depends on genuine approved Pyramid Designs photography or video.
 - Capabilities and parent-company presentation required refinement and were addressed in Phase 1C-R.
 
@@ -82,7 +82,7 @@ The verified disclosure remains:
 
 The relationship is now a compact provenance row with a small yellow rule, restrained heading size and the verified external link. The redundant explanatory paragraph was removed.
 
-The footer no longer repeats the full relationship sentence. It retains the verified `MAD Alpha Designers` link in the Connect group, useful navigation, social links, legal links and the provisional Pyramid Designs mark. Pyramid Designs remains the dominant site identity.
+The footer no longer repeats the full relationship sentence. It retains the verified `MAD Alpha Designers` link in the Connect group, useful navigation, social links, legal links and the owner-approved Pyramid Designs logo master. Pyramid Designs remains the dominant site identity.
 
 ## 7. Vertical rhythm refinement
 
@@ -139,8 +139,8 @@ The refined Home was checked at approximately 1440, 1280, 1024, 768, 430, 390 an
 
 Only the following genuinely unresolved decisions remain:
 
-1. Approve or replace the proposed SVG mark against a genuine approved master.
-2. Supply and approve the final Nexa or wordmark master and licence evidence if it is to be used.
+1. Supply a separate approved inverse/dark-background, horizontal, mark-only or favicon variant if a future placement requires one.
+2. Supply Nexa licence/source evidence only if Nexa is to be used as editable live text.
 3. Supply approved portfolio projects, media, credits, publication rights and factual descriptors.
 4. Supply approved Pyramid Designs team, workplace, event or short-form culture media.
 5. Approve final production service wording and all remaining proposed or synthetic copy before publication.
@@ -150,3 +150,11 @@ Manrope, dark-first presentation, Selected Work composition, yellow balance, rec
 ## 13. Phase boundary
 
 Phase 1C-R refines the Home prototype only. Phase 1D has not begun. Proceeding to Phase 1D still requires the explicit owner or reviewer gate defined by the controlled production programme.
+
+## 14. Phase 1C-L approved logo integration
+
+The owner-supplied `pyramidf.svg` was relocated without content changes to `public/brand/approved/pyramid-designs-master.svg`. Its SHA-256 before and after relocation is `2C5D2042EF020AA7AD37FF92E6FD9C3407EF305102EE49DA3B6900FF99FFE60C`.
+
+The master declares `width="3214"`, `height="2632"` and `viewBox="0 0 3214 2632"`. It contains the complete symbol and `Pyramid Designs` wordmark as vector outlines. `PyramidLogo` now references this single production asset for the header, footer, Home hero and design-system review. The previous generated provisional mark and inline React path definitions were removed.
+
+The supplied charcoal/yellow master is not recoloured or filtered. Header and footer placements use a light holding surface on the dark-first interface so the approved charcoal artwork remains visible. A future standalone inverse or dark-background variant must be supplied and approved rather than fabricated.
