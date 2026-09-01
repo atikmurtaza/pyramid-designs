@@ -8,7 +8,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header__inner container">
         <CurrentNavigationLink className="brand-link" href="/" aria-label="Pyramid Designs home">
-          <PyramidLogo decorative />
+          <PyramidLogo decorative variant="symbol" />
         </CurrentNavigationLink>
         <nav className="desktop-navigation" aria-label="Primary navigation">
           {primaryNavigation.map((item) => <CurrentNavigationLink key={item.href} href={item.href}>{item.label}</CurrentNavigationLink>)}

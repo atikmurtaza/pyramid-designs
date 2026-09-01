@@ -14,7 +14,7 @@ export function SiteFooter() {
       <div className="container site-footer__grid">
         <div>
           <Link className="site-footer__brand-link" href="/" aria-label="Pyramid Designs home">
-            <PyramidLogo className="site-footer__mark" decorative />
+            <PyramidLogo className="site-footer__mark" decorative variant="symbol" />
           </Link>
         </div>
         <nav aria-label="Footer navigation">

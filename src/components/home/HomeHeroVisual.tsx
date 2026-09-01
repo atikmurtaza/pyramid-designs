@@ -2,7 +2,7 @@ import { PyramidLogo } from "@/components/brand/PyramidLogo";
 
 /**
  * Static, server-rendered fallback and future Phase 1G replacement boundary.
- * The owner-approved logo master is rendered unchanged inside the composition.
+ * The exact-geometry symbol derivative is rendered inside the composition.
  */
 export function HomeHeroVisual() {
   return (
@@ -16,8 +16,8 @@ export function HomeHeroVisual() {
       <div className="home-hero-visual__grid" />
       <div className="home-hero-visual__plane home-hero-visual__plane--top" />
       <div className="home-hero-visual__plane home-hero-visual__plane--side" />
-      <div className="home-hero-visual__mark-shell">
-        <PyramidLogo className="home-hero-visual__mark" decorative />
+      <div className="home-hero-visual__mark-field">
+        <PyramidLogo className="home-hero-visual__mark" decorative variant="symbol" />
       </div>
       <div className="home-hero-visual__anchor" />
     </div>

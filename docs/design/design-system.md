@@ -30,7 +30,7 @@ All four supplied raster references were inspected and remain unchanged at the r
 | `pyramiddesigns.jpg` | Reference only | Brand board confirming colours and Nexa Light reference. |
 | `public/brand/approved/pyramid-designs-master.svg` | **OWNER APPROVED MASTER** | Complete symbol and outlined wordmark. SVG contents are preserved exactly as supplied. |
 
-The approved master resolves the complete stacked logo artwork used by the website. It does not provide a separate mark-only, horizontal, inverse/dark-background or favicon variant. The supplied charcoal/yellow artwork is placed on a light holding surface when used on the dark-first interface; no filter or recolouring is applied. The outlined wordmark does not require the site to embed Nexa, but a Nexa licence/source file is still required if Nexa is later used as editable live text.
+The approved master resolves the complete stacked logo artwork used by the website. Phase 1D adds `public/brand/derived/pyramid-designs-symbol.svg`, a transparent website derivative containing only the master's exact symbol paths and original transform. The outlined wordmark path is omitted; no geometry is redrawn, recoloured, filtered or rasterised. Compact dark-first placements use this symbol inside deliberate yellow and warm-neutral compositions instead of presenting the full lockup on a white card. The outlined master wordmark does not require the site to embed Nexa, but a Nexa licence/source file is still required if Nexa is later used as editable live text.
 
 ### Stack baseline
 
@@ -103,7 +103,7 @@ No icon library was installed because Phase 1A needs no repeated production icon
 - `TextLink`: native anchor with a durable underline.
 - `Container`: page-width constraint.
 - `Surface`: semantic panel treatment.
-- `PyramidLogo`: reusable reference to the unchanged owner-approved complete SVG master.
+- `PyramidLogo`: reusable reference to either the unchanged owner-approved complete SVG master or its documented exact-geometry symbol derivative.
 
 ### Review route and production exclusion
 

@@ -5,15 +5,15 @@
 
 ## Global shell
 
-`RootLayout` provides a skip link, `SiteHeader`, page content, and `SiteFooter`. `PyramidLogo` is the single reusable reference to `public/brand/approved/pyramid-designs-master.svg`, the owner-approved complete logo master.
+`RootLayout` provides a skip link, `SiteHeader`, page content, and `SiteFooter`. `PyramidLogo` is the single reusable component for `public/brand/approved/pyramid-designs-master.svg` and the documented `public/brand/derived/pyramid-designs-symbol.svg` website derivative.
 
 ## Header and mobile navigation
 
-The desktop header uses semantic primary navigation in the approved order, with a separate Join us action. Below 768px it uses the browser-native modal `<dialog>` rather than a drawer dependency. The dialog provides modal background blocking and focus containment; Escape closes it and focus returns to the trigger. It does not misuse ARIA menu roles for ordinary links.
+The desktop header uses semantic primary navigation in the approved order, with a separate Join us action. Its linked brand identity uses the transparent symbol derivative inside a compact geometric yellow and warm-neutral field, not the complete wordmark on a white holding card. Below 768px it uses the browser-native modal `<dialog>` rather than a drawer dependency. The dialog provides modal background blocking and focus containment; Escape closes it and focus returns to the trigger. It does not misuse ARIA menu roles for ordinary links.
 
 ## Footer
 
-The footer links the owner-approved complete logo to Home with an accessible link name. It also supports the supplied social URLs, the supplied MAD Alpha Designers domain, approved parent attribution wording, Pakistan context, and structured future legal/contact routes. It intentionally does not publish an address, phone number, legal claim, or invented social handle.
+The footer links the symbol derivative to Home with an accessible link name and uses a larger version of the same geometric field. It also supports the supplied social URLs, the supplied MAD Alpha Designers domain, approved parent attribution wording, Pakistan context, and structured future legal/contact routes. It intentionally does not publish an address, phone number, legal claim, or invented social handle.
 
 ## Theme behaviour
 
