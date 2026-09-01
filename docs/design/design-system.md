@@ -1,5 +1,7 @@
 # Pyramid Designs design system foundation
 
+> **Phase 1B addendum:** The responsive shell, component contracts, native-dialog navigation, theme decision, form/status foundations, and client/server boundary are documented in `docs/design/component-system.md`. No public pages, providers, workflows, or deployment configuration are added by Phase 1B.
+
 **Phase:** 1A — Brand Asset Normalisation and Design-System Foundation
 **Status:** Proposed for visual review; not a public-page implementation
 **Research date:** September 1, 2026

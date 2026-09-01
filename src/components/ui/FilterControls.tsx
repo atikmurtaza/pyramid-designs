@@ -1,0 +1,2 @@
+type FilterControlsProps = { filters: readonly string[]; selected?: string };
+export function FilterControls({ filters, selected }: FilterControlsProps) { return <form className="filter-controls" aria-label="Example filters"><div className="filter-controls__list">{filters.map((filter) => <button className="filter-control" type="button" aria-pressed={filter === selected} key={filter}>{filter}</button>)}</div><button className="text-link filter-clear" type="reset">Clear filters</button></form>; }
