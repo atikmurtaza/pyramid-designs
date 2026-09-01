@@ -58,7 +58,7 @@ export default function HomePage() {
             Creative work, technical depth.
           </h1>
           <p className="home-hero__support" data-content-status="proposed-copy">
-            One multidisciplinary company for substantial projects and talented people in Pakistan.
+            Creative and technical disciplines working together, for ambitious projects and people ready to contribute.
           </p>
           <div className="home-hero__actions">
             <Link className="button button-primary" href="/work">View work</Link>
@@ -113,10 +113,13 @@ export default function HomePage() {
             </p>
           </div>
           <div className="home-capabilities__list">
-            {capabilities.map(([title, description]) => (
+            {capabilities.map(([title, description], index) => (
               <article data-content-status="proposed-copy" key={title}>
-                <h3>{title}</h3>
-                <p>{description}</p>
+                <span className="home-capabilities__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
               </article>
             ))}
           </div>
@@ -171,7 +174,6 @@ export default function HomePage() {
           <div className="home-parent__accent" aria-hidden="true" />
           <div>
             <h2 id="parent-title">Pyramid Designs, MAD Alpha Designers company.</h2>
-            <p data-content-status="proposed-copy">Pyramid Designs keeps its own local identity while acknowledging the verified parent-company relationship.</p>
           </div>
           <a className="text-link" href="https://madalphadesigners.com" target="_blank" rel="noreferrer">
             Visit MAD Alpha Designers

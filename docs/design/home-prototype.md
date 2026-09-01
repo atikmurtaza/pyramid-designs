@@ -1,269 +1,152 @@
 # Pyramid Designs Home prototype
 
-**Phase:** 1C - Home Page Visual Responsive Prototype
+**Phase:** 1C-R - Owner Visual Refinement
 
-**Status:** Design prototype complete, owner visual decisions pending
+**Status:** Owner review incorporated; implementation and verification complete
 
 **Review date:** September 1, 2026
 
-This phase implements one public-page visual prototype only. It does not create backend functionality, CMS/data infrastructure, production integrations, final 3D, deployment configuration or production service changes.
+This phase refines the existing Home visual prototype. It does not redesign the page, begin Phase 1D, create backend or CMS functionality, add production integrations, implement 3D, deploy, or change production configuration.
 
-## Provisional brand notice
+## 1. Owner decisions recorded
 
-The following choices remain:
+The current approved direction is:
 
-`PROVISIONAL — OWNER VISUAL APPROVAL REQUIRED`
+- Manrope is the working primary website typeface. Nexa remains relevant only if a genuine licensed brand or wordmark source is supplied.
+- Dark is the intentional public default. Functional semantic light tokens remain available. There is no public theme toggle.
+- `Creative work, technical depth.` is the provisionally approved H1.
+- The Selected Work asymmetric editorial composition and logical DOM order are approved.
+- The global yellow balance is approved.
+- The two recruitment paths are approved conceptually: published vacancies and general freelance, project, portfolio or future permanent introductions.
+- The proposed SVG mark remains provisional pending comparison with a genuine approved master.
+- The Culture structure is approved. Final visual quality depends on genuine approved Pyramid Designs photography or video.
+- Capabilities and parent-company presentation required refinement and were addressed in Phase 1C-R.
 
-- Proposed Pyramid Designs SVG mark.
-- Manrope as the primary UI typeface.
-- Final Nexa/wordmark asset and licence evidence.
-- Public theme-toggle decision.
+The Home information architecture, two-column hero, Selected Work composition, recruitment architecture, responsive and accessibility foundations, header, footer and `HomeHeroVisual` replacement boundary remain unchanged.
 
-The proposed mark geometry was not changed. The Home prototype places the existing mark in a replaceable static visual composition so the owner can assess it at realistic scale.
+## 2. Hero supporting copy
 
-## 1. Home narrative
+The selected supporting copy is:
 
-The Home page follows the approved sequence:
+> Creative and technical disciplines working together, for ambitious projects and people ready to contribute.
 
-1. Header.
-2. Hero.
-3. Selected Work.
-4. Capabilities.
-5. Culture / People.
-6. Careers / Join.
-7. Parent-company relationship.
-8. Footer.
+It addresses prospective clients through the project reference and prospective talent through contribution, while keeping the sentence concise and avoiding an internal company-description tone.
 
-The page first establishes the company, then presents work as the strongest evidence, explains its multidisciplinary scope, gives culture meaningful visual space, provides distinct recruitment paths and closes with restrained parent-company attribution.
+Alternatives considered:
 
-## 2. Hero copy options
+1. `Creative and technical disciplines together, for clients shaping new work and people who want to help make it.`
+2. `A place for multidisciplinary work, and for creative and technical people looking to contribute.`
 
-All three directions below are **PROPOSED COPY**, not approved production copy.
-
-### Direction A
-
-**Headline:** Creative work, technical depth.
-
-**Support:** One multidisciplinary company for substantial projects and talented people in Pakistan.
-
-- Clarity: strong. Creative and technical breadth is immediate.
-- Brand character: direct and compact without generic agency phrasing.
-- Work/career balance: support line and paired actions cover both purposes.
-- Local relevance: Pakistan appears plainly without decorative geographic cliché.
-
-### Direction B
-
-**Headline:** Design, development and engineering in one place.
-
-**Support:** Pyramid Designs brings different disciplines together for work and people in Pakistan.
-
-- Clarity: strongest literal description.
-- Brand character: more functional and less distinctive than Direction A.
-- Work/career balance: present, but the headline leans toward services.
-- Local relevance: explicit and restrained.
-
-### Direction C
-
-**Headline:** Built for the work and the people behind it.
-
-**Support:** A creative and technical company for projects, permanent opportunities and independent collaborators.
-
-- Clarity: strongest dual-purpose message.
-- Brand character: warmer, but less immediately specific about disciplines.
-- Work/career balance: strongest recruitment emphasis.
-- Local relevance: would need a separate Pakistan reference.
-
-## 3. Selected prototype hero copy
-
-Direction A is the prototype default:
+The H1 remains:
 
 > Creative work, technical depth.
 
-> One multidisciplinary company for substantial projects and talented people in Pakistan.
+`HomeHeroVisual` remains an intentionally temporary, server-rendered CSS/SVG composition and the isolated Phase 1G replacement boundary. It received no material visual expansion.
 
-It keeps the headline to two desktop lines in Manrope, avoids familiar agency slogans, and leaves the distinct `View work` and `Join us` actions understandable above the fold.
+## 3. Selected Work
 
-## 4. Hero visual architecture
+Selected Work was not redesigned. It retains:
 
-`HomeHeroVisual` is a server-rendered, decorative CSS/SVG composition. It uses:
+- one dominant project and two secondary projects;
+- the approved asymmetric desktop composition;
+- logical DOM order;
+- a single-column mobile editorial feed;
+- clearly synthetic project media and metadata.
 
-- the unchanged proposed SVG mark;
-- a charcoal field;
-- controlled yellow triangular planes;
-- a faint structural grid;
-- a simple diagonal anchor related to the mark construction;
-- one light mark panel so the original charcoal/yellow treatment remains legible in both theme families.
+Only section-end spacing changed as part of the page rhythm review.
 
-The visual is intentionally static and light. It communicates scale, whitespace, foreground/background separation and the approximate future interaction field without pretending to be final 3D.
+## 4. Capabilities refinement
 
-## 5. Future 3D replacement boundary
-
-`src/components/home/HomeHeroVisual.tsx` is the Phase 1G replacement boundary. The Home hero copy, actions, grid and responsive order do not depend on its internals.
-
-Phase 1G may replace this one component with an isolated dynamic 3D client leaf after approval. The static component remains the conceptual reduced-motion, save-data, unsupported-WebGL and loading fallback. No complex 3D prop API has been defined early.
-
-## 6. Selected Work composition
-
-Selected Work uses one dominant project followed by two smaller projects in logical DOM order. Desktop CSS creates the asymmetric 1 + 2 composition; tablet and mobile collapse to a vertical editorial feed without reordering content.
-
-Each prototype entry supports later:
-
-- project media;
-- title;
-- discipline;
-- sector;
-- year;
-- short descriptor;
-- case-study path.
-
-Current entries are explicitly synthetic in source and visible metadata. The compositions use abstract brand geometry rather than stock work or invented client attribution. `/work` remains a planned route and was not implemented in this phase.
-
-## 7. Capabilities treatment
-
-Capabilities use typography, a two-column editorial list and restrained dividers instead of icon cards. Categories come from approved planning material:
+Capabilities remains a server-rendered typography-led section using only approved category names:
 
 - Design.
 - Development.
 - Engineering.
 - Marketing and content.
 
-Supporting sentences are proposed prototype copy and must be reviewed against final approved service language.
+The refinement adds visible `01` to `04` numbering, stronger heading scale, a connected two-column rule system, clearer alignment between category and description, and a restrained yellow rule on precise-pointer hover. All capability information remains visible without hover. No cards, icons, accordion, client component or dependency were added.
 
-## 8. Culture treatment
+On narrow mobile widths the grid becomes one column, removes the internal vertical divider and preserves the number, title and description reading order.
 
-Culture receives a full section with two deliberately different media proportions and a substantial statement. Placeholder visuals are geometric and captions state that approved workplace, people and event photography is required.
+## 5. Culture refinement
 
-No stock office imagery, employee identities, quotes, benefits or workplace claims are presented as Pyramid Designs facts.
+The approved Culture structure is preserved. Placeholder graphics were simplified to quiet media-ready surfaces with a single restrained yellow baseline. They no longer try to substitute increasingly elaborate geometry for unavailable photography.
 
-## 9. Careers / Join treatment
+The two proportions remain available for future approved team, workplace, event, short video or poster media. Visible captions continue to state that approved media is required.
 
-The recruitment section has high page priority but remains visually secondary to Selected Work. It separates:
+## 6. Parent-company and footer refinement
 
-- `View open roles` for approved live permanent or contract vacancies.
-- `Introduce yourself` for freelance, project, portfolio and future permanent interest.
-
-Visible copy states that live availability is not connected. No vacancy is implied, and no form or candidate-data flow exists.
-
-## 10. Parent-company treatment
-
-The section uses the approved relationship statement:
+The verified disclosure remains:
 
 > Pyramid Designs, MAD Alpha Designers company.
 
-It includes the verified `madalphadesigners.com` domain and a short local-identity explanation. It does not reproduce the parent website or make the Home page primarily about MAD Alpha Designers.
+The relationship is now a compact provenance row with a small yellow rule, restrained heading size and the verified external link. The redundant explanatory paragraph was removed.
 
-## 11. Responsive behaviour
+The footer no longer repeats the full relationship sentence. It retains the verified `MAD Alpha Designers` link in the Connect group, useful navigation, social links, legal links and the provisional Pyramid Designs mark. Pyramid Designs remains the dominant site identity.
 
-The prototype was reviewed at approximately 1440, 1280, 1024, 768, 430, 390 and 320 CSS pixels.
+## 7. Vertical rhythm refinement
 
-- Desktop: asymmetric split hero; dominant work entry plus paired secondary entries; culture media and copy share the field.
-- 1024: hero remains split, actions stay above the fold and desktop navigation remains on one line.
-- 768: hero becomes copy-first and stacked while desktop navigation still fits at the approved breakpoint.
-- 430/390/320: mobile dialog navigation is active below 768px; hero copy is two lines; CTAs share one clear row; the visual becomes a short 16:10 field; work becomes a single reading flow; footer becomes one column.
-- No tested width produced horizontal overflow, clipped headlines or wrapped CTA labels.
-- DOM order remains the reading order for work and culture content.
+Spacing was reduced selectively rather than globally:
 
-## 12. Theme findings
+- less trailing space after Selected Work;
+- tighter Capabilities and Culture section padding;
+- a shorter Culture-to-recruitment transition;
+- a tighter recruitment section;
+- a substantially shorter parent-company row.
 
-System-aware dark mode was visually inspected across the full Home page, including header, hero, project media, capabilities, culture, recruitment, parent attribution and footer.
+At the 1440 by 900 review viewport, the page height reduced from approximately 5,027px to 4,706px. The parent-company treatment reduced from approximately 324px to 142px. Editorial breathing room remains around the hero, work media and major section introductions.
 
-The light theme was code-reviewed against the established semantic token set. Full-page light visual inspection was not completed because the available browser session used a dark system preference and blocked the temporary local theme override. This is a review issue, not a code or architecture blocker.
+## 8. Theme behaviour
 
-Recommendation: keep public theme behavior **system-only** for now. Do not expose a toggle until the owner has visually approved the mark, media treatment and yellow balance in both complete themes.
+The server renders `<html data-theme="dark">`. Dark semantic tokens therefore apply before first paint, without reading operating-system preference, local storage or client state. There is no theme initialization script, public toggle, hydration dependency or theme flash.
 
-## 13. Typography findings
+The existing `[data-theme="light"]` semantic token set remains maintained. A temporary server-side light selection was visually inspected at desktop width, including recruitment, parent attribution and footer, then the final source was restored to the dark default. The light check produced no horizontal overflow and retained the approved yellow accent and readable foreground hierarchy.
 
-Manrope remains suitable in realistic Home usage:
+The architecture can support a future explicit owner-approved theme decision by changing the root `data-theme` value. No component contains scattered theme-specific hard-coded page backgrounds for this decision.
 
-- the hero is direct without becoming oversized;
-- section headings retain strong character at moderate scale;
-- body copy and metadata remain readable;
-- navigation and buttons fit their targets;
-- mobile headline wrapping is deliberate at 320-430px.
+## 9. Responsive review
 
-Visual QA found and fixed a Phase 1A integration defect: the Manrope variable existed on `<body>`, while the font declaration was only on `<html>`, causing a Times New Roman fallback. The shared body rule now consumes the variable correctly.
+The refined Home was checked at approximately 1440, 1280, 1024, 768, 430, 390 and 320 CSS pixels, plus a typical 1440 by 800 laptop-height viewport.
 
-Manrope remains `PROVISIONAL — OWNER VISUAL APPROVAL REQUIRED`.
+- No tested width produced horizontal overflow.
+- The hero H1 remains two lines at every tested width.
+- Hero buttons remain on one line and retain the existing 44px minimum target.
+- Desktop navigation remains on one line through the approved breakpoint; the existing mobile dialog navigation is active below it.
+- Capabilities retains its two-column editorial relationship through tablet and becomes a clear single-column sequence on narrow mobile.
+- Culture and recruitment preserve logical reading order.
+- Parent attribution remains clear without competing with major Home sections.
 
-## 14. Yellow / colour findings
+## 10. Accessibility review
 
-`#E8C547` is used for primary actions, focus contrast, key geometric planes, project placeholder emphasis and a low-percentage recruitment surface tint.
+- The page retains one H1 followed by meaningful H2 and H3 structure.
+- Main section and project DOM order is unchanged.
+- Essential capability information is not hover-only and numbering is not required to understand the category names.
+- Yellow is an accent, not the sole carrier of meaning.
+- Existing focus-visible, skip-link, forced-colour, reduced-motion and touch-target foundations remain active.
+- Decorative placeholder and hero geometry remains hidden from assistive technology.
+- CTA labels do not wrap at the required widths.
+- No animation, scroll listener or motion-only meaning was introduced.
 
-It is not used as small body text, a full-page background, a glow or a gradient headline. The page remains primarily off-white/charcoal in the relevant system theme. Yellow feels recognisable without becoming wallpaper.
+## 11. Performance and architecture
 
-## 15. Accessibility findings
+- Home remains a React Server Component.
+- No Home-specific client component was added.
+- No dependency, image, video, animation library, 3D runtime, backend, CMS or production configuration was added.
+- `HomeHeroVisual` remains the future 3D replacement boundary and static fallback direction.
+- Placeholder media continues to reserve stable aspect ratios.
 
-- One H1 and meaningful H2/H3 structure.
-- Header, main sections and footer retain semantic landmarks.
-- Skip link remains present.
-- Mobile navigation uses the existing native dialog, exposes the active Home link, closes correctly and restores focus through the Phase 1B implementation.
-- Visible keyboard focus was inspected on the mobile menu trigger.
-- All tested controls meet the existing 44px minimum target.
-- CTA labels remain on one line.
-- Decorative hero and project geometry is hidden from assistive technology.
-- Culture placeholder graphics are decorative; their required-media status is stated in visible captions.
-- No essential information depends on hover, colour or motion.
-- Forced-colour and reduced-motion foundations remain active.
-- Repeated SVG title IDs were corrected by generating unique IDs; decorative mark instances now avoid redundant announcements.
+## 12. Remaining provisional decisions
 
-## 16. Performance findings
+Only the following genuinely unresolved decisions remain:
 
-- Home is a React Server Component.
-- Home sections add no Home-specific client component.
-- `HomeHeroVisual` and abstract media are CSS/SVG only.
-- No image, video, animation or 3D dependency was added.
-- No scroll listener, animation library or runtime media request exists.
-- Geometry reserves stable aspect ratios to avoid layout shift.
-- Existing shell client boundaries remain `MobileNavigation` and `CurrentNavigationLink` only.
-- Production build observations are recorded in the completion report after verification.
+1. Approve or replace the proposed SVG mark against a genuine approved master.
+2. Supply and approve the final Nexa or wordmark master and licence evidence if it is to be used.
+3. Supply approved portfolio projects, media, credits, publication rights and factual descriptors.
+4. Supply approved Pyramid Designs team, workplace, event or short-form culture media.
+5. Approve final production service wording and all remaining proposed or synthetic copy before publication.
 
-## 17. Synthetic-content inventory
+Manrope, dark-first presentation, Selected Work composition, yellow balance, recruitment-path distinction and Culture structure are no longer listed as unresolved owner direction.
 
-The following are synthetic or proposed and cannot be treated as approved production content:
+## 13. Phase boundary
 
-- selected hero headline and support line;
-- all three project titles, disciplines-as-presented, descriptors, sector/year placeholders and abstract media;
-- capability supporting sentences;
-- culture headline and narrative;
-- culture media placeholders;
-- recruitment headline and supporting sentences;
-- parent-section explanatory sentence;
-- all `data-content-status="proposed-copy"`, `synthetic`, `prototype-explanation` and `provisional` records in the Home source.
-
-The following are verified planning inputs:
-
-- Pyramid Designs identity.
-- Multidisciplinary creative/technical positioning.
-- Pakistan/local-market focus.
-- permanent, freelance and project relationship concepts.
-- capability category names drawn from the approved plan.
-- parent-company statement and domain.
-- approved social URLs in the shared footer.
-
-## 18. Owner review decisions
-
-1. Approve or replace the proposed SVG mark at realistic hero/header/footer sizes.
-2. Approve Manrope as the public UI family or provide a licensed replacement.
-3. Supply and approve the final Nexa/wordmark master and licence evidence.
-4. Approve Direction A hero copy or select another documented direction.
-5. Approve the static hero composition as the Phase 1G fallback direction.
-6. Approve the Selected Work asymmetric rhythm and media proportions.
-7. Approve yellow quantity across both complete themes.
-8. Choose system-only, fixed approved theme or a later public toggle after full visual review.
-9. Approve the culture section scale and required photography direction.
-10. Approve the distinct `View open roles` and `Introduce yourself` recruitment paths.
-
-## 19. Inputs required for Phase 1D
-
-Recommended next task: **Phase 1D - Work Index Visual Responsive Prototype**.
-
-Before or during that prototype, request:
-
-- any approved project names and anonymisation rules;
-- approved project disciplines, sectors, years and descriptors;
-- media/credit/publication-rights status for candidate portfolio assets;
-- which project, if any, may be the dominant prototype example;
-- owner feedback on Home work proportions and metadata density;
-- owner decision on the hero copy direction if it should carry into Work navigation context.
-
-Phase 1D must remain a visual prototype. Do not begin CMS, database, admin, production media infrastructure or deployment work without the relevant later gate.
+Phase 1C-R refines the Home prototype only. Phase 1D has not begun. Proceeding to Phase 1D still requires the explicit owner or reviewer gate defined by the controlled production programme.
