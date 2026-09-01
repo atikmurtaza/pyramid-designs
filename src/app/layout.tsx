@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import "./globals.css";
 import "./phase1b.css";
+import "./active-navigation.css";
 
 const manrope = Manrope({ subsets: ["latin"], display: "swap", variable: "--font-manrope" });
 export const metadata: Metadata = { title: { default: "Pyramid Designs", template: "%s | Pyramid Designs" }, description: "Pyramid Designs website foundation." };

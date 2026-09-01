@@ -1,0 +1,1 @@
+.desktop-navigation a[aria-current="page"], .mobile-navigation__links a[aria-current="page"] { color: var(--color-text-strong); text-decoration: underline; text-decoration-color: var(--color-primary); text-decoration-thickness: 0.18em; text-underline-offset: 0.3em; }

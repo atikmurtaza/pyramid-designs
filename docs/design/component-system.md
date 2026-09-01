@@ -37,7 +37,7 @@ Desktop navigation is single-line at 768px and above; the mobile dialog is used 
 
 ## Client/server boundary
 
-`MobileNavigation` is the only new client component. It needs browser dialog calls, open state, and focus restoration. Header, footer, cards, metadata, layouts, media, filters, and forms remain server-compatible.
+`MobileNavigation` handles browser dialog calls, open state, and focus restoration. `CurrentNavigationLink` reads the route to expose `aria-current` and the active visual treatment. Header, footer, cards, metadata, layouts, media, filters, and forms otherwise remain server-compatible.
 
 ## Phase 1C inputs
 
