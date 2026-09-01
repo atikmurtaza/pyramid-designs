@@ -118,3 +118,7 @@ No icon library was installed because Phase 1A needs no repeated production icon
 ### Phase 1B inputs
 
 The owner-approved logo master is integrated. Later phases still require real content/media rights and each explicit owner/reviewer gate defined by the plan.
+
+## Phase 1D-LR logo derivative repair
+
+Owner visual review rejected the earlier Phase 1D presentation because its yellow logo artwork was misclassified as surrounding page geometry and visually merged with it. The canonical `public/brand/approved/pyramid-designs-master.svg` remains authoritative. Its yellow `path4` and `path2` plus charcoal `path3` are indivisible symbol artwork; only charcoal `path5`, the outlined wordmark, may be removed. The repaired transparent symbol derivative preserves `path4`, `path3`, and `path2` in that order, with their canonical transform and colours. No rendered background shape exists in the master, so no transparent-lockup derivative is required.

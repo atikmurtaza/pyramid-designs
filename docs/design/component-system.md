@@ -42,3 +42,7 @@ Desktop navigation is single-line at 768px and above; the mobile dialog is used 
 ## Phase 1C inputs
 
 Phase 1C-L integrated the owner-approved complete logo master. Nexa licensing remains open only for future editable live-text use. Every later phase still requires explicit owner or reviewer authorization.
+
+## Phase 1D-LR logo presentation repair
+
+The owner rejected the former Phase 1D presentation because it made yellow logo artwork read as page decoration. Header and footer now use the complete repaired symbol on a plain neutral contrast field where the dark shell would otherwise conceal its charcoal geometry; there is no yellow square, gradient field, or CSS replacement geometry. The Home hero retains its existing component boundary, but uses the same plain neutral contrast surface so its separate decorative geometry cannot appear to extend the approved mark.

@@ -47,7 +47,7 @@
 .loading-block { min-height: 6rem; border-radius: var(--radius-field); background: var(--color-surface-elevated); }.empty-state, .error-state { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-media); padding: var(--space-5); background: var(--color-surface); }
 @media (max-width: 767px) { .desktop-navigation, .desktop-navigation__action { display: none; }.mobile-navigation { display: block; }.brand-link__wordmark { display: none; }.site-footer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }@media (max-width: 479px) { .site-footer__grid { grid-template-columns: 1fr; } }@media (forced-colors: active) { .navigation-dialog, .site-header, .site-footer, .media-frame, .empty-state, .error-state { border: 1px solid CanvasText; }.filter-control[aria-pressed="true"] { forced-color-adjust: none; background: Highlight; color: HighlightText; } }
 
-/* Phase 1D approved logo presentation */
+/* Phase 1D-LR approved logo presentation */
 .brand-link {
   position: relative;
   display: inline-flex;
@@ -57,10 +57,10 @@
   min-height: 3.25rem;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   border-radius: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0 56%, #f7f4ed 56% 100%);
+  background: #f7f4ed;
 }
 
 .brand-link img {
@@ -74,10 +74,10 @@
   min-height: 5rem;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   border-radius: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0 58%, #f7f4ed 58% 100%);
+  background: #f7f4ed;
 }
 
 .site-footer__brand-link .site-footer__mark {
@@ -99,14 +99,13 @@
   overflow: hidden;
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-media);
-}
-
-.brand-review-surface--master {
   background: #f7f4ed;
 }
 
+.brand-review-surface--master {
+}
+
 .brand-review-surface--symbol {
-  background: linear-gradient(145deg, var(--color-primary) 0 48%, #f7f4ed 48% 72%, var(--color-surface-elevated) 72% 100%);
 }
 
 @media (max-width: 479px) {

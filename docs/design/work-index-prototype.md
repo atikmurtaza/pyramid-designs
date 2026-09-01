@@ -79,3 +79,7 @@ Header, footer and Home hero now use the symbol derivative. Their surrounding ye
 ## Phase boundary
 
 Phase 1D implements the Work index visual and responsive prototype only. It does not add CMS or database storage, production case studies, infrastructure, candidate submission, deployment, DNS changes or Phase 1G 3D work.
+
+## Phase 1D-LR logo derivative repair
+
+Owner visual review rejected the former Phase 1D logo presentation because it misclassified yellow logo paths as surrounding artwork. The repaired `public/brand/derived/pyramid-designs-symbol.svg` retains all approved graphical paths from the master in canonical order and with the original transform and colours; it removes only the outlined `Pyramid Designs` wordmark. The canonical master has no rendered background shape, so no transparent-lockup derivative is created. This repair does not alter the completed Work index layout.

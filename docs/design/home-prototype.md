@@ -158,3 +158,7 @@ The owner-supplied `pyramidf.svg` was relocated without content changes to `publ
 The master declares `width="3214"`, `height="2632"` and `viewBox="0 0 3214 2632"`. It contains the complete symbol and `Pyramid Designs` wordmark as vector outlines. `PyramidLogo` now references this single production asset for the header, footer, Home hero and design-system review. The previous generated provisional mark and inline React path definitions were removed.
 
 The supplied charcoal/yellow master is not recoloured or filtered. Phase 1D corrects its website presentation by deriving a transparent symbol-only SVG from the master's exact symbol paths while omitting the outlined wordmark path. Header and footer placements use the symbol inside compact geometric yellow and warm-neutral fields. `HomeHeroVisual` uses the same transparent symbol in its existing geometric composition rather than repeating the complete wordmark inside a white card. The canonical master remains unchanged.
+
+## 15. Phase 1D-LR logo derivative repair
+
+The initial Phase 1D presentation was rejected in owner visual review: yellow triangular logo elements were visually merged with surrounding hero and shell geometry. Phase 1D-LR preserves the entire approved yellow-and-charcoal symbol as a single asset and removes only the outlined wordmark. `HomeHeroVisual` remains the future replacement boundary, with independently decorative shapes visually separated from the complete symbol on a plain neutral contrast surface. The canonical master remains authoritative.
