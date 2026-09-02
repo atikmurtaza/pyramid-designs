@@ -124,3 +124,11 @@
     border: 1px solid CanvasText;
   }
 }
+
+/* Shared navigation and footer links keep a full touch target around their text. */
+.desktop-navigation a,
+.site-footer a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+}
