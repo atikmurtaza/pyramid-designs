@@ -1,7 +1,7 @@
 # Phase 1 static frontend audit
 
-**Phase:** 1J  
-**Date:** September 2, 2026  
+**Phase:** 1J
+**Date:** September 2, 2026
 **Scope:** Current static/frontend public routes only. This is an implementation and browser-review record, not production-content approval, legal approval, WCAG certification, deployment proof, or authorization for 3D, backend, CMS, data collection, authentication, or infrastructure.
 
 ## Accepted route scope
