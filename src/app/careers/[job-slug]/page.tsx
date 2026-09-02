@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { careerJobs, findCareerJob } from "@/content/careers";
 import "../careers.css";
 
@@ -18,7 +19,7 @@ function DetailList({ title, items }: { title: string; items: readonly string[] 
 export default async function CareerDetailPage({ params }: PageProperties) {
   const { "job-slug": slug } = await params;
   const job = findCareerJob(slug);
-  if (!job) return <main id="main-content" className="careers-page"><section className="career-detail container"><p>Prototype role unavailable.</p><h1>That role cannot be found.</h1><Link className="text-link" href="/careers">Return to Careers</Link></section></main>;
+  if (!job) notFound();
 
   return <main id="main-content" className="careers-page"><article className="career-detail">
     <header className="career-detail__hero"><div className="container"><p><Link href="/careers">Careers</Link><span aria-hidden="true"> / </span>{job.department}</p><h1>{job.title}</h1><p className="career-detail__summary">{job.summary}</p><ul className="career-detail__meta"><li>{job.location}</li><li>{job.arrangement}</li><li>{job.employmentType}</li><li>{job.experienceLevel}</li><li>{job.schedule}</li><li>Closes {job.closingDate}</li></ul></div></header>

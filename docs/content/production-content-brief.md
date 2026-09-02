@@ -11,6 +11,8 @@
 
 ## Home
 
+- Approve the Home 3D treatment or its removal. If retained, the production-approved static fallback must carry the same non-essential visual meaning on mobile, reduced-motion, Save-Data and unavailable-WebGL paths; any future compressed model asset must remain within the documented 700 KB target.
+
 - Approve final hero headline, supporting copy, and primary calls to action.
 - Replace the selected-work placeholders with approved projects, media, sector, year, services, outcomes, credits, publication rights, and case-study destinations.
 - Supply approved Culture-preview photography and captions, including rights and consent.
@@ -23,6 +25,8 @@
 - Confirm the production discipline taxonomy and whether filters or individual case-study routes remain useful at the approved project count.
 
 ## Culture
+
+- Approve the final discipline taxonomy and descriptions used by both the visible HTML controls and optional 3D view. The collaboration photograph remains the immediate fallback, so its production replacement must work before enhancement loads and on every static-only path.
 
 - Supply approved factual copy about collaboration, critique, development, handover, and the Careers transition. Remove all fictional people and stories.
 - Obtain explicit publication consent for every person, name, role, caption, and image; do not expose confidential project material.

@@ -27,7 +27,7 @@
 .contact-error-summary { padding: var(--space-5); border-left: .4rem solid var(--color-danger); background: var(--color-surface); outline: none; }
 .contact-error-summary h2 { margin: 0; color: var(--color-text-strong); font-size: 1.25rem; letter-spacing: -.03em; }
 .contact-error-summary ul { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: 1.2rem; }
-.contact-error-summary a { color: var(--color-foreground); font-weight: 750; }
+.contact-error-summary a { display: inline-flex; min-height: 2.75rem; align-items: center; color: var(--color-foreground); font-weight: 750; }
 .contact-form__actions { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
 .contact-form__actions .text-link { min-height: 2.75rem; display: inline-flex; align-items: center; }
 .contact-form-state { padding: clamp(2rem, 5vw, 5rem); border-left: .4rem solid var(--color-primary); background: var(--color-surface); }
