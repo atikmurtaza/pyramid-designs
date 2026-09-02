@@ -1,0 +1,19 @@
+.trust-page { padding-block: clamp(3rem, 8vw, 7rem); }
+.trust-article { max-width: 74rem; }
+.trust-header { max-width: 46rem; }
+.trust-header h1 { max-width: 13ch; margin: var(--space-4) 0 0; color: var(--color-text-strong); font-size: clamp(2.75rem, 6vw, 6rem); font-weight: 720; letter-spacing: -.07em; line-height: .91; text-wrap: balance; }
+.trust-header > p:last-child { margin: var(--space-5) 0 0; color: var(--color-text-muted); font-size: clamp(1.05rem, 1.7vw, 1.25rem); line-height: 1.7; }
+.trust-notice { padding-left: var(--space-3); border-left: .25rem solid var(--color-primary); color: var(--color-text-muted); font-size: .8125rem; font-weight: 800; letter-spacing: .03em; line-height: 1.55; text-transform: uppercase; }
+.trust-toc { max-width: 46rem; margin-top: clamp(3rem, 7vw, 6rem); padding-block: var(--space-5); border-block: 1px solid var(--color-border); }
+.trust-toc > p { margin: 0; color: var(--color-text-strong); font-weight: 800; }
+.trust-toc ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-6); margin: var(--space-3) 0 0; padding-left: 1.3rem; }
+.trust-toc a, .trust-related a { color: var(--color-foreground); font-weight: 700; text-decoration-color: var(--color-primary); text-decoration-thickness: .125em; text-underline-offset: .2em; }
+.trust-content { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); max-width: var(--text-measure); margin-top: clamp(3rem, 7vw, 6rem); }
+.trust-content section { scroll-margin-top: calc(var(--header-height) + var(--space-5)); }
+.trust-content h2, .trust-related h2 { margin: 0; color: var(--color-text-strong); font-size: clamp(1.6rem, 3vw, 2.55rem); font-weight: 720; letter-spacing: -.055em; line-height: 1.02; }
+.trust-content p { margin: var(--space-4) 0 0; color: var(--color-foreground); line-height: 1.75; }
+.trust-content ul { display: grid; gap: var(--space-2); margin: var(--space-4) 0 0; padding-left: 1.3rem; line-height: 1.7; }
+.trust-related { max-width: var(--text-measure); margin-top: clamp(3rem, 7vw, 6rem); padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
+.trust-related ul { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+@media (max-width: 36rem) { .trust-toc ol { grid-template-columns: 1fr; } }
+@media (forced-colors: active) { .trust-toc { border-color: CanvasText; } }

@@ -1,0 +1,40 @@
+.contact-page { overflow: clip; }
+.contact-page h1, .contact-page h2, .contact-page h3, .contact-page p { margin: 0; }
+.contact-hero { padding-block: clamp(4.5rem, 10vw, 9rem) clamp(4rem, 8vw, 7rem); background: var(--color-surface); }
+.contact-hero__layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(17rem, .5fr); gap: clamp(2rem, 9vw, 10rem); align-items: end; }
+.contact-hero__layout > div > p { max-width: 42rem; padding-left: var(--space-3); border-left: .25rem solid var(--color-primary); color: var(--color-text-muted); font-size: .8125rem; font-weight: 750; line-height: 1.55; }
+.contact-hero h1 { max-width: 10ch; margin-top: var(--space-5); color: var(--color-text-strong); font-size: clamp(3.3rem, 7.5vw, 7.75rem); font-weight: 720; letter-spacing: -.075em; line-height: .88; text-wrap: balance; }
+.contact-hero__layout > p, .contact-content__heading > p, .contact-content aside p, .contact-form__boundary, .contact-form-state > p { color: var(--color-text-muted); line-height: 1.7; }
+.contact-hero__layout > p { max-width: 27ch; font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
+.contact-content { display: grid; grid-template-columns: minmax(15rem, .65fr) minmax(0, 1fr); gap: clamp(3rem, 9vw, 10rem); padding-block: var(--section-space); }
+.contact-content__heading h2, .contact-form-state h2 { max-width: 12ch; color: var(--color-text-strong); font-size: clamp(2rem, 4.2vw, 4.25rem); font-weight: 720; letter-spacing: -.065em; line-height: .95; }
+.contact-content__heading > p { margin-top: var(--space-4); }
+.contact-content aside { display: grid; gap: var(--space-3); margin-top: var(--space-7); padding: var(--space-5); border-left: .4rem solid var(--color-primary); background: var(--color-surface); }
+.contact-content aside h3 { color: var(--color-text-strong); font-size: 1.2rem; }
+.contact-content aside .text-link { width: fit-content; }
+.contact-form, .contact-form-state { display: grid; gap: var(--space-6); max-width: 42rem; }
+.contact-form__boundary { padding-block: var(--space-4); border-block: 1px solid var(--color-border); font-size: .875rem; }
+.contact-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+.contact-form__grid .form-field:last-child { grid-column: 1 / -1; }
+.contact-form .form-field { display: grid; gap: var(--space-2); min-width: 0; }
+.contact-form .form-field label { color: var(--color-text-strong); font-size: .875rem; font-weight: 750; line-height: 1.5; }
+.contact-form .form-control { width: 100%; min-height: 2.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-field); background: var(--color-surface); color: var(--color-foreground); font: inherit; font-size: max(1rem, 16px); padding: .625rem .75rem; }
+.contact-form textarea { min-height: 10rem; resize: vertical; }
+.contact-form .form-control[aria-invalid="true"] { border-color: var(--color-danger); }
+.contact-form .form-field__error, .contact-form .form-field__help { margin: 0; font-size: .875rem; line-height: 1.5; }
+.contact-form .form-field__error { color: var(--color-danger); font-weight: 750; }
+.contact-form .form-field__help { color: var(--color-text-muted); }
+.contact-error-summary { padding: var(--space-5); border-left: .4rem solid var(--color-danger); background: var(--color-surface); outline: none; }
+.contact-error-summary h2 { margin: 0; color: var(--color-text-strong); font-size: 1.25rem; letter-spacing: -.03em; }
+.contact-error-summary ul { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: 1.2rem; }
+.contact-error-summary a { color: var(--color-foreground); font-weight: 750; }
+.contact-form__actions { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+.contact-form__actions .text-link { min-height: 2.75rem; display: inline-flex; align-items: center; }
+.contact-form-state { padding: clamp(2rem, 5vw, 5rem); border-left: .4rem solid var(--color-primary); background: var(--color-surface); }
+.contact-form-state--failure { border-color: var(--color-danger); }
+.contact-form-state > p:first-child { color: var(--color-primary); font-size: .8125rem; font-weight: 800; text-transform: uppercase; }
+.contact-form-state--failure > p:first-child { color: var(--color-danger); }
+.contact-form-state .button { width: fit-content; }
+@media (max-width: 48rem) { .contact-hero__layout, .contact-content, .contact-form__grid { grid-template-columns: 1fr; } .contact-form__grid .form-field:last-child { grid-column: 1; } .contact-form__actions .button { width: 100%; } }
+@media (max-width: 26.875rem) { .contact-hero { padding-block: 3.5rem 4rem; } .contact-hero h1 { font-size: clamp(2.8rem, 14vw, 4rem); } }
+@media (forced-colors: active) { .contact-form .form-control, .contact-error-summary, .contact-content aside, .contact-form-state { border-color: CanvasText; } }

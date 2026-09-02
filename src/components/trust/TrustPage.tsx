@@ -1,0 +1,8 @@
+import Link from "next/link";
+
+export type TrustSection = { title: string; paragraphs: readonly string[]; items?: readonly string[] };
+type TrustPageProps = { title: string; summary: string; label: string; sections: readonly TrustSection[] };
+
+export function TrustPage({ title, summary, label, sections }: TrustPageProps) {
+  return <main id="main-content" className="trust-page"><article className="trust-article container"><header className="trust-header"><p className="trust-notice">{label}. REQUIRES LEGAL / OWNER APPROVAL.</p><h1>{title}</h1><p>{summary}</p></header><nav className="trust-toc" aria-label={`${title} sections`}><p>On this page</p><ol>{sections.map(({ title: sectionTitle }, index) => <li key={sectionTitle}><a href={`#section-${index + 1}`}>{sectionTitle}</a></li>)}</ol></nav><div className="trust-content">{sections.map(({ title: sectionTitle, paragraphs, items }, index) => <section key={sectionTitle} id={`section-${index + 1}`} aria-labelledby={`heading-${index + 1}`}><h2 id={`heading-${index + 1}`}>{sectionTitle}</h2>{paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{items && <ul>{items.map((item) => <li key={item}>{item}</li>)}</ul>}</section>)}</div><footer className="trust-related"><h2>Related information</h2><ul><li><Link href="/contact">Contact prototype</Link></li><li><Link href="/privacy">Privacy prototype</Link></li><li><Link href="/candidate-privacy">Candidate Privacy prototype</Link></li><li><Link href="/terms">Terms prototype</Link></li><li><Link href="/accessibility">Accessibility statement prototype</Link></li></ul></footer></article></main>;
+}

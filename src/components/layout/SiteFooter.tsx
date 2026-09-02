@@ -37,6 +37,7 @@ export function SiteFooter() {
           <p className="eyebrow">Legal</p>
           <ul>
             <li><Link href="/privacy">Privacy</Link></li>
+            <li><Link href="/candidate-privacy">Candidate Privacy</Link></li>
             <li><Link href="/terms">Terms</Link></li>
             <li><Link href="/accessibility">Accessibility</Link></li>
           </ul>
