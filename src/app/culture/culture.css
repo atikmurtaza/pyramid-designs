@@ -107,6 +107,94 @@
   grid-column: 7 / 13;
 }
 
+.culture-collaboration-visual {
+  display: grid;
+  grid-column: 7 / 13;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.culture-collaboration-visual .culture-figure {
+  position: relative;
+  grid-column: auto;
+  overflow: hidden;
+}
+
+.culture-collaboration-3d {
+  position: absolute;
+  inset: 0 0 auto;
+  aspect-ratio: 4 / 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-deliberate) var(--ease-standard);
+}
+
+.culture-collaboration-3d--ready {
+  opacity: 1;
+}
+
+.culture-collaboration-3d canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.culture-collaboration__enable {
+  width: fit-content;
+}
+
+.culture-disciplines {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.culture-disciplines legend {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-strong);
+  font-weight: 750;
+}
+
+.culture-disciplines label {
+  display: grid;
+  min-height: 4.5rem;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.culture-disciplines label:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.culture-disciplines label:has(input:checked) {
+  background: color-mix(in srgb, var(--color-primary) 13%, transparent);
+}
+
+.culture-disciplines input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--color-primary);
+}
+
+.culture-disciplines span {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.culture-disciplines strong {
+  color: var(--color-text-strong);
+}
+
 .culture-figure {
   display: grid;
   gap: var(--space-3);
@@ -329,7 +417,7 @@
     grid-column: 1 / 6;
   }
 
-  .culture-collaboration .culture-figure {
+  .culture-collaboration-visual {
     grid-column: 6 / 13;
   }
 
@@ -379,7 +467,7 @@
   }
 
   .culture-collaboration__copy,
-  .culture-collaboration .culture-figure {
+  .culture-collaboration-visual {
     grid-column: 1;
   }
 
@@ -457,5 +545,9 @@
   .culture-hero__status,
   .culture-story__status {
     border-color: Highlight;
+  }
+
+  .culture-disciplines label:has(input:checked) {
+    outline: 2px solid Highlight;
   }
 }

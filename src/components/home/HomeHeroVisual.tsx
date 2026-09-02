@@ -1,8 +1,9 @@
 import { PyramidLogo } from "@/components/brand/PyramidLogo";
+import { HomeHero3DEnhancement } from "./HomeHero3DEnhancement";
 
 /**
- * Static, server-rendered fallback and future Phase 1G replacement boundary.
- * The exact-geometry symbol derivative is rendered inside the composition.
+ * Static, server-rendered fallback beneath the optional Phase 1K enhancement.
+ * The exact-geometry symbol derivative remains available without WebGL.
  */
 export function HomeHeroVisual() {
   return (
@@ -20,6 +21,7 @@ export function HomeHeroVisual() {
         <PyramidLogo className="home-hero-visual__mark" decorative variant="symbol" />
       </div>
       <div className="home-hero-visual__anchor" />
+      <HomeHero3DEnhancement />
     </div>
   );
 }

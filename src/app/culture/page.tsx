@@ -3,10 +3,10 @@ import Image, { type StaticImageData } from "next/image";
 import collaborationHero from "@/assets/culture/culture-collaboration-hero.webp";
 import digitalReview from "@/assets/culture/culture-digital-review.webp";
 import projectCritique from "@/assets/culture/culture-project-critique.webp";
-import prototypeReview from "@/assets/culture/culture-prototype-review.webp";
 import hamzaPortrait from "@/assets/culture/fictional-hamza-ilyas.webp";
 import mariamPortrait from "@/assets/culture/fictional-mariam-raza.webp";
 import sanaPortrait from "@/assets/culture/fictional-sana-qureshi.webp";
+import { CultureCollaborationVisual } from "@/components/culture/CultureCollaborationVisual";
 import "./culture.css";
 
 export const metadata: Metadata = {
@@ -84,14 +84,7 @@ export default function CulturePage() {
           <p>Design, development, engineering, content and project operations need room to question the same brief from different angles.</p>
           <p>This prototype treats collaboration as practical work: reviewing, making, testing, documenting and deciding together.</p>
         </div>
-        <figure className="culture-figure culture-figure--portrait">
-          <Image
-            src={prototypeReview}
-            alt="Synthetic image of a South Asian designer and engineer reviewing a physical prototype and printed layouts."
-            sizes="(max-width: 768px) 100vw, 52vw"
-          />
-          <PrototypeCaption />
-        </figure>
+        <CultureCollaborationVisual />
       </section>
 
       <section className="culture-critique" aria-labelledby="culture-critique-title">
