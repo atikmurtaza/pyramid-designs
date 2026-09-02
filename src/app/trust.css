@@ -7,7 +7,7 @@
 .trust-toc { max-width: 46rem; margin-top: clamp(3rem, 7vw, 6rem); padding-block: var(--space-5); border-block: 1px solid var(--color-border); }
 .trust-toc > p { margin: 0; color: var(--color-text-strong); font-weight: 800; }
 .trust-toc ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-6); margin: var(--space-3) 0 0; padding-left: 1.3rem; }
-.trust-toc a, .trust-related a { color: var(--color-foreground); font-weight: 700; text-decoration-color: var(--color-primary); text-decoration-thickness: .125em; text-underline-offset: .2em; }
+.trust-toc a, .trust-related a { display: inline-flex; min-height: 2.75rem; align-items: center; color: var(--color-foreground); font-weight: 700; text-decoration-color: var(--color-primary); text-decoration-thickness: .125em; text-underline-offset: .2em; }
 .trust-content { display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); max-width: var(--text-measure); margin-top: clamp(3rem, 7vw, 6rem); }
 .trust-content section { scroll-margin-top: calc(var(--header-height) + var(--space-5)); }
 .trust-content h2, .trust-related h2 { margin: 0; color: var(--color-text-strong); font-size: clamp(1.6rem, 3vw, 2.55rem); font-weight: 720; letter-spacing: -.055em; line-height: 1.02; }

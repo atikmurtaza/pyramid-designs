@@ -43,7 +43,7 @@
 .careers-bridge { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(2rem, 7vw, 7rem); align-items: end; padding-block: clamp(4.5rem, 9vw, 9rem); }
 .career-detail__hero { padding-block: clamp(3rem, 7vw, 6rem) clamp(4.5rem, 9vw, 9rem); background: var(--color-surface); }
 .career-detail__hero > div > p:first-child { color: var(--color-text-muted); font-size: 0.875rem; font-weight: 700; }
-.career-detail__hero > div > p:first-child a { color: var(--color-foreground); }
+.career-detail__hero > div > p:first-child a, .career-detail__aside .text-link { display: inline-flex; min-height: 2.75rem; align-items: center; color: var(--color-foreground); }
 .career-detail__summary { max-width: 42rem; margin-top: var(--space-6); color: var(--color-text-muted); font-size: clamp(1.1rem, 1.9vw, 1.35rem); line-height: 1.65; }
 .career-detail__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.36fr); gap: clamp(3rem, 10vw, 11rem); padding-block: clamp(4.5rem, 8vw, 8rem); }
 .career-detail__main { display: grid; gap: clamp(3.5rem, 7vw, 7rem); }

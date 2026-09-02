@@ -176,7 +176,7 @@ export default function CulturePage() {
             <h2 id="culture-transition-title">Interested in working here?</h2>
             <p>Culture introduces the working environment. Careers will hold approved opportunities, routes and application guidance.</p>
           </div>
-          <p className="culture-transition__status">Careers prototype follows in Phase 1F.</p>
+          <p className="culture-transition__status">Careers presents prototype roles and routes to the candidate introduction flow.</p>
         </div>
       </section>
     </main>
