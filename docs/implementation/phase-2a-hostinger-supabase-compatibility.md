@@ -1,8 +1,8 @@
 # Phase 2A — Hostinger + Supabase synthetic compatibility spike
 
-**Date:** 2026-09-02; live Supabase closure and Phase 2A-H Hostinger verification 2026-09-03
+**Date:** 2026-09-02; live Supabase and final Hostinger pg runtime closure 2026-09-03
 
-**Status:** **FAIL — SUPABASE COMPATIBILITY PASS; SECURITY PASS; HOSTINGER FRONTEND PASS; HOSTINGER PRISMA RUNTIME FAIL; NODE ISOLATION DIAGNOSTIC READY FOR HOSTINGER**
+**Status:** **PHASE 2A: PASS WITH DEFERRED NON-BLOCKING OPERATIONS ITEM — HOSTINGER PG RUNTIME PASS; HOSTINGER SCHEDULER DEFERRED**
 
 **Scope:** Synthetic compatibility preparation, local verification, live Supabase verification, the Phase 2A-SC server-only table correction and verification of an isolated Hostinger temporary deployment. The temporary Hostinger deployment does not change production DNS. No real candidate data, staff authentication, Google Drive integration, production-domain deployment or Phase 2B work was performed.
 
@@ -11,11 +11,15 @@ Current Phase 2A status on 2026-09-03:
 - **SUPABASE COMPATIBILITY: PASS**
 - **SUPABASE COMPATIBILITY SECURITY: PASS**
 - **HOSTINGER FRONTEND DEPLOYMENT: PASS**
-- **HOSTINGER PHASE 2A RUNTIME PROBES: FAIL — PRISMA ROUTES RETURN `500` BEFORE AUTHORIZATION**
-- **PHASE 2A-NI NODE ISOLATION: LOCAL PASS; HOSTINGER DIAGNOSTIC DEPLOYMENT REQUIRED**
-- **OVERALL PHASE 2A: FAIL — DO NOT APPROVE PHASE 2A**
+- **HOSTINGER PG RUNTIME: PASS**
+- **HOSTINGER SCHEDULER: DEFERRED**
+- **OVERALL PHASE 2A: PASS WITH DEFERRED NON-BLOCKING ITEMS**
 
-The reviewed Phase 2A compatibility infrastructure and narrow Phase 2A-P Webpack correction are deployed from `origin/main`. The final Hostinger retest still fails before route authorization because the Hostinger process raises `EEXIST` while Node initializes `process.stdin`. Hostinger-to-Supabase connectivity through the deployed Prisma routes remains unproven.
+Hostinger is running `main` at `81d3960191002ce155559c3da87891ae71c14043`. The application database runtime uses `pg`; Prisma is retained only for schema and migration tooling. Protected database and cron routes pass authorization, live Supabase read/write and idempotency checks before and after an authorised same-commit redeploy. The actual Hostinger scheduler remains a deferred operations gate. See **Final Hostinger pg Runtime Closure** below.
+
+**Phase 2A closure decision:** Phase 2A is approved for Phase 2B database/domain implementation.
+
+This decision does not authorize real candidate intake, candidate-file upload, Google Drive, production authentication, production deployment/domain launch or reliance on the Hostinger scheduler. Phase 2B execution remains subject to its separate owner/reviewer authorization.
 
 ## Phase 2A-H outcome on 2026-09-03
 
@@ -745,6 +749,98 @@ Root cause: the original table migration created `CompatibilityProbe` in Supabas
 **SUPABASE PORTION: APPROVED.**
 
 **HOSTINGER RUNTIME STILL DEFERRED.**
+
+**PHASE 2B HAS NOT STARTED.**
+
+## Final Hostinger pg Runtime Closure
+
+**Phase:** Phase 2A-FR2 — Final Hostinger pg Runtime Closure
+
+**Date:** 2026-09-03
+
+**Status:** PASS WITH ISSUES
+
+**HOSTINGER PG RUNTIME: PASS**
+
+**HOSTINGER SCHEDULER: DEFERRED**
+
+### Deployment and runtime architecture
+
+- Hostinger deployed branch `main` at commit `81d3960191002ce155559c3da87891ae71c14043` (`refactor: use pg for production database runtime`). The FR2 authorised same-commit redeploy started at 2026-09-03 19:10:54 in hPanel, completed successfully and became the current deployment at 19:12.
+- hPanel records Node `22.x`; the protected server probe reported Node major 22. The completed Hostinger build used Next.js `16.3.3`, compiled successfully, generated 17 static pages and emitted the expected compatibility, database and cron routes.
+- Application database runtime uses `pg`. `src` contains no `@prisma/client`, `@prisma/adapter-pg` or `PrismaClient` import. Prisma `6.12.0` remains development-only schema validation and migration tooling; no generated Prisma Client runtime is required by the deployed application.
+- The approved process-lifetime `pg.Pool` remains bounded at `max: 3`, `idleTimeoutMillis: 10_000`, `connectionTimeoutMillis: 10_000` and `application_name: pyramid-designs`.
+
+### Authorization and Hostinger to Supabase
+
+| Gate | Missing credential | Incorrect credential | Correct credential |
+| --- | --- | --- | --- |
+| Database endpoint | `401 UNAUTHORIZED` | `401 UNAUTHORIZED` | `200 DATABASE_PROBE_OK` |
+| Cron endpoint | `401 UNAUTHORIZED` | `401 UNAUTHORIZED` | `200 CRON_PROBE_OK` |
+
+- The protected database request proved Hostinger Node runtime -> `pg.Pool` -> Supabase Supavisor Session Pooler -> PostgreSQL -> `CompatibilityProbe`.
+- The fixed parameterised upsert and count/read succeeded. The response contained only safe status data and did not expose a connection string, database error or driver detail.
+- Five bounded pre-redeploy database calls completed without hanging or connection exhaustion; every call returned `200 DATABASE_PROBE_OK` with `matchingRows: 1`. A correct protected request after FR2 recovery returned the same result.
+- Repeated pre-redeploy and post-redeploy cron calls completed without hanging or reconnect failure; every call returned `200 CRON_PROBE_OK` and retained the original fixed-row timestamp.
+- Live synthetic-table inspection confirmed exactly one row for `phase-2a-database-probe` and exactly one row for `phase-2a-cron-probe`.
+
+### Redeploy, environment and cache lifecycle
+
+- Before the FR2 same-commit redeploy, the cache marker was `2026-09-03T18:09:26.137Z`. The first protected check after recovery returned `2026-09-03T18:12:56.118Z`, confirming again that the Next.js cache did not survive the deployment lifecycle.
+- After redeploy, the application returned healthy, the database and cron endpoints reconnected automatically, and no manual database repair or reinitialisation was needed.
+- Required Hostinger runtime environment names remained available: `DATABASE_URL`, `COMPATIBILITY_PROBE_SECRET` and `CRON_SECRET`. Values, fragments, lengths and encoded forms were not recorded. `DIRECT_URL` remains absent from the running Hostinger application and reserved for controlled administrative/migration use.
+- No current or future architecture decision may treat Next.js cache or process memory as authoritative. PostgreSQL remains the authoritative future state.
+
+### Platform regression
+
+- server execution — PASS (`SERVER_EXECUTION_OK`, Node major 22, server-only secret access);
+- outbound HTTPS — PASS (`OUTBOUND_HTTPS_OK`);
+- cache stability and explicit revalidation — PASS;
+- 1 KiB upload — PASS;
+- 5 MiB upload — PASS;
+- 5 MiB + 1 byte upload — PASS;
+- 6 MiB + 1 byte upload — PASS with application `413 PROBE_PAYLOAD_TOO_LARGE`;
+- transaction helper — PASS locally on Node `22.22.0`; commit, rollback and client release were exercised without adding another deployed diagnostic route.
+
+### Supabase security regression
+
+- `CompatibilityProbe` RLS — enabled and not forced;
+- policies — zero;
+- `PUBLIC`, `anon` and `authenticated` privileges — zero;
+- privileged server `pg` runtime access — PASS;
+- migration ledger — two migrations recognized and database schema up to date.
+
+This temporary compatibility-table privilege pattern is not automatically approved for future production business tables. Phase 2B must design future tables, roles, grants, RLS and authorization deliberately under a separate owner/reviewer gate.
+
+### Logs and frontend regression
+
+- The completed Hostinger build log showed zero npm vulnerabilities and no reviewed database URL, password, compatibility/cron secret, raw PostgreSQL connection string, sensitive SQL, Prisma runtime error, `EEXIST` or module-load failure.
+- Post-test Hostinger runtime logs reported zero issues/errors and no reviewed secret, connection-string, SQL, Prisma, `EEXIST`, module-load, transaction or pool-error leakage.
+- After redeploy, `/`, `/work`, `/culture`, `/company`, `/careers`, `/join`, `/contact` and `/privacy` returned `200`; `/dev/design-system` and `/careers/unknown-synthetic-role` returned `404`.
+- A fresh deployed desktop Home check after FR2 recovery rendered the expected hero visual and intact canonical logo with no obvious horizontal overflow. The corrected same-commit artifact's previously verified 390 px Home fallback remains applicable; no frozen frontend source changed in Phase 2A-FR2.
+
+### Local verification and repository state
+
+- `npm run prisma:validate` — PASS;
+- `npm run lint` — PASS;
+- `npm run typecheck` — PASS;
+- `npm run build` — PASS; Next.js `16.3.3`, 17 static pages and the expected dynamic Phase 2A routes;
+- `npm run test:phase2a:pg` — PASS (`PHASE_2A_PG_RUNTIME_OK`);
+- Prisma migration status — PASS; two migrations found and schema up to date;
+- `npm audit --omit=dev` — PASS; zero vulnerabilities;
+- `git diff --check` — PASS before documentation updates;
+- `.env.local` — ignored/untracked;
+- canonical approved logo SHA-256 — `2C5D2042EF020AA7AD37FF92E6FD9C3407EF305102EE49DA3B6900FF99FFE60C`;
+- local `HEAD` and `origin/main` — `81d3960191002ce155559c3da87891ae71c14043` before documentation updates;
+- source drift — none; only this evidence document and the readiness checklist are intentionally modified and remain uncommitted for owner/reviewer approval.
+
+### Deferred operations and cleanup
+
+- The protected cron endpoint is proven. No actual Hostinger scheduler was configured or executed, so **HOSTINGER SCHEDULER: DEFERRED** remains a non-blocking later operations gate.
+- Retain `CompatibilityProbe`, the database/cron/server/outbound/upload/cache probes and their forward migrations until Phase 2A closure is reviewed.
+- Before production launch, remove public diagnostic routes and create a reviewed forward migration to remove `CompatibilityProbe` when it is no longer required. Never rewrite or delete migration history.
+
+**Phase 2A-FR2 recommendation: APPROVE PHASE 2A WITH DEFERRED NON-BLOCKING ITEMS.**
 
 **PHASE 2B HAS NOT STARTED.**
 

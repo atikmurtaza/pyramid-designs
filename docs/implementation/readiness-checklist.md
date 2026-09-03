@@ -23,10 +23,12 @@
 - [x] Owner's Hostinger account exposes managed Web App deployment on an isolated temporary domain without changing production DNS.
 - [ ] Hostinger CPU, memory, storage, process, build, cron and effective request/upload limits are recorded.
   - hPanel records 200 GB disk, 3072 MB RAM, 2 CPU cores, 600,000 inodes, 120 maximum processes and one of five Web App slots in use. Cron availability and effective request/upload limits remain unproven.
-- [ ] Synthetic Hostinger compatibility spike passes App Router, server route, Server Action, environment-secret, PostgreSQL connection, ISR/revalidation, cron, restart/redeploy and upload-limit checks.
-  - Local and live Supabase connectivity, migrations, public-role denial, protected probes and idempotency pass.
-  - Phase 2A-NIR on 2026-09-03 proved Hostinger-to-Supabase network/TLS and raw `pg` access, but isolated Prisma Client runtime import as incompatible with the current managed Node runtime.
-  - ADR 0014 corrects the deployed architecture to `pg` application runtime with Prisma retained for schema/migrations. Node 22 local database, transaction, authorization, idempotency, security and production-artifact gates pass. Final protected-route and same-commit reconnection proof remains owner-redeploy dependent.
+- [x] Synthetic Hostinger compatibility spike passes App Router, server route, environment-secret, PostgreSQL connection, ISR/revalidation, protected cron endpoint, restart/redeploy and bounded upload-limit checks.
+  - Phase 2A-FR2 on 2026-09-03 verified commit `81d3960191002ce155559c3da87891ae71c14043` on Hostinger `main`, Node `22.x` and Next.js `16.3.3` before and after an authorised same-commit redeploy. The final deployment completed at 19:12 and became current.
+  - The deployed `pg` runtime reached Supabase through the Session Pooler, completed fixed parameterised database and cron operations, retained one logical row per synthetic label, and reconnected without manual repair. Missing and incorrect bearer credentials returned `401`; correct credentials returned the expected safe `200` codes.
+  - Server execution, outbound HTTPS, tagged cache/revalidation, 1 KiB, 5 MiB and 5 MiB + 1 byte uploads passed; 6 MiB + 1 byte returned the application `413`. Cache reset across redeployment, so PostgreSQL remains the authoritative future state.
+  - Hostinger environment names persisted, runtime/build logs exposed no reviewed secret or database detail, and the frozen frontend route matrix remained healthy. The actual Hostinger scheduler facility was not configured or executed and remains a deferred operations gate; only the protected cron endpoint is proven.
+  - **Phase 2A: PASS WITH DEFERRED NON-BLOCKING OPERATIONS ITEM.** Phase 2A is approved for Phase 2B database/domain implementation only; it does not authorize candidate intake/uploads, Google Drive, production Auth, production deployment/domain launch or scheduler reliance.
 - [x] Exact implementation-time Node.js, Next.js and package versions are selected and pinned after review.
 - [ ] Production, preview and development environment boundaries are approved.
 - [ ] Supabase Mumbai processing/privacy position is owner/legal reviewed.
