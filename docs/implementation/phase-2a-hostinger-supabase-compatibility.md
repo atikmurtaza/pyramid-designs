@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-02; live Supabase closure and Phase 2A-H Hostinger verification 2026-09-03
 
-**Status:** **PASS WITH ISSUES — SUPABASE COMPATIBILITY PASS; SECURITY PASS; HOSTINGER FRONTEND PASS; PRISMA RUNTIME CORRECTION PENDING HOSTINGER RETEST**
+**Status:** **FAIL — SUPABASE COMPATIBILITY PASS; SECURITY PASS; HOSTINGER FRONTEND PASS; HOSTINGER PRISMA RUNTIME FAIL; NODE ISOLATION DIAGNOSTIC READY FOR HOSTINGER**
 
 **Scope:** Synthetic compatibility preparation, local verification, live Supabase verification, the Phase 2A-SC server-only table correction and verification of an isolated Hostinger temporary deployment. The temporary Hostinger deployment does not change production DNS. No real candidate data, staff authentication, Google Drive integration, production-domain deployment or Phase 2B work was performed.
 
@@ -11,10 +11,11 @@ Current Phase 2A status on 2026-09-03:
 - **SUPABASE COMPATIBILITY: PASS**
 - **SUPABASE COMPATIBILITY SECURITY: PASS**
 - **HOSTINGER FRONTEND DEPLOYMENT: PASS**
-- **HOSTINGER PHASE 2A RUNTIME PROBES: PRISMA/TURBOPACK FAILURE CORRECTED LOCALLY; HOSTINGER RETEST REQUIRED**
-- **OVERALL PHASE 2A: PASS WITH ISSUES**
+- **HOSTINGER PHASE 2A RUNTIME PROBES: FAIL — PRISMA ROUTES RETURN `500` BEFORE AUTHORIZATION**
+- **PHASE 2A-NI NODE ISOLATION: LOCAL PASS; HOSTINGER DIAGNOSTIC DEPLOYMENT REQUIRED**
+- **OVERALL PHASE 2A: FAIL — DO NOT APPROVE PHASE 2A**
 
-The owner/reviewer has approved the reviewed Phase 2A compatibility infrastructure and the narrow Phase 2A-P runtime correction for commit and push to `origin/main` after local gates pass. Hostinger redeployment remains owner-operated. Hostinger-to-Supabase connectivity through the deployed Prisma routes remains unproven until the corrected build is retested.
+The reviewed Phase 2A compatibility infrastructure and narrow Phase 2A-P Webpack correction are deployed from `origin/main`. The final Hostinger retest still fails before route authorization because the Hostinger process raises `EEXIST` while Node initializes `process.stdin`. Hostinger-to-Supabase connectivity through the deployed Prisma routes remains unproven.
 
 ## Phase 2A-H outcome on 2026-09-03
 
@@ -422,11 +423,126 @@ Local production verification on Node.js `22.22.0` confirmed that the Webpack bu
 
 Redeploy the temporary Hostinger Web App from the corrected `main` commit. Confirm the deployment log reports a Webpack production build, then repeat missing, incorrect and correct-secret tests for both Prisma-dependent routes. Confirm that unauthorized requests return `401`, authorized database and cron probes return their success codes, runtime logs contain no `EEXIST` or failed external-module error, and restart plus same-commit redeploy retain the result. Do not change production DNS and do not begin Phase 2B.
 
+## Hostinger Prisma Webpack Retest
+
+**Date:** 2026-09-03
+
+**Status: FAIL.** The final Phase 2A-PR retest confirmed that the isolated Hostinger Web App deployed the intended correction, but both Prisma-dependent route modules still fail before their authorization handlers execute.
+
+Deployment and packaging evidence:
+
+- Hostinger deployed branch `main` at commit `29a4c37dee48f4c45d4790b0f3da6822d89c2149` (`29a4c37d` in hPanel).
+- The deployment used Node `22.x`, ran Prisma postinstall generation successfully with Prisma Client `6.12.0`, and ran the Next.js `16.3.3` Webpack production build through `next build --webpack`.
+- The previous Turbopack-generated `@prisma/client-<content-hash>/runtime/library` alias text was absent from the current Hostinger logs. This confirms that the corrected Webpack artifact was deployed; it does not establish successful Prisma loading.
+
+Protected-route results:
+
+| Route | Missing secret | Incorrect secret | Correct secret, first call | Correct secret, repeated call |
+| --- | --- | --- | --- | --- |
+| `/api/internal/compatibility/database` | Empty `500` | Empty `500` | Empty `500` | Empty `500` |
+| `/api/internal/cron-probe` | Empty `500` | Empty `500` | Empty `500` | Empty `500` |
+
+Authorization did not execute. Hostinger runtime logs repeatedly reported `Error: open EEXIST` from Node's `node:net` socket construction while initializing `process.stdin`, followed through the built-in ESM module-loading path. The earlier hashed Prisma/Turbopack alias stack is gone, but the required `EEXIST` absence gate still fails. No credential or secret value was reproduced in this record.
+
+Consequences of the module-load failure:
+
+- Prisma did not reach an executable route handler on Hostinger.
+- Hostinger-to-Supabase connectivity through Prisma is not proven.
+- The deployed database read, fixed synthetic upsert, count and repeated-call idempotency were not exercised.
+- The deployed cron write and repeated-call idempotency were not exercised.
+- A same-commit redeploy/restart and post-restart Prisma reconnection test were not attempted because the required successful Prisma/database verification prerequisite failed.
+- Hostinger scheduler availability and actual scheduler invocation remain **DEFERRED / UNVERIFIED**. Manual endpoint testing would prove only deployed endpoint compatibility even if it passed.
+
+Regression evidence remained healthy outside the Prisma route boundary:
+
+- server execution returned `200 SERVER_EXECUTION_OK` under Node major 22;
+- outbound HTTPS, cache stability and explicit revalidation passed;
+- uploads of 1 KiB, 5 MiB and 5 MiB + 1 byte returned `200`; 6 MiB + 1 byte returned the application `413` response;
+- public routes `/`, `/work`, `/culture`, `/company`, `/careers`, `/join` and `/contact` returned `200`;
+- `/dev/design-system` and `/careers/unknown-synthetic-role` returned `404`;
+- desktop Home rendered the 3D canvas; the 390 px Home used the static fallback with zero canvases; neither check found a console error or horizontal overflow;
+- the deployed logo hash matched the approved repository logo hash;
+- sampled public HTML and nine referenced scripts contained neither a PostgreSQL URL nor a configured secret value.
+
+The direct controlled Supabase security regression query passed: RLS is enabled but not forced, zero policies exist, no `PUBLIC`, `anon` or `authenticated` grants exist, and exactly one row remains for each fixed synthetic label (`phase-2a-database-probe` and `phase-2a-cron-probe`). This operator-side evidence does not prove Hostinger-to-Supabase access.
+
+Local verification on Node.js `22.22.0` passed `npm run probe:phase2a`, `npm run prisma:validate`, `npm run prisma:generate`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm audit --omit=dev` and `git diff --check`. The production build used Webpack, the approved logo hash was unchanged, and the local production server was stopped after verification. These local results do not override the Hostinger runtime failure.
+
+**Final recommendation: DO NOT APPROVE PHASE 2A.** Phase 2B remains gated and has not started.
+
+## Phase 2A-NI — Node / Database Runtime Isolation
+
+**Date:** 2026-09-03
+
+**Status: READY FOR HOSTINGER RETEST.** The diagnostic implementation passes locally under Node.js `22.22.0`, but no Hostinger conclusion is claimed until the isolated Web App is redeployed from the diagnostic commit and every stage is invoked independently.
+
+### Preserved failure classification
+
+The two observed Hostinger failures remain distinct:
+
+1. The original Turbopack build failed while loading a linked, content-hashed `@prisma/client-<content-hash>/runtime/library` external from `.next/node_modules`.
+2. Commit `29a4c37dee48f4c45d4790b0f3da6822d89c2149` removed that packaging form by using Webpack. The current failure is still `Error: open EEXIST`, but its stack now occurs while Node creates the `process.stdin` socket through `node:net` and the built-in ESM facade.
+
+The second result does not establish bad Supabase credentials, a bad `DATABASE_URL`, failed Prisma generation, a schema error or recurrence of the original Turbopack alias problem. The first import or operation that causes Hostinger to initialize the failing stdio handle remains to be proven by the deployed isolation matrix.
+
+### Authoritative research reviewed on 2026-09-03
+
+- Node.js 22 process documentation: [Process standard streams](https://nodejs.org/download/release/v22.22.0/docs/api/process.html#processstdin). `process.stdin` is a `net.Socket` when file descriptor 0 refers to a pipe, a TTY stream for a terminal or a file stream otherwise. Merely accessing the property can therefore initialize a Node stream wrapper for descriptor 0.
+- Node.js `v22.22.0` implementation: [`getStdin()`](https://github.com/nodejs/node/blob/v22.22.0/lib/internal/bootstrap/switches/is_main_thread.js) constructs a `net.Socket` around descriptor 0 for pipe/TCP handles. [`Socket` construction](https://github.com/nodejs/node/blob/v22.22.0/lib/net.js) opens the supplied descriptor and throws the returned libuv error if the handle cannot be opened. The Hostinger stack is consistent with this path, but the source alone does not identify which application import first accessed the property.
+- Node.js built-in ESM implementation: [`BuiltinModule.getESMFacade()`](https://github.com/nodejs/node/blob/v22.22.0/lib/internal/bootstrap/realm.js) creates and synchronizes named exports for built-in modules. The observed Hostinger stack includes this function, so a built-in ESM namespace import is a relevant boundary to isolate; this is an evidence-based inference, not a confirmed Node defect.
+- Prisma v6 client generation: [Generating Prisma Client](https://www.prisma.io/docs/orm/v6/prisma-client/setup-and-configuration/generating-prisma-client). Prisma v6 supports constructing the generated client without a driver adapter when using its normal library engine. Driver adapters are a separate opt-in path, documented in [Database drivers](https://www.prisma.io/docs/orm/overview/databases/database-drivers). The current generated configuration reports `engineType: "library"`, so a direct-client diagnostic is supported without changing Prisma versions.
+- `node-postgres` pooling: [Pool API](https://node-postgres.com/apis/pool) and [Pooling](https://node-postgres.com/features/pooling). A `Pool` creates clients lazily; construction can therefore be tested separately from a fixed `SELECT 1` query, and `pool.end()` provides explicit resource closure.
+- Next.js server externalization: [`serverExternalPackages`](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages), last updated 2025-12-05. Next.js automatically externalizes packages including `@prisma/client` and `pg` for Node.js server execution. The Phase 2A-NI routes retain the default configuration rather than adding another speculative bundling override.
+- Hostinger managed Node deployment: [Deploying a Node.js Web App](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/) and [Node.js Web App troubleshooting](https://www.hostinger.com/support/how-to-fix-common-nodejs-errors-at-hostinger/). The reviewed Hostinger material documents supported Node versions, build/start configuration, environment variables and logs, but no supported workaround or stated limitation for `process.stdin` descriptor reuse was found.
+- Supabase changelog: [Supabase Changelog](https://supabase.com/changelog.md). The current changelog was checked before implementation; no breaking change affecting the existing fixed PostgreSQL `SELECT 1`, Session Pooler connection or `CompatibilityProbe` security controls was identified.
+
+No authoritative Node.js, Prisma, `pg`, Next.js or Hostinger source reviewed above identifies this exact managed-runtime `open EEXIST` stack as a known Prisma 6.12 or `pg` 8.23 defect. No forum-only workaround, global stdio monkey-patch, Node-internal patch, dependency downgrade or Prisma major-version change was adopted.
+
+### Dependency and emitted-bundle inspection
+
+- Generator: `prisma-client`, custom output `src/generated/prisma`, Prisma `6.12.0`, generated `engineType: "library"`, with the `driverAdapters` preview feature enabled.
+- Current production construction: `PrismaPg` from `@prisma/adapter-pg` receives the server-only `DATABASE_URL`; the generated `PrismaClient` receives that adapter.
+- The generated `src/generated/prisma/client.ts` imports `node:process` as a namespace and uses `process.cwd()` in a bundler file annotation. This is isolated separately from importing `@prisma/client/runtime/library`.
+- The Prisma `runtime/library` artifact contains stdout/stderr TTY and logging access but no literal `process.stdin`, `setRawMode` or `readline` access.
+- The inspected `pg` and `@prisma/adapter-pg` runtime entry points contain no literal `process.stdin` or `setRawMode` access. `pgpass` defaults a warning stream to `process.stderr`.
+- The Webpack diagnostic artifacts keep `pg` and `@prisma/client/runtime/library` as Node server externals. `@prisma/adapter-pg` is bundled and reaches `pg` through the external import. No `serverExternalPackages` change was required.
+
+These source findings narrow the test design but do not prove the Hostinger cause. In particular, the generated client's `node:process` namespace import is a candidate boundary because of the observed ESM-facade stack, not a proven defect.
+
+### Isolation matrix
+
+Every diagnostic route uses the existing `COMPATIBILITY_PROBE_SECRET`, runs in the Node.js runtime, disables caching, returns only fixed markers, logs only a fixed failure label and catches errors without returning messages or stacks.
+
+| Stage | Independent operation | Local Node `22.22.0` | Hostinger |
+| --- | --- | --- | --- |
+| A | Node/Next Route Handler baseline; no database import | `200 NODE_BASELINE_OK` | Pending deployment |
+| B | Dynamic `pg` import only | `200 PG_IMPORT_OK` | Pending deployment |
+| C | Construct and close a `pg.Pool`; no query | `200 PG_POOL_OK` | Pending deployment |
+| D | Raw `pg` fixed `SELECT 1` | `200 PG_QUERY_OK` | Pending deployment |
+| E1 | Dynamic `@prisma/client/runtime/library` import only | `200 PRISMA_RUNTIME_IMPORT_OK` | Pending deployment |
+| E2 | Dynamic generated Prisma client import only | `200 PRISMA_CLIENT_IMPORT_OK` | Pending deployment |
+| F | Construct and disconnect generated Prisma client without adapter; no query | `200 PRISMA_DIRECT_CONSTRUCT_OK` | Pending deployment |
+| G | Generated Prisma client without adapter; fixed `SELECT 1` | `200 PRISMA_DIRECT_QUERY_OK` | Pending deployment |
+| H1 | Dynamic `@prisma/adapter-pg` import only | `200 PRISMA_ADAPTER_IMPORT_OK` | Pending deployment |
+| H2 | Construct `PrismaPg`; no Prisma client and no query | `200 PRISMA_ADAPTER_CONSTRUCT_OK` | Pending deployment |
+| H3 | Construct `PrismaPg` and `PrismaClient`; no query | `200 PRISMA_ADAPTER_PRISMA_CONSTRUCT_OK` | Pending deployment |
+| H4 | Adapter-backed Prisma client; fixed `SELECT 1` | `200 PRISMA_ADAPTER_QUERY_OK` | Pending deployment |
+
+For every local route, missing and incorrect bearer credentials returned `401 UNAUTHORIZED` before the diagnostic import or operation. The raw `pg` and both Prisma query paths used only the fixed statement `SELECT 1 AS value`; they did not accept SQL or identifiers from the request.
+
+### Local interpretation and deployment gate
+
+Local results establish only that Node `22.22.0`, raw `pg`, direct Prisma and adapter-backed Prisma all work against the existing controlled Supabase database from the local production server. No Outcome A/B/C/D is selected because those outcomes depend on Hostinger results.
+
+After the diagnostic commit is deployed, run `npm run probe:phase2a:node-isolation` against the isolated Hostinger Web App. Preserve each HTTP status and fixed response code, review logs for `EEXIST`, and identify the earliest failing independent stage. Safe later stages should still be invoked when they distinguish raw `pg`, direct Prisma and adapter-backed Prisma paths. Do not change production DNS and do not begin Phase 2B.
+
+**Phase 2A-NI recommendation: REQUIRES HOSTINGER DIAGNOSTIC DEPLOYMENT.**
+
 ## 20. Phase 2B recommendation
 
 **Do not begin Phase 2B.**
 
-The Phase 2A Supabase portion is approved after the Phase 2A-SC correction. Live connectivity, migrations, public-role denial, protected probes, idempotency and local regressions pass. Phase 2A-H is **FAIL** because Hostinger deploys the pre-probe frontend commit and has no runtime variables. Overall Phase 2A remains **PASS WITH ISSUES** and is not approved for closure. Do not begin Phase 2B without the separate owner/reviewer gate.
+The Supabase portion remains approved after the Phase 2A-SC correction: operator-side connectivity, migrations, public-role denial, protected local probes, idempotency and local regressions pass. The final Phase 2A-PR Hostinger retest is **FAIL** because both deployed Prisma-dependent routes return `500` before authorization and logs retain an `EEXIST` failure during Node `process.stdin` initialization. Overall Phase 2A is **FAIL** and is not approved for closure. Do not begin Phase 2B without successful Hostinger Prisma evidence and a separate owner/reviewer gate.
 
 ## Verification record
 

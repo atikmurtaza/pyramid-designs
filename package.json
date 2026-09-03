@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
-    "probe:phase2a": "node scripts/run-phase-2a-probes.mjs"
+    "probe:phase2a": "node scripts/run-phase-2a-probes.mjs",
+    "probe:phase2a:node-isolation": "node scripts/run-phase-2a-node-isolation.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "6.12.0",
