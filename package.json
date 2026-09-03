@@ -14,7 +14,9 @@
     "prisma:validate": "prisma validate",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "probe:phase2a": "node scripts/run-phase-2a-probes.mjs",
-    "test:phase2a:pg": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2a-pg-runtime.mjs"
+    "test:phase2a:pg": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2a-pg-runtime.mjs",
+    "seed:phase2b": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/seed-phase-2b-synthetic.mjs",
+    "test:phase2b": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2b-domain.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.7.0",
