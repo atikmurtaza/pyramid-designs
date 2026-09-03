@@ -10,6 +10,7 @@ build/
 .env.*
 !.env.example
 .vercel/
+src/generated/prisma/
 *.pem
 *.key
 

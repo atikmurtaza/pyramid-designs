@@ -1,0 +1,17 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Temporary Phase 2A synthetic-only model. Remove before production launch.
+model CompatibilityProbe {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  label     String   @unique @db.VarChar(80)
+}
