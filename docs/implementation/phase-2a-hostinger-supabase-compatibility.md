@@ -538,11 +538,126 @@ After the diagnostic commit is deployed, run `npm run probe:phase2a:node-isolati
 
 **Phase 2A-NI recommendation: REQUIRES HOSTINGER DIAGNOSTIC DEPLOYMENT.**
 
+## Hostinger Node Isolation Runtime Matrix
+
+**Date:** 2026-09-03
+
+**Phase 2A-NIR status: PASS WITH ISSUES.** Hostinger ran commit `a27ad5011579afa62d076b831351220e740314a3` on Node.js `22.x`. The completed deployment log recorded Next.js `16.3.3`, `next build --webpack`, a successful optimized production build and every Phase 2A node-isolation route in the emitted route manifest.
+
+Every route returned `401 UNAUTHORIZED` for both missing and incorrect compatibility secrets before its diagnostic operation. Authorized results were:
+
+| Stage | Result | EEXIST | Conclusion |
+| --- | --- | --- | --- |
+| A | `200 NODE_BASELINE_OK` | No | Ordinary Next.js Route Handler execution works. |
+| B | `200 PG_IMPORT_OK` | No | Importing `pg` does not trigger the Hostinger failure. |
+| C | `200 PG_POOL_OK` | No | Constructing and closing `pg.Pool` works without a query. |
+| D | `200 PG_QUERY_OK` | No | Hostinger-to-Supabase network, TLS and raw PostgreSQL access pass with the fixed `SELECT 1`. |
+| E1 | `503 PRISMA_RUNTIME_IMPORT_FAILED` | No | First failing boundary: importing `@prisma/client/runtime/library`. |
+| E2 | `503 PRISMA_CLIENT_IMPORT_FAILED` | No | Generated-client import fails after the shared Prisma runtime boundary. |
+| F | `503 PRISMA_DIRECT_CONSTRUCT_FAILED` | No | Direct Prisma construction cannot pass the earlier runtime-import boundary. |
+| G | `503 PRISMA_DIRECT_QUERY_FAILED` | No | Direct Prisma query path cannot pass the earlier runtime-import boundary; this is not a Hostinger-to-Supabase network failure. |
+| H1 | `200 PRISMA_ADAPTER_IMPORT_OK` | No | Importing `@prisma/adapter-pg` works independently. |
+| H2 | `200 PRISMA_ADAPTER_CONSTRUCT_OK` | No | Constructing the adapter works independently. |
+| H3 | `503 PRISMA_ADAPTER_PRISMA_CONSTRUCT_FAILED` | No | The adapter path fails only when the Prisma client is added. |
+| H4 | `503 PRISMA_ADAPTER_QUERY_FAILED` | No | Adapter-backed Prisma query cannot pass the shared Prisma client/runtime boundary. |
+
+`EEXIST: No` means the current safe Hostinger runtime log did not contain `EEXIST`; it does not assert that the caught internal exception had a different operating-system code. The log exposed only the fixed failure markers for E1, E2, F, G, H3 and H4. It did not expose a database URL, secret, environment value, SQL statement or sensitive stack context.
+
+### First failing boundary
+
+Stage E1 is the first failed expected marker. Node/Next, `pg` import, `pg.Pool` construction and raw `pg` database access all pass before the independent Prisma runtime import returns the fixed failure response.
+
+### Raw pg result
+
+**HOSTINGER -> SUPABASE: PROVEN VIA RAW PG.**
+
+**HOSTINGER -> SUPABASE NETWORK/TLS: PASS.**
+
+**RAW PG DATABASE ACCESS: PASS.**
+
+Stage D returned `200 PG_QUERY_OK` for the fixed `SELECT 1`. Hostinger-to-Supabase compatibility must no longer be described as unproven for the raw `pg` path.
+
+### Prisma direct and adapter result
+
+Direct Prisma construction and query both fail after the shared E1 Prisma runtime-import boundary. The adapter package itself imports and constructs successfully, but adding the Prisma client fails. The evidence therefore does not support an adapter-specific classification or removing only `@prisma/adapter-pg`.
+
+### Architecture outcome
+
+**OUTCOME B — raw `pg` works; Prisma fails.** Hostinger networking, TLS, Supabase Session Pooler access and raw PostgreSQL queries are compatible. The remaining incompatibility is within the Prisma client/runtime path on this Hostinger managed Node.js runtime.
+
+The recommended next step is a separate architecture decision evaluating direct `pg` for the Hostinger runtime while retaining Prisma for schema and migrations, with another thin typed database layer considered only if it proves necessary. Do not begin that architecture change automatically.
+
+**Phase 2A-NIR recommendation: REQUIRES PRISMA RUNTIME ARCHITECTURE CHANGE.**
+
+**PHASE 2B HAS NOT STARTED.**
+
+## Phase 2A-RA Runtime Database Architecture Correction
+
+**Date:** 2026-09-03
+
+### Supportability research
+
+Official Prisma, node-postgres, Next.js and Supabase guidance was reviewed before implementation. Prisma's production migration workflow applies committed migration history with `prisma migrate deploy`; that command does not generate Prisma Client artifacts. node-postgres provides the required pool, parameterized-query and same-client transaction primitives directly. Next.js Route Handlers run on the server and the database routes explicitly remain on the Node.js runtime. Supabase Session Pooler remains the approved `DATABASE_URL` path for this persistent IPv4 Hostinger process. The current Supabase changelog contained no breaking change affecting this fixed PostgreSQL runtime path.
+
+Sources:
+
+- Prisma production migration deployment: <https://www.prisma.io/docs/orm/prisma-client/deployment/deploy-database-changes-with-prisma-migrate>
+- Prisma CLI `migrate deploy`: <https://www.prisma.io/docs/orm/reference/prisma-cli-reference#migrate-deploy>
+- node-postgres queries, pooling and transactions: <https://node-postgres.com/features/queries>, <https://node-postgres.com/features/pooling>, <https://node-postgres.com/features/transactions>
+- Next.js Route Handlers and server-only boundaries: <https://nextjs.org/docs/app/api-reference/file-conventions/route>, <https://nextjs.org/docs/app/getting-started/server-and-client-components#preventing-environment-poisoning>
+- Supabase database connections and changelog: <https://supabase.com/docs/guides/database/connecting-to-postgres>, <https://supabase.com/changelog.md>
+
+### Architecture decision and runtime layer
+
+ADR 0014, `docs/architecture/decisions/0014-runtime-postgresql-with-pg.md`, is accepted. The Hostinger application runtime now uses `pg`; Prisma is retained only for schema definition and migration tooling.
+
+`src/lib/server/database.ts` is server-only and owns one lazily created `pg.Pool` per process/global module lifetime. It exposes only an explicit parameterized query helper, a same-client transaction helper and an explicit pool-close helper for controlled tests or shutdown. Idle-client and rollback failures emit fixed safe markers without database details.
+
+Pool settings are fixed at maximum `3` connections, `10,000 ms` idle timeout, `10,000 ms` connection timeout and application name `pyramid-designs`. This is deliberately small for initial traffic and the Supabase Session Pooler. No environment tuning knobs were added without measured need.
+
+`src/lib/server/compatibility-probe.ts` is the temporary repository boundary. It contains the only current application SQL, uses placeholders for every value, supplies UUIDs from Node, maps timestamps/counts to plain application values and does not expose `pg` results to route responses.
+
+The transaction helper uses `BEGIN`, invokes the callback with one checked-out client, then `COMMIT`. Failure attempts `ROLLBACK`, throws a fixed `DatabaseTransactionError` and always releases the client.
+
+### Migration and dependency architecture
+
+`prisma/schema.prisma`, both Phase 2A migrations and the migration ledger convention remain unchanged. The Prisma client generator was removed because neither the application runtime nor `prisma migrate deploy` needs generated client output.
+
+The controlled migration flow is: edit the Prisma schema; generate a development migration with `prisma migrate dev --create-only`; inspect its SQL/security effects; apply and verify it in development; commit schema and migrations together; then run `prisma migrate deploy` through a controlled CI/administrator path. Production `db push` is prohibited.
+
+Runtime dependency: `pg`. Development/tooling dependency: `prisma`. Removed runtime dependencies: `@prisma/client` and `@prisma/adapter-pg`. The postinstall generation hook, generated Prisma Client output and `prisma:generate` script were removed. `prisma:migrate:deploy` was added.
+
+### Route conversion and diagnostic cleanup
+
+The protected database and cron probes now use the shared `pg` repository. Bearer authorization, fixed synthetic labels, safe response codes, idempotency and the absence of request-controlled SQL are preserved. The database route commits the upsert and count through the transaction helper; the cron route performs the same fixed idempotent upsert through the pooled query helper.
+
+All twelve node-isolation routes, their shared helper and the isolation runner were removed after their Hostinger evidence was preserved in the Phase 2A-NIR matrix above. The general server, outbound, revalidation and bounded upload compatibility probes remain because final Hostinger platform closure is still pending.
+
+`CompatibilityProbe` and its forward security migration remain temporary. RLS stays enabled with zero policies and no `PUBLIC`, `anon` or `authenticated` grants. The table is not dropped in this architecture-correction commit.
+
+### Verification and Hostinger gate
+
+Local verification on Node.js `22.22.0` passed raw `SELECT 1`, a parameterized integer query, transaction commit, transaction rollback with the fixed safe error, compatibility upsert/count and repeated database/cron idempotency. Cleanup left exactly one row for each approved fixed probe label and no transaction-test rows.
+
+The Node.js `22.22.0` production server passed the complete compatibility runner. Missing and incorrect bearer credentials returned `401 UNAUTHORIZED`; correct credentials returned `200 DATABASE_PROBE_OK` with one matching row and `200 CRON_PROBE_OK`; repeated calls retained their original timestamps. The server, outbound HTTPS, cache revalidation and bounded upload probes also passed.
+
+Live security regression confirmed RLS enabled and not forced, zero policies, zero `PUBLIC`/`anon`/`authenticated` table grants and only the two fixed synthetic rows. The browser static bundle contained no database URL, secret variable name or PostgreSQL URL. The production server artifact contained no Prisma Client, generated-client or adapter runtime reference.
+
+`prisma validate` passed and `prisma migrate deploy` found both committed migrations with no pending migration. Lint, typecheck, the Next.js `16.3.3` Webpack production build, `npm audit --omit=dev` and `git diff --check` passed. The build emitted the database and cron routes but none of the removed isolation routes.
+
+Representative frozen public routes returned `200`; `/dev/design-system` and the removed isolation URL returned `404`. No Phase 1 frontend component, style, content asset or approved brand source changed. The approved logo SHA-256 remained `2C5D2042EF020AA7AD37FF92E6FD9C3407EF305102EE49DA3B6900FF99FFE60C`.
+
+Hostinger has not yet deployed this architecture-correction commit. After owner redeployment, the required final proof is missing/wrong bearer `401` and correct bearer `200 DATABASE_PROBE_OK` / `200 CRON_PROBE_OK`, repeated idempotency, then same-commit redeploy/restart and successful pool reconnection. No Hostinger scheduler assumption is made.
+
+**Phase 2A-RA recommendation: READY FOR FINAL HOSTINGER PG RETEST.**
+
+**PHASE 2B HAS NOT STARTED.**
+
 ## 20. Phase 2B recommendation
 
 **Do not begin Phase 2B.**
 
-The Supabase portion remains approved after the Phase 2A-SC correction: operator-side connectivity, migrations, public-role denial, protected local probes, idempotency and local regressions pass. The final Phase 2A-PR Hostinger retest is **FAIL** because both deployed Prisma-dependent routes return `500` before authorization and logs retain an `EEXIST` failure during Node `process.stdin` initialization. Overall Phase 2A is **FAIL** and is not approved for closure. Do not begin Phase 2B without successful Hostinger Prisma evidence and a separate owner/reviewer gate.
+The Supabase portion remains approved after the Phase 2A-SC correction. Outcome B proves Hostinger-to-Supabase raw PostgreSQL access, and Phase 2A-RA replaces the incompatible Prisma Client runtime path with `pg`. Overall Phase 2A remains **PASS WITH ISSUES** until the architecture-correction commit is deployed and the protected database/cron routes plus same-commit reconnection pass on Hostinger. Do not begin Phase 2B without that proof and a separate owner/reviewer gate.
 
 ## Verification record
 

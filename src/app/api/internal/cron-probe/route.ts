@@ -3,8 +3,8 @@ import {
   hasBearerSecret,
   unauthorizedCompatibilityResponse,
 } from "@/lib/server/compatibility";
+import { recordCompatibilityProbe } from "@/lib/server/compatibility-probe";
 import { serverEnvironment } from "@/lib/server/environment";
-import { getPrisma } from "@/lib/server/prisma";
 
 const LABEL = "phase-2a-cron-probe";
 
@@ -22,18 +22,12 @@ export async function POST(request: Request) {
   if (!hasBearerSecret(request, secret)) return unauthorizedCompatibilityResponse();
 
   try {
-    const prisma = getPrisma();
-    const record = await prisma.compatibilityProbe.upsert({
-      where: { label: LABEL },
-      create: { label: LABEL },
-      update: {},
-      select: { createdAt: true },
-    });
+    const firstRecordedAt = await recordCompatibilityProbe(LABEL);
 
     return compatibilityJson({
       ok: true,
       code: "CRON_PROBE_OK",
-      firstRecordedAt: record.createdAt.toISOString(),
+      firstRecordedAt,
     });
   } catch {
     console.error("phase_2a_cron_probe_failed");

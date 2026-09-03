@@ -23,15 +23,15 @@
 - [x] Owner's Hostinger account exposes managed Web App deployment on an isolated temporary domain without changing production DNS.
 - [ ] Hostinger CPU, memory, storage, process, build, cron and effective request/upload limits are recorded.
   - hPanel records 200 GB disk, 3072 MB RAM, 2 CPU cores, 600,000 inodes, 120 maximum processes and one of five Web App slots in use. Cron availability and effective request/upload limits remain unproven.
-- [ ] Synthetic Hostinger compatibility spike passes App Router, server route, Server Action, environment-secret, Prisma connection, ISR/revalidation, cron, restart/redeploy and upload-limit checks.
+- [ ] Synthetic Hostinger compatibility spike passes App Router, server route, Server Action, environment-secret, PostgreSQL connection, ISR/revalidation, cron, restart/redeploy and upload-limit checks.
   - Local and live Supabase connectivity, migrations, public-role denial, protected probes and idempotency pass.
-  - Phase 2A-H on 2026-09-03 failed its deployment preconditions: Hostinger deploys `cf2dd2a7`, which predates the Phase 2A routes, and hPanel has zero environment variables. Public routes, static assets, Node 22.x configuration, logs and basic desktop/mobile rendering pass; protected runtime, database, upload, cron, persistence, restart/redeploy and cache tests remain deferred.
-  - Phase 2A-D commit and push are owner/reviewer authorised. Hostinger environment configuration and redeployment remain owner-operated; Hostinger-to-Supabase has not yet passed.
+  - Phase 2A-NIR on 2026-09-03 proved Hostinger-to-Supabase network/TLS and raw `pg` access, but isolated Prisma Client runtime import as incompatible with the current managed Node runtime.
+  - ADR 0014 corrects the deployed architecture to `pg` application runtime with Prisma retained for schema/migrations. Node 22 local database, transaction, authorization, idempotency, security and production-artifact gates pass. Final protected-route and same-commit reconnection proof remains owner-redeploy dependent.
 - [x] Exact implementation-time Node.js, Next.js and package versions are selected and pinned after review.
 - [ ] Production, preview and development environment boundaries are approved.
 - [ ] Supabase Mumbai processing/privacy position is owner/legal reviewed.
 - [ ] Supabase project/account ownership, recovery contacts and MFA are assigned.
-- [ ] Runtime and migration database-role strategy is approved.
+- [x] Runtime library and migration-tooling split is approved: `pg` for the Hostinger application; Prisma schema/migrations through a controlled administrator path. Database-role least-privilege design remains a separate production gate.
 - [ ] RLS posture is approved: public API roles denied; no claim of per-staff RLS without proof.
 - [ ] Environment variable inventory is approved; no secret values are committed.
   - Hostinger runtime requires `DATABASE_URL`, `COMPATIBILITY_PROBE_SECRET` and `CRON_SECRET`. `DIRECT_URL` remains reserved for controlled migration/administrative use and is not a running-web-app requirement.

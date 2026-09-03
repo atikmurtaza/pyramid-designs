@@ -3,8 +3,8 @@ import {
   hasBearerSecret,
   unauthorizedCompatibilityResponse,
 } from "@/lib/server/compatibility";
+import { recordAndCountCompatibilityProbe } from "@/lib/server/compatibility-probe";
 import { serverEnvironment } from "@/lib/server/environment";
-import { getPrisma } from "@/lib/server/prisma";
 
 const LABEL = "phase-2a-database-probe";
 
@@ -22,22 +22,12 @@ export async function POST(request: Request) {
   if (!hasBearerSecret(request, secret)) return unauthorizedCompatibilityResponse();
 
   try {
-    const prisma = getPrisma();
-    const record = await prisma.compatibilityProbe.upsert({
-      where: { label: LABEL },
-      create: { label: LABEL },
-      update: {},
-      select: { createdAt: true },
-    });
-    const matchingRows = await prisma.compatibilityProbe.count({
-      where: { label: LABEL },
-    });
+    const result = await recordAndCountCompatibilityProbe(LABEL);
 
     return compatibilityJson({
       ok: true,
       code: "DATABASE_PROBE_OK",
-      createdAt: record.createdAt.toISOString(),
-      matchingRows,
+      ...result,
     });
   } catch {
     console.error("phase_2a_database_probe_failed");

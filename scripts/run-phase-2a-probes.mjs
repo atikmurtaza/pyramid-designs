@@ -9,7 +9,7 @@ async function call(
   const response = await fetch(new URL(path, baseUrl), {
     method,
     headers: {
-      Authorization: `Bearer ${secret}`,
+      ...(secret ? { Authorization: `Bearer ${secret}` } : {}),
       ...(body ? { "Content-Type": "application/octet-stream" } : {}),
     },
     body,
@@ -23,6 +23,20 @@ async function call(
   }
   return result;
 }
+
+async function verifyAuthorization(path, secret) {
+  const missing = await call(path, { secret: null, expectedStatus: 401 });
+  const incorrect = await call(path, {
+    secret: "x".repeat(secret.length),
+    expectedStatus: 401,
+  });
+  if (missing.code !== "UNAUTHORIZED" || incorrect.code !== "UNAUTHORIZED") {
+    throw new Error(`${path} did not preserve bearer authorization.`);
+  }
+}
+
+await verifyAuthorization("/api/internal/compatibility/database", probeSecret);
+if (cronSecret) await verifyAuthorization("/api/internal/cron-probe", cronSecret);
 
 const results = {
   server: await call("/api/internal/compatibility/server"),
