@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-02; live Supabase closure and Phase 2A-H Hostinger verification 2026-09-03
 
-**Status:** **PASS WITH ISSUES — SUPABASE COMPATIBILITY PASS; SECURITY PASS; HOSTINGER FRONTEND PASS; RUNTIME PROBES PENDING REDEPLOY**
+**Status:** **PASS WITH ISSUES — SUPABASE COMPATIBILITY PASS; SECURITY PASS; HOSTINGER FRONTEND PASS; PRISMA RUNTIME CORRECTION PENDING HOSTINGER RETEST**
 
 **Scope:** Synthetic compatibility preparation, local verification, live Supabase verification, the Phase 2A-SC server-only table correction and verification of an isolated Hostinger temporary deployment. The temporary Hostinger deployment does not change production DNS. No real candidate data, staff authentication, Google Drive integration, production-domain deployment or Phase 2B work was performed.
 
@@ -11,10 +11,10 @@ Current Phase 2A status on 2026-09-03:
 - **SUPABASE COMPATIBILITY: PASS**
 - **SUPABASE COMPATIBILITY SECURITY: PASS**
 - **HOSTINGER FRONTEND DEPLOYMENT: PASS**
-- **HOSTINGER PHASE 2A RUNTIME PROBES: NOT YET DEPLOYED / PENDING REDEPLOY**
+- **HOSTINGER PHASE 2A RUNTIME PROBES: PRISMA/TURBOPACK FAILURE CORRECTED LOCALLY; HOSTINGER RETEST REQUIRED**
 - **OVERALL PHASE 2A: PASS WITH ISSUES**
 
-The owner/reviewer has approved the reviewed Phase 2A compatibility infrastructure for commit and push to `origin/main`. Hostinger environment configuration and redeployment remain owner-operated steps. Hostinger-to-Supabase connectivity has not yet passed.
+The owner/reviewer has approved the reviewed Phase 2A compatibility infrastructure and the narrow Phase 2A-P runtime correction for commit and push to `origin/main` after local gates pass. Hostinger redeployment remains owner-operated. Hostinger-to-Supabase connectivity through the deployed Prisma routes remains unproven until the corrected build is retested.
 
 ## Phase 2A-H outcome on 2026-09-03
 
@@ -382,7 +382,45 @@ npm run probe:phase2a
 - Hostinger request/body/upload and timeout limits are unproven because the route is absent from the deployed commit.
 - Hostinger environment persistence and restart/redeploy database recovery are unproven because no variables or database route are deployed.
 
-No ADR changed because no actual incompatibility evidence has yet contradicted ADR 0009 or ADR 0011.
+No ADR changed. The Hostinger-first architecture remains unchanged; the corrective build selection is recorded below as a deployment compatibility measure rather than a new architecture decision.
+
+## Hostinger Prisma/Turbopack corrective analysis
+
+**Research and local analysis date:** 2026-09-03.
+
+### Failure and root cause
+
+After the Phase 2A infrastructure reached the isolated Hostinger Web App, all non-Prisma compatibility routes passed. Only `/api/internal/compatibility/database` and `/api/internal/cron-probe` failed, including requests with missing or incorrect bearer credentials. Hostinger returned empty `500` responses because the route modules failed before their handlers and authorization checks ran. Repeated runtime logs reported `Failed to load external module @prisma/client-<content-hash>/runtime/library: Error: open EEXIST` from `.next/server/chunks/[turbopack]_runtime.js`; a same-commit redeploy did not clear the failure.
+
+The Prisma generator is the supported `prisma-client` generator with a required custom output at `src/generated/prisma`. `npm run prisma:generate` produces ordinary TypeScript modules there; it does not create symlinks or junctions. The generated client imports `@prisma/client/runtime/library`, while the route handlers import the generated client through `src/lib/server/prisma.ts`.
+
+The default Next.js 16.3.3 Turbopack production build bundled the custom generated client but externalized its `@prisma/client/runtime/library` import. The emitted route chunk dynamically imported a content-hashed package name such as `@prisma/client-<content-hash>/runtime/library`, backed locally by a `.next/node_modules/@prisma/client-<content-hash>` filesystem link to the installed package. This is the exact external-loading path named in the Hostinger failure. The failure boundary is therefore the Hostinger runtime loading Turbopack's linked, content-hashed Prisma external, not missing Prisma generation, route authorization, the database schema or a database credential response.
+
+### Alternatives evaluated
+
+1. **Build-time generation:** already guaranteed by `postinstall: prisma generate`; no redundant build hook was added.
+2. **`serverExternalPackages`:** rejected as ineffective. Next.js already automatically externalizes `@prisma/client` and `pg`, and the failed Turbopack artifact already proves that the Prisma runtime was externalized. Explicitly listing the same packages would preserve the linked hashed alias that fails on Hostinger. `@prisma/adapter-pg` was successfully bundled and did not need forced externalization.
+3. **Generated-client relocation or generator change:** rejected because generation completed reliably, the custom output itself contained no links, and changing the supported generator/output would be a broader workaround without removing Next.js's automatic Prisma externalization behavior.
+4. **Webpack production fallback:** selected. Next.js 16 supports `next build --webpack` as the production-build opt-out from the default Turbopack bundler. The Webpack artifact imports `@prisma/client/runtime/library` by its real package name, contains no `.next/node_modules` hashed Prisma alias, and preserves the existing application/runtime contract.
+
+### Correction and implications
+
+The repository `build` script now runs `next build --webpack`. Development remains unchanged. Prisma, `@prisma/client` and `@prisma/adapter-pg` remain pinned at `6.12.0`; `pg` remains pinned at `8.23.0`. The Prisma schema, generated-client location, adapter, migrations and route code are unchanged. No ADR update is required because this is a narrow supported bundler fallback for the approved Hostinger runtime rather than a change to the server-first architecture.
+
+Local production verification on Node.js `22.22.0` confirmed that the Webpack build completes and emits direct `@prisma/client/runtime/library` imports with no hashed Prisma alias or linked `.next/node_modules/@prisma` directory. In `next start` mode, both protected routes loaded; missing and incorrect secrets reached their handlers and returned `401`, correct secrets executed Prisma and returned `200`, and the complete Phase 2A probe suite passed. Representative public routes returned `200`, `/dev/design-system` returned `404`, desktop Home and in-view Culture rendered their optional canvases, 390 px Home retained the static fallback, 390 px Culture required explicit opt-in before creating a canvas, and browser checks found no error overlay, console error or horizontal overflow. The approved logo SHA-256 remained `2C5D2042EF020AA7AD37FF92E6FD9C3407EF305102EE49DA3B6900FF99FFE60C`. These local results prove the corrected artifact behavior but do not prove Hostinger until the isolated Web App is rebuilt and retested from the new commit.
+
+### Current upstream sources
+
+- Next.js CLI, including the supported `next build --webpack` option: <https://nextjs.org/docs/app/api-reference/cli/next>
+- Next.js `serverExternalPackages`, including automatic externalization of `@prisma/client` and `pg`: <https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages>
+- Next.js 16.3/Turbopack upstream report documenting content-hashed packages and links under `.next/node_modules`: <https://github.com/vercel/next.js/issues/95815>
+- Prisma generators reference for `prisma-client`, its required custom output and generated TypeScript files: <https://www.prisma.io/docs/orm/prisma-schema/overview/generators>
+- Prisma deployment guidance for explicitly running `prisma generate` during dependency installation where cached dependencies can otherwise leave a stale client: <https://www.prisma.io/docs/orm/more/help-and-troubleshooting/vercel-caching-issue>
+- Supabase changelog reviewed for current breaking changes; none changed this Prisma packaging correction: <https://supabase.com/changelog>
+
+### Hostinger retest requirement
+
+Redeploy the temporary Hostinger Web App from the corrected `main` commit. Confirm the deployment log reports a Webpack production build, then repeat missing, incorrect and correct-secret tests for both Prisma-dependent routes. Confirm that unauthorized requests return `401`, authorized database and cron probes return their success codes, runtime logs contain no `EEXIST` or failed external-module error, and restart plus same-commit redeploy retain the result. Do not change production DNS and do not begin Phase 2B.
 
 ## 20. Phase 2B recommendation
 
