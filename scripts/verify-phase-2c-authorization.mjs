@@ -21,6 +21,7 @@ const session = await import("../src/lib/server/auth/session.ts");
 const authorization = await import("../src/lib/server/auth/authorization.ts");
 const redirects = await import("../src/lib/server/auth/redirects.ts");
 const csrf = await import("../src/lib/server/auth/csrf.ts");
+const mfaFactors = await import("../src/app/internal/staff-auth/mfa-factors.ts");
 
 const targetId = "00000000-0000-4000-8000-00000000002f";
 const submittedState = {
@@ -396,6 +397,52 @@ try {
   assert.equal(packageJson.dependencies["@prisma/client"], undefined);
   assert.equal(packageJson.dependencies["@prisma/adapter-pg"], undefined);
   assert.equal(await staffRepository.getEffectiveStaffRoles(phase2CFixtures.subjects.zeroRole).then((roles) => roles.length), 0);
+
+  const verifiedFactorId = mfaFactors.selectVerifiedTotpFactor([
+    {
+      id: "unverified-oldest",
+      factor_type: "totp",
+      status: "unverified",
+      created_at: "2026-01-01T00:00:00.000Z",
+    },
+    {
+      id: "verified-newer",
+      factor_type: "totp",
+      status: "verified",
+      created_at: "2026-03-01T00:00:00.000Z",
+    },
+    {
+      id: "verified-oldest",
+      factor_type: "totp",
+      status: "verified",
+      created_at: "2026-02-01T00:00:00.000Z",
+    },
+  ]);
+  assert.equal(verifiedFactorId, "verified-oldest");
+  assert.equal(
+    mfaFactors.selectVerifiedTotpFactor([
+      {
+        id: "unverified-only",
+        factor_type: "totp",
+        status: "unverified",
+        created_at: "2026-01-01T00:00:00.000Z",
+      },
+    ]),
+    null,
+  );
+
+  const mfaSource = await readFile("src/app/internal/staff-auth/MfaEnrollment.tsx", "utf8");
+  assert.match(mfaSource, /\.auth\.mfa\.listFactors\(\)/);
+  assert.match(mfaSource, /\.auth\.mfa\.challenge\(/);
+  assert.match(mfaSource, /\.auth\.mfa\.verify\(/);
+  assert.match(mfaSource, /window\.location\.reload\(\)/);
+  assert(!mfaSource.includes(".auth.mfa.enroll("));
+  assert(!/error\.message|JSON\.stringify|setAssurance/i.test(mfaSource));
+  assert(!/qr_code|otpauth:|console\./i.test(mfaSource));
+
+  const staffAuthPageSource = await readFile("src/app/internal/staff-auth/page.tsx", "utf8");
+  assert.match(staffAuthPageSource, /resolveAuthenticatedStaff\(\)/);
+  assert.match(staffAuthPageSource, /readVerifiedSupabaseClaims\(\)/);
 
   let statusUpdate;
   assert.equal(

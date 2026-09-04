@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
 import { publicEnvironment } from "@/lib/env/public";
+import { selectVerifiedTotpFactor } from "./mfa-factors";
 
-type Enrollment = Readonly<{ factorId: string; qrCode: string }>;
+type Challenge = Readonly<{ factorId: string; challengeId: string }>;
 
 function browserClient() {
   const url = publicEnvironment.supabaseUrl;
@@ -14,27 +15,49 @@ function browserClient() {
   return createBrowserClient(url, publishableKey);
 }
 
-export function MfaEnrollment() {
-  const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+export function MfaExistingFactorChallenge() {
+  const [factorId, setFactorId] = useState<string | null>(null);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  async function startEnrollment() {
+  useEffect(() => {
+    let active = true;
+
+    async function loadVerifiedFactor() {
+      try {
+        const { data, error } = await browserClient().auth.mfa.listFactors();
+        if (error) throw error;
+        const selectedFactorId = selectVerifiedTotpFactor(data.all);
+        if (active) setFactorId(selectedFactorId);
+      } catch {
+        if (active) setMessage("TOTP factor lookup failed.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadVerifiedFactor();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function startChallenge() {
+    if (!factorId) return;
     setMessage("");
     try {
-      const { data, error } = await browserClient().auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "Phase 2C synthetic test",
-      });
+      const { data, error } = await browserClient().auth.mfa.challenge({ factorId });
       if (error) throw error;
-      setEnrollment({ factorId: data.id, qrCode: data.totp.qr_code });
+      setChallenge({ factorId, challengeId: data.id });
     } catch {
-      setMessage("TOTP enrollment could not start.");
+      setMessage("TOTP challenge could not start.");
     }
   }
 
   async function verify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!enrollment) return;
+    if (!challenge) return;
 
     const form = event.currentTarget;
     const code = new FormData(form).get("code");
@@ -46,8 +69,9 @@ export function MfaEnrollment() {
 
     setMessage("");
     try {
-      const { error } = await browserClient().auth.mfa.challengeAndVerify({
-        factorId: enrollment.factorId,
+      const { error } = await browserClient().auth.mfa.verify({
+        factorId: challenge.factorId,
+        challengeId: challenge.challengeId,
         code,
       });
       if (error) throw error;
@@ -57,11 +81,29 @@ export function MfaEnrollment() {
     }
   }
 
-  if (!enrollment) {
+  if (loading) {
+    return (
+      <section aria-labelledby="totp-heading" aria-busy="true">
+        <h2 id="totp-heading">TOTP verification</h2>
+        <p>Checking for a verified TOTP factor.</p>
+      </section>
+    );
+  }
+
+  if (!factorId) {
     return (
       <section aria-labelledby="totp-heading">
-        <h2 id="totp-heading">TOTP enrollment</h2>
-        <button type="button" onClick={startEnrollment}>Start TOTP enrollment</button>
+        <h2 id="totp-heading">TOTP verification</h2>
+        <p>{message || "No verified TOTP factor is available for this test account."}</p>
+      </section>
+    );
+  }
+
+  if (!challenge) {
+    return (
+      <section aria-labelledby="totp-heading">
+        <h2 id="totp-heading">TOTP verification</h2>
+        <button type="button" onClick={startChallenge}>Verify existing TOTP factor</button>
         {message ? <p role="alert">{message}</p> : null}
       </section>
     );
@@ -69,16 +111,7 @@ export function MfaEnrollment() {
 
   return (
     <section aria-labelledby="totp-heading">
-      <h2 id="totp-heading">TOTP enrollment</h2>
-      <p>Scan this QR code with your authenticator app.</p>
-      {/* Provider-managed inline SVG; keep it in-memory and out of Next image processing. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={enrollment.qrCode.trimEnd()}
-        alt="TOTP enrollment QR code"
-        width={256}
-        height={256}
-      />
+      <h2 id="totp-heading">TOTP verification</h2>
       <form onSubmit={verify}>
         <label htmlFor="totp-code">Six-digit authenticator code</label>
         <input

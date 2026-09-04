@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 
 import { authorize } from "@/lib/server/auth/authorization";
 import { resolveAuthenticatedStaff } from "@/lib/server/auth/session";
@@ -8,11 +9,13 @@ import {
 } from "@/lib/server/auth/supabase";
 import { findStaffAuthorizationProfile } from "@/lib/server/repositories/staff";
 
-import { MfaEnrollment } from "./MfaEnrollment";
+import { MfaExistingFactorChallenge } from "./MfaEnrollment";
 
 const SYNTHETIC_EMAIL = "test@example.com";
 const SYNTHETIC_CONTENT_ID = "00000000-0000-4000-8000-00000000002f";
 const SYNTHETIC_STAFF_ID = "00000000-0000-4000-8000-000000000020";
+const SYNTHETIC_JOB_ID = "00000000-0000-4000-8000-000000000008";
+const SYNTHETIC_APPLICATION_ID = "00000000-0000-4000-8000-000000000011";
 
 async function signIn(formData: FormData) {
   "use server";
@@ -104,7 +107,30 @@ export default async function StaffAuthTestPage({
             <dt>Staff management reason</dt>
             <dd>{deniedDecision.reasonCode}</dd>
           </dl>
-          {principal.assuranceLevel === "aal1" ? <MfaEnrollment /> : null}
+          {principal.assuranceLevel === "aal1" ? <MfaExistingFactorChallenge /> : null}
+          {principal.assuranceLevel === "aal2" ? (
+            <section aria-labelledby="phase-2d-read-heading">
+              <h2 id="phase-2d-read-heading">Phase 2D synthetic staff reads</h2>
+              <p>Each link performs a fresh server session, role, state and target check.</p>
+              <ul>
+                <li>
+                  <Link href={`/api/internal/staff-auth/read?resource=job&id=${SYNTHETIC_JOB_ID}`}>
+                    Read synthetic job
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/api/internal/staff-auth/read?resource=application&id=${SYNTHETIC_APPLICATION_ID}`}>
+                    Read synthetic application contact
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/api/internal/staff-auth/read?resource=audit">
+                    Read synthetic audit evidence
+                  </Link>
+                </li>
+              </ul>
+            </section>
+          ) : null}
         </>
       ) : providerClaims ? (
         <dl>

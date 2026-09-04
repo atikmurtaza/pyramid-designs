@@ -343,6 +343,20 @@ export function authorize(
   principal: StaffPrincipal | null | undefined,
   request: AuthorizationRequest,
 ): AuthorizationDecision {
+  const boundaryDecision = authorizeBeforeTargetStateLookup(principal, request);
+  if (!boundaryDecision.allowed) return boundaryDecision;
+
+  const operation = request.operation as AuthorizationOperation;
+  if (!stateAllows(principal!, operation, request.target?.state)) {
+    return { allowed: false, reasonCode: "STATE_DENIED" };
+  }
+  return { allowed: true, reasonCode: "ALLOWED" };
+}
+
+export function authorizeBeforeTargetStateLookup(
+  principal: StaffPrincipal | null | undefined,
+  request: AuthorizationRequest,
+): AuthorizationDecision {
   if (!principal) return { allowed: false, reasonCode: "AUTHENTICATION_REQUIRED" };
   if (principal.assuranceLevel !== "aal2") {
     return { allowed: false, reasonCode: "MFA_REQUIRED" };
@@ -364,9 +378,6 @@ export function authorize(
   }
   if (TARGET_ID_REQUIRED.has(operation) && !request.target.id?.trim()) {
     return { allowed: false, reasonCode: "TARGET_ID_REQUIRED" };
-  }
-  if (!stateAllows(principal, operation, request.target.state)) {
-    return { allowed: false, reasonCode: "STATE_DENIED" };
   }
   return { allowed: true, reasonCode: "ALLOWED" };
 }
