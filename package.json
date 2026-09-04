@@ -20,7 +20,8 @@
     "seed:phase2c": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/seed-phase-2c-synthetic.mjs",
     "test:phase2c": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2c-authorization.mjs",
     "test:phase2d": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2d-staff-reads.mjs",
-    "test:phase2e": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2e-staff-portal.mjs"
+    "test:phase2e": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2e-staff-portal.mjs",
+    "test:phase2f": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2f-staff-mutations.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.7.0",

@@ -133,7 +133,9 @@ body:has(.staff-portal) > .site-footer {
   font-weight: 700;
 }
 
-.staff-form input:not([type="hidden"]) {
+.staff-form input:not([type="hidden"]),
+.staff-form select,
+.staff-form textarea {
   width: 100%;
   min-height: 2.75rem;
   border: 1px solid var(--color-border);
@@ -144,9 +146,37 @@ body:has(.staff-portal) > .site-footer {
   font: inherit;
 }
 
+.staff-form textarea {
+  resize: vertical;
+}
+
 .staff-form .button {
   justify-self: start;
   margin-top: var(--space-2);
+}
+
+.staff-mutation-panel {
+  margin-bottom: var(--space-6);
+}
+
+.staff-confirmation {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.staff-confirmation input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+}
+
+.staff-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-6);
 }
 
 .staff-card-grid {
@@ -268,7 +298,8 @@ body:has(.staff-portal) > .site-footer {
   }
 
   .staff-card-grid,
-  .staff-details {
+  .staff-details,
+  .staff-actions {
     grid-template-columns: 1fr;
   }
 

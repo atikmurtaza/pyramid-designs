@@ -33,6 +33,16 @@ export type StaffContentListItem = Readonly<{
   updatedAt: Date;
 }>;
 
+export type StaffContentRead = Readonly<{
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  publicationState: string;
+  version: number;
+  updatedAt: Date;
+}>;
+
 export type StaffJobListItem = Readonly<{
   id: string;
   title: string;
@@ -153,6 +163,42 @@ export async function listStaffContent(
     });
     return { ...row };
   });
+}
+
+export async function readStaffContent(
+  principal: StaffPrincipal | null | undefined,
+  contentId: string,
+  executor: DatabaseExecutor = database,
+): Promise<StaffContentRead> {
+  const id = requireUuid(contentId);
+  const target = { type: "CONTENT", id } as const;
+  requireReadBoundary(principal, "content.draft.read", target);
+
+  const stateResult = await executor.query<{ publicationState: string }>(
+    `SELECT "publicationState"
+     FROM public."Project"
+     WHERE "id" = $1
+     LIMIT 1`,
+    [id],
+  );
+  const state = stateResult.rows[0];
+  if (!state) unavailable();
+
+  requireAuthorization(principal, {
+    operation: "content.draft.read",
+    target: { ...target, state },
+  });
+
+  const result = await executor.query<StaffContentRead>(
+    `SELECT "id", "slug", "title", "summary", "publicationState", "version", "updatedAt"
+     FROM public."Project"
+     WHERE "id" = $1
+     LIMIT 1`,
+    [id],
+  );
+  const row = result.rows[0];
+  if (!row || row.id !== id) unavailable();
+  return { ...row };
 }
 
 export async function listStaffJobs(

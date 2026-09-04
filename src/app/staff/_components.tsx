@@ -18,6 +18,20 @@ export function StaffEmptyState({ children }: Readonly<{ children: React.ReactNo
   return <p className="staff-empty">{children}</p>;
 }
 
+const MUTATION_MESSAGES: Readonly<Record<string, string>> = {
+  applied: "The change was saved with its audit evidence.",
+  already_applied: "This submission was already applied; no duplicate change was made.",
+  validation_failed: "Check the permitted fields and try again.",
+  unavailable: "The change is not available. Refresh the record before trying again.",
+};
+
+export function StaffMutationNotice({ status }: Readonly<{ status?: string }>) {
+  const message = status ? MUTATION_MESSAGES[status] : undefined;
+  if (!message) return null;
+  const failed = status === "validation_failed" || status === "unavailable";
+  return <p className="staff-notice" role={failed ? "alert" : "status"}>{message}</p>;
+}
+
 export function StaffBackLink({ href, children }: Readonly<{ href: string; children: React.ReactNode }>) {
   return <Link className="text-link staff-back-link" href={href}>{children}</Link>;
 }

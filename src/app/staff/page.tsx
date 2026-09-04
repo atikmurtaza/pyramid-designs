@@ -36,7 +36,7 @@ export default async function StaffPage({
         <StaffPageHeading
           eyebrow="Authorized workspace"
           title="Staff portal"
-          summary="Read-only access is resolved from the current server session, staff status, roles and database state on every request."
+          summary="Staff access is resolved from the current server session, staff status, roles and database state on every request."
         />
         {message ? <p className="staff-notice" role="status">{message}</p> : null}
         <div className="staff-card-grid">
