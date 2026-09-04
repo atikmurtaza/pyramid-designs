@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { publicEnvironment } from "@/lib/env/public";
-import { selectVerifiedTotpFactor } from "./mfa-factors";
+import { selectVerifiedTotpFactor } from "@/lib/supabase/mfa-factors";
 
 type Challenge = Readonly<{ factorId: string; challengeId: string }>;
 
@@ -83,8 +83,9 @@ export function MfaExistingFactorChallenge() {
 
   if (loading) {
     return (
-      <section aria-labelledby="totp-heading" aria-busy="true">
-        <h2 id="totp-heading">TOTP verification</h2>
+      <section className="staff-panel" aria-labelledby="totp-heading" aria-busy="true">
+        <p className="eyebrow">Step two</p>
+        <h2 id="totp-heading">Verify your authenticator</h2>
         <p>Checking for a verified TOTP factor.</p>
       </section>
     );
@@ -92,27 +93,32 @@ export function MfaExistingFactorChallenge() {
 
   if (!factorId) {
     return (
-      <section aria-labelledby="totp-heading">
-        <h2 id="totp-heading">TOTP verification</h2>
-        <p>{message || "No verified TOTP factor is available for this test account."}</p>
+      <section className="staff-panel" aria-labelledby="totp-heading">
+        <p className="eyebrow">Step two</p>
+        <h2 id="totp-heading">Verify your authenticator</h2>
+        <p>{message || "No verified TOTP factor is available for this account."}</p>
       </section>
     );
   }
 
   if (!challenge) {
     return (
-      <section aria-labelledby="totp-heading">
-        <h2 id="totp-heading">TOTP verification</h2>
-        <button type="button" onClick={startChallenge}>Verify existing TOTP factor</button>
+      <section className="staff-panel" aria-labelledby="totp-heading">
+        <p className="eyebrow">Step two</p>
+        <h2 id="totp-heading">Verify your authenticator</h2>
+        <button className="button button-primary" type="button" onClick={startChallenge}>
+          Continue with TOTP
+        </button>
         {message ? <p role="alert">{message}</p> : null}
       </section>
     );
   }
 
   return (
-    <section aria-labelledby="totp-heading">
-      <h2 id="totp-heading">TOTP verification</h2>
-      <form onSubmit={verify}>
+    <section className="staff-panel" aria-labelledby="totp-heading">
+      <p className="eyebrow">Step two</p>
+      <h2 id="totp-heading">Verify your authenticator</h2>
+      <form className="staff-form" onSubmit={verify}>
         <label htmlFor="totp-code">Six-digit authenticator code</label>
         <input
           id="totp-code"
@@ -122,7 +128,7 @@ export function MfaExistingFactorChallenge() {
           pattern="[0-9]{6}"
           required
         />
-        <button type="submit">Verify TOTP</button>
+        <button className="button button-primary" type="submit">Verify TOTP</button>
       </form>
       {message ? <p role="alert">{message}</p> : null}
     </section>

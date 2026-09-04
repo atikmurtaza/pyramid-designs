@@ -21,7 +21,7 @@ const session = await import("../src/lib/server/auth/session.ts");
 const authorization = await import("../src/lib/server/auth/authorization.ts");
 const redirects = await import("../src/lib/server/auth/redirects.ts");
 const csrf = await import("../src/lib/server/auth/csrf.ts");
-const mfaFactors = await import("../src/app/internal/staff-auth/mfa-factors.ts");
+const mfaFactors = await import("../src/lib/supabase/mfa-factors.ts");
 
 const targetId = "00000000-0000-4000-8000-00000000002f";
 const submittedState = {
@@ -431,7 +431,7 @@ try {
     null,
   );
 
-  const mfaSource = await readFile("src/app/internal/staff-auth/MfaEnrollment.tsx", "utf8");
+  const mfaSource = await readFile("src/components/staff/MfaExistingFactorChallenge.tsx", "utf8");
   assert.match(mfaSource, /\.auth\.mfa\.listFactors\(\)/);
   assert.match(mfaSource, /\.auth\.mfa\.challenge\(/);
   assert.match(mfaSource, /\.auth\.mfa\.verify\(/);

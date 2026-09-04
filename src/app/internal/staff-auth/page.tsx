@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
+import { MfaExistingFactorChallenge } from "@/components/staff/MfaExistingFactorChallenge";
+
 import { authorize } from "@/lib/server/auth/authorization";
 import { resolveAuthenticatedStaff } from "@/lib/server/auth/session";
 import {
@@ -8,8 +10,6 @@ import {
   readVerifiedSupabaseClaims,
 } from "@/lib/server/auth/supabase";
 import { findStaffAuthorizationProfile } from "@/lib/server/repositories/staff";
-
-import { MfaExistingFactorChallenge } from "./MfaEnrollment";
 
 const SYNTHETIC_EMAIL = "test@example.com";
 const SYNTHETIC_CONTENT_ID = "00000000-0000-4000-8000-00000000002f";

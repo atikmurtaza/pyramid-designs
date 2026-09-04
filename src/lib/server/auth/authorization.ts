@@ -5,6 +5,7 @@ import type { StaffRole } from "../repositories/staff.ts";
 import type { StaffPrincipal } from "./session";
 
 export const AUTHORIZATION_OPERATIONS = [
+  "content.list_metadata",
   "content.draft.read",
   "content.create",
   "content.edit",
@@ -12,6 +13,7 @@ export const AUTHORIZATION_OPERATIONS = [
   "content.archive",
   "site_settings.public.edit",
   "site_settings.recruitment.edit",
+  "job.list_metadata",
   "job.draft.read",
   "job.create",
   "job.edit",
@@ -108,6 +110,7 @@ export class AuthorizationDeniedError extends Error {
 }
 
 const ROLE_GRANTS: Record<AuthorizationOperation, readonly StaffRole[]> = {
+  "content.list_metadata": ["CONTENT_EDITOR", "ADMIN"],
   "content.draft.read": ["CONTENT_EDITOR", "ADMIN"],
   "content.create": ["CONTENT_EDITOR", "ADMIN"],
   "content.edit": ["CONTENT_EDITOR", "ADMIN"],
@@ -115,6 +118,7 @@ const ROLE_GRANTS: Record<AuthorizationOperation, readonly StaffRole[]> = {
   "content.archive": ["CONTENT_EDITOR", "ADMIN"],
   "site_settings.public.edit": ["CONTENT_EDITOR", "ADMIN"],
   "site_settings.recruitment.edit": ["ADMIN"],
+  "job.list_metadata": ["HIRING_REVIEWER", "HIRING_MANAGER", "ADMIN"],
   "job.draft.read": ["HIRING_REVIEWER", "HIRING_MANAGER", "ADMIN"],
   "job.create": ["HIRING_MANAGER", "ADMIN"],
   "job.edit": ["HIRING_MANAGER", "ADMIN"],
@@ -267,7 +271,11 @@ function stateAllows(
   operation: AuthorizationOperation,
   state: AuthorizationState | undefined,
 ) {
-  if (operation === "content.draft.read" || operation === "content.edit") {
+  if (
+    operation === "content.list_metadata" ||
+    operation === "content.draft.read" ||
+    operation === "content.edit"
+  ) {
     return ["DRAFT", "SCHEDULED"].includes(state?.publicationState ?? "");
   }
   if (operation === "content.publish") {
@@ -280,7 +288,7 @@ function stateAllows(
     return ["DRAFT", "SCHEDULED", "PUBLISHED"].includes(state?.publicationState ?? "");
   }
 
-  if (operation === "job.draft.read") {
+  if (operation === "job.list_metadata" || operation === "job.draft.read") {
     const unrestricted = hasAnyRole(principal, ["HIRING_MANAGER", "ADMIN"]);
     return unrestricted || state?.assignedApplicationContext === true;
   }

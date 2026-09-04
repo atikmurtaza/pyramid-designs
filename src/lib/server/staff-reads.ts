@@ -26,6 +26,31 @@ export type StaffSessionSummary = Readonly<{
   authorizationState: "AUTHORIZED";
 }>;
 
+export type StaffContentListItem = Readonly<{
+  id: string;
+  title: string;
+  publicationState: string;
+  updatedAt: Date;
+}>;
+
+export type StaffJobListItem = Readonly<{
+  id: string;
+  title: string;
+  departmentName: string;
+  lifecycleState: string;
+  applicationDeadline: Date | null;
+}>;
+
+export type StaffApplicationListItem = Readonly<{
+  id: string;
+  publicReference: string;
+  applicationType: string;
+  jobTitle: string | null;
+  technicalStatus: string;
+  hiringStatus: string | null;
+  createdAt: Date;
+}>;
+
 export type StaffJobRead = Readonly<{
   id: string;
   title: string;
@@ -102,6 +127,120 @@ export function staffSessionSummary(principal: StaffPrincipal): StaffSessionSumm
   };
 }
 
+export async function listStaffContent(
+  principal: StaffPrincipal | null | undefined,
+  executor: DatabaseExecutor = database,
+): Promise<StaffContentListItem[]> {
+  const target = { type: "CONTENT" } as const;
+  requireReadBoundary(principal, "content.list_metadata", target);
+
+  const result = await executor.query<StaffContentListItem>(
+    `SELECT "id", "title", "publicationState", "updatedAt"
+     FROM public."Project"
+     WHERE "publicationState" IN ('DRAFT', 'SCHEDULED')
+     ORDER BY "updatedAt" DESC, "id"
+     LIMIT 50`,
+  );
+
+  return result.rows.map((row) => {
+    requireAuthorization(principal, {
+      operation: "content.list_metadata",
+      target: {
+        type: "CONTENT",
+        id: row.id,
+        state: { publicationState: row.publicationState },
+      },
+    });
+    return { ...row };
+  });
+}
+
+export async function listStaffJobs(
+  principal: StaffPrincipal | null | undefined,
+  executor: DatabaseExecutor = database,
+): Promise<StaffJobListItem[]> {
+  const target = { type: "JOB" } as const;
+  requireReadBoundary(principal, "job.list_metadata", target);
+  const managementView = hasRole(principal, ["HIRING_MANAGER", "ADMIN"]);
+
+  const result = await executor.query<StaffJobListItem & { assignedApplicationContext: boolean }>(
+    `SELECT job."id", job."title", department."name" AS "departmentName",
+            job."lifecycleState", job."applicationDeadline",
+            EXISTS (
+              SELECT 1
+              FROM public."Application" application
+              WHERE application."jobId" = job."id"
+                AND application."technicalStatus" = 'SUBMITTED'
+                AND application."expiresAt" > CURRENT_TIMESTAMP
+                AND application."deletionCompletedAt" IS NULL
+            ) AS "assignedApplicationContext"
+     FROM public."Job" job
+     JOIN public."Department" department ON department."id" = job."departmentId"
+     WHERE ($1::boolean = true OR EXISTS (
+       SELECT 1
+       FROM public."Application" application
+       WHERE application."jobId" = job."id"
+         AND application."technicalStatus" = 'SUBMITTED'
+         AND application."expiresAt" > CURRENT_TIMESTAMP
+         AND application."deletionCompletedAt" IS NULL
+     ))
+     ORDER BY job."updatedAt" DESC, job."id"
+     LIMIT 50`,
+    [managementView],
+  );
+
+  return result.rows.map(({ assignedApplicationContext, ...row }) => {
+    requireAuthorization(principal, {
+      operation: "job.list_metadata",
+      target: {
+        type: "JOB",
+        id: row.id,
+        state: { lifecycleState: row.lifecycleState, assignedApplicationContext },
+      },
+    });
+    return row;
+  });
+}
+
+export async function listStaffApplications(
+  principal: StaffPrincipal | null | undefined,
+  executor: DatabaseExecutor = database,
+): Promise<StaffApplicationListItem[]> {
+  const target = { type: "APPLICATION" } as const;
+  requireReadBoundary(principal, "application.list_metadata", target);
+
+  const result = await executor.query<StaffApplicationListItem>(
+    `SELECT application."id", application."publicReference", application."applicationType",
+            job."title" AS "jobTitle", application."technicalStatus",
+            application."hiringStatus", application."createdAt"
+     FROM public."Application" application
+     LEFT JOIN public."Job" job ON job."id" = application."jobId"
+     WHERE application."technicalStatus" = 'SUBMITTED'
+       AND application."expiresAt" > CURRENT_TIMESTAMP
+       AND application."deletionCompletedAt" IS NULL
+     ORDER BY application."createdAt" DESC, application."id"
+     LIMIT 50`,
+  );
+
+  return result.rows.map((row) => {
+    requireAuthorization(principal, {
+      operation: "application.list_metadata",
+      target: {
+        type: "APPLICATION",
+        id: row.id,
+        state: {
+          technicalStatus: row.technicalStatus,
+          hiringStatus: row.hiringStatus,
+          retentionPermitsAccess: true,
+          deletionCompleted: false,
+          inRecruitmentScope: true,
+        },
+      },
+    });
+    return { ...row };
+  });
+}
+
 export async function readStaffJob(
   principal: StaffPrincipal | null | undefined,
   jobId: string,
@@ -159,7 +298,7 @@ export async function readStaffJob(
       [id],
     );
     const row = result.rows[0];
-    if (!row) unavailable();
+    if (!row || row.id !== id) unavailable();
     return { ...row, detailLevel: "APPLICATION_CONTEXT" };
   }
 
@@ -190,7 +329,7 @@ export async function readStaffJob(
     [id],
   );
   const row = result.rows[0];
-  if (!row) unavailable();
+  if (!row || row.id !== id) unavailable();
   return { ...row, detailLevel: "MANAGEMENT" };
 }
 
@@ -240,7 +379,7 @@ export async function readStaffApplicationContact(
     [id],
   );
   const row = result.rows[0];
-  if (!row) unavailable();
+  if (!row || row.id !== id) unavailable();
   return { ...row };
 }
 
