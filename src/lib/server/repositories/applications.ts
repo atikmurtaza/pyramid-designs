@@ -64,7 +64,7 @@ export type CreateApplicationInput = ApplicationSnapshot &
     idempotencyKeyHash: string;
     requestHash: string;
     idempotencyExpiresAt: Date;
-    answers?: Array<{ jobQuestionId: string; value: string | boolean }>;
+    answers?: Array<{ jobQuestionId: string; value: string | boolean; optionId?: string }>;
   };
 
 export interface ApplicationRecord {
@@ -93,7 +93,7 @@ interface JobQuestionRow {
   questionType: "SHORT_TEXT" | "LONG_TEXT" | "SELECT" | "YES_NO";
   prompt: string;
   required: boolean;
-  options: string[];
+  options: Array<{ id: string; label: string }>;
 }
 
 const hiringTransitions: Readonly<Record<HiringStatus, readonly HiringStatus[]>> = {
@@ -112,10 +112,15 @@ function publicReference() {
 }
 
 async function loadJobQuestions(executor: DatabaseExecutor, jobId: string) {
+  // Parent locks also prevent question/option insertions during this snapshot.
+  await executor.query(`SELECT "id" FROM public."JobQuestion" WHERE "jobId" = $1 FOR UPDATE`, [jobId]);
+  await executor.query(`SELECT option."id" FROM public."JobQuestionOption" option
+    JOIN public."JobQuestion" question ON question."id" = option."jobQuestionId"
+    WHERE question."jobId" = $1 FOR SHARE OF option`, [jobId]);
   const result = await executor.query<JobQuestionRow>(
     `SELECT question."id", question."questionType", question."prompt", question."required",
-            COALESCE(array_agg(option."label" ORDER BY option."sortOrder")
-              FILTER (WHERE option."id" IS NOT NULL), ARRAY[]::varchar[]) AS "options"
+            COALESCE(jsonb_agg(jsonb_build_object('id', option."id", 'label', option."label") ORDER BY option."sortOrder")
+              FILTER (WHERE option."id" IS NOT NULL), '[]'::jsonb) AS "options"
      FROM public."JobQuestion" question
      LEFT JOIN public."JobQuestionOption" option ON option."jobQuestionId" = question."id"
      WHERE question."jobId" = $1 AND question."active" = true
@@ -154,12 +159,19 @@ async function insertAnswers(
         ? String(answer.value)
         : null;
     const answerBoolean = question.questionType === "YES_NO" ? answer.value : null;
-    const selectedOption = question.questionType === "SELECT" ? String(answer.value) : null;
+    const selectedOption = question.questionType === "SELECT"
+      ? (answer.optionId ? question.options.find((option) => option.id === answer.optionId)?.label ?? null : String(answer.value))
+      : null;
+
+    if (answerText !== null && (typeof answer.value !== "string" || !answerText.trim()
+      || answerText.length > (question.questionType === "SHORT_TEXT" ? 500 : 4000))) {
+      throw new Error("Text application answer is invalid.");
+    }
 
     if (question.questionType === "YES_NO" && typeof answer.value !== "boolean") {
       throw new Error("Yes/no application answer is invalid.");
     }
-    if (question.questionType === "SELECT" && !question.options.includes(selectedOption ?? "")) {
+    if (question.questionType === "SELECT" && !question.options.some((option) => option.label === selectedOption)) {
       throw new Error("Selected application answer is invalid.");
     }
 
@@ -182,8 +194,9 @@ async function insertAnswers(
   }
 }
 
-export async function createApplication(input: CreateApplicationInput): Promise<ApplicationRecord> {
-  return transaction(async (executor) => {
+async function createApplicationWithExecutor(
+  input: CreateApplicationInput, executor: DatabaseExecutor, fileFree: boolean,
+): Promise<ApplicationRecord> {
     const idempotencyId = randomUUID();
     const reserved = await executor.query(
       `INSERT INTO public."IdempotencyRecord" (
@@ -201,7 +214,7 @@ export async function createApplication(input: CreateApplicationInput): Promise<
       }>(
         `SELECT "requestHash", "state", "resultReference"
          FROM public."IdempotencyRecord"
-         WHERE "scope" = 'APPLICATION_SUBMISSION' AND "keyHash" = $1
+         WHERE "scope" = 'APPLICATION_SUBMISSION' AND "keyHash" = $1 AND "expiresAt" > clock_timestamp()
          FOR UPDATE`,
         [input.idempotencyKeyHash],
       );
@@ -246,10 +259,10 @@ export async function createApplication(input: CreateApplicationInput): Promise<
          FROM public."Job"
          WHERE "id" = $1
            AND "lifecycleState" = 'PUBLISHED'
-           AND ("publishAt" IS NULL OR "publishAt" <= CURRENT_TIMESTAMP)
-           AND ("applicationDeadline" IS NULL OR CURRENT_TIMESTAMP < "applicationDeadline")
+           AND ("publishAt" IS NULL OR "publishAt" <= clock_timestamp())
+           AND ("applicationDeadline" IS NULL OR clock_timestamp() < "applicationDeadline")
            AND "closedAt" IS NULL
-         FOR SHARE`,
+         FOR UPDATE`,
         [input.jobId],
       );
       if (!job.rows[0]) throw new Error("Job is not accepting applications.");
@@ -257,6 +270,8 @@ export async function createApplication(input: CreateApplicationInput): Promise<
       questions = await loadJobQuestions(executor, input.jobId);
     } else {
       departmentId = input.departmentId;
+      const department = await executor.query(`SELECT "id" FROM public."Department" WHERE "id" = $1 AND "active" = true FOR SHARE`, [departmentId]);
+      if (!department.rowCount) throw new Error("Department is unavailable.");
       if (input.answers?.length) throw new Error("Talent-network answers cannot reference job questions.");
     }
 
@@ -269,11 +284,11 @@ export async function createApplication(input: CreateApplicationInput): Promise<
          "professionalUrl", "availabilityText", "remoteAvailable", "shortIntroduction",
          "engagementType", "preferredEngagement", "freelancerRateMinMinor",
          "freelancerRateMaxMinor", "rateCurrency", "accommodationContactRequested", "source",
-         "safeCampaignCode", "retentionPolicyId", "expiresAt", "updatedAt"
+         "safeCampaignCode", "retentionPolicyId", "expiresAt", "updatedAt", "requiresClearedFile"
        ) VALUES (
          $1, $2, $3::"ApplicationType", $4, $5, $6, $7, $8, $9, $10, $11, $12,
          $13, $14, $15, $16, $17::"TalentEngagementType", $18, $19, $20, $21, $22,
-         $23, $24, $25, $26, CURRENT_TIMESTAMP
+         $23, $24, $25, $26, CURRENT_TIMESTAMP, $27
        )
        RETURNING "id", "publicReference", "applicationType", "jobId", "technicalStatus", "hiringStatus", "expiresAt", "createdAt"`,
       [
@@ -303,6 +318,7 @@ export async function createApplication(input: CreateApplicationInput): Promise<
         input.safeCampaignCode ?? null,
         input.retentionPolicyId,
         expiresAt,
+        !fileFree,
       ],
     );
 
@@ -319,6 +335,24 @@ export async function createApplication(input: CreateApplicationInput): Promise<
       ],
     );
     await insertAnswers(executor, applicationId, questions, input.answers);
+    if (fileFree) {
+      // Check the wall clock again after locks/evidence writes, not transaction-start time.
+      if (input.applicationType === "JOB_APPLICATION") {
+        const eligible = await executor.query(`SELECT "id" FROM public."Job" WHERE "id" = $1
+          AND "lifecycleState" = 'PUBLISHED' AND "closedAt" IS NULL
+          AND ("publishAt" IS NULL OR "publishAt" <= clock_timestamp())
+          AND ("applicationDeadline" IS NULL OR clock_timestamp() < "applicationDeadline")`, [input.jobId]);
+        if (!eligible.rowCount) throw new Error("Job is not accepting applications.");
+      }
+      const completed = await executor.query<ApplicationRow>(`UPDATE public."Application"
+        SET "technicalStatus" = 'SUBMITTED', "hiringStatus" = 'NEW', "submittedAt" = clock_timestamp(), "updatedAt" = clock_timestamp()
+        WHERE "id" = $1
+        RETURNING "id", "publicReference", "applicationType", "jobId", "technicalStatus", "hiringStatus", "expiresAt", "createdAt"`, [applicationId]);
+      inserted.rows[0] = completed.rows[0];
+      await executor.query(`INSERT INTO public."ApplicationStatusEvent"
+        ("id", "applicationId", "toStatus", "actorType", "systemActorCode", "reasonCode")
+        VALUES ($1, $2, 'NEW', 'SYSTEM', 'PUBLIC_INTAKE', 'STRUCTURED_SUBMISSION_COMPLETED')`, [randomUUID(), applicationId]);
+    }
     await executor.query(
       `UPDATE public."IdempotencyRecord"
        SET "state" = 'COMPLETED', "resultReference" = $2
@@ -326,7 +360,15 @@ export async function createApplication(input: CreateApplicationInput): Promise<
       [idempotencyId, applicationId],
     );
     return { ...inserted.rows[0] };
-  });
+}
+
+export async function createApplication(input: CreateApplicationInput): Promise<ApplicationRecord> {
+  return transaction((executor) => createApplicationWithExecutor(input, executor, false));
+}
+
+// Server-only approved Phase 2G flow. No client-controlled mode or status parameter.
+export async function createFileFreeApplication(input: CreateApplicationInput, executor: DatabaseExecutor) {
+  return createApplicationWithExecutor(input, executor, true);
 }
 
 async function changeHiringStatusWithExecutor(executor: DatabaseExecutor, input: {

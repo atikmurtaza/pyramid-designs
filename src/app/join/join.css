@@ -48,6 +48,11 @@
 .join-form__actions { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
 .join-success { max-width: 58rem; padding: clamp(2rem, 5vw, 5rem); border-left: 0.4rem solid var(--color-primary); background: var(--color-surface); }
 .join-success .button { width: fit-content; }
+.join-intake-opportunities { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-5); }
+.join-form button:disabled { cursor: wait; opacity: 0.65; }
+.join-form fieldset:disabled { opacity: 0.75; }
+.join-form p, .join-intake-opportunities a { overflow-wrap: anywhere; }
+.join-error-summary:focus-visible, .join-success:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
 @media (max-width: 48rem) { .join-hero__layout, .join-introduction { grid-template-columns: 1fr; } .join-introduction { align-items: start; } .join-form__grid, .join-choices { grid-template-columns: 1fr; } .join-form__field--wide { grid-column: 1; } .join-form__actions .button { width: 100%; } }
 @media (max-width: 26.875rem) { .join-hero { padding-block: 3.5rem 4rem; } .join-hero h1 { font-size: clamp(2.8rem, 14vw, 4rem); } .join-form__actions { align-items: stretch; } }
 @media (forced-colors: active) { .join-form input, .join-form textarea, .join-form select, .join-choices label, .join-form__acknowledgement, .join-error-summary { border-color: CanvasText !important; } }

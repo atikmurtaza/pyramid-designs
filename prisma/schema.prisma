@@ -426,6 +426,7 @@ model Application {
   source                        String                     @db.VarChar(40)
   safeCampaignCode              String?                    @db.VarChar(80)
   technicalStatus               ApplicationTechnicalStatus @default(SUBMISSION_PENDING)
+  requiresClearedFile            Boolean                    @default(true)
   hiringStatus                  HiringStatus?
   retentionPolicyId             String                     @db.Uuid
   expiresAt                     DateTime                   @db.Timestamptz(6)

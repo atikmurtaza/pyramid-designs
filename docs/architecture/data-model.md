@@ -159,6 +159,8 @@ Staff may see that records appear similar only if a separately approved workflow
 
 No stored candidate draft is required for MVP. A short-lived server submission intent may exist in `IdempotencyRecord`; it is not a candidate account or resumable profile.
 
+Phase 2G adds non-null, immutable, server-owned `Application.requiresClearedFile` (default `true`). Existing records retain file-required semantics. The approved file-free public flow sets it to `false`; consent and structured evidence still apply, and any active attached file must be cleared. See [ADR 0015](decisions/0015-file-free-application-submission.md).
+
 ## 7. Job model
 
 `Job` fields:

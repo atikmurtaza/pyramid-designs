@@ -2,175 +2,114 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { CareerJob } from "@/content/careers";
+import type { IntakeContext } from "@/lib/server/public-intake";
 
-type FieldName =
-  | "fullName"
-  | "email"
-  | "professionalFocus"
-  | "discipline"
-  | "introduction"
-  | "portfolioUrl"
-  | "document"
-  | "acknowledgement";
-type Errors = Partial<Record<FieldName, string>>;
-
-type JoinFormPrototypeProps = {
-  job?: CareerJob;
-  initialState?: "errors" | "success";
-};
-
-const initialErrors: Errors = {
-  fullName: "Enter your full name.",
-  email: "Enter an email address in the correct format.",
-  portfolioUrl: "Enter a complete portfolio URL, including https://.",
-  document: "Choose a PDF no larger than 5 MB.",
-};
-
-function isValidUrl(value: string) {
-  try {
-    return new URL(value).protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-export function JoinFormPrototype({ job, initialState }: JoinFormPrototypeProps) {
-  const [errors, setErrors] = useState<Errors>(initialState === "errors" ? initialErrors : {});
-  const [submitted, setSubmitted] = useState(initialState === "success");
-  const [fileMessage, setFileMessage] = useState("No file selected. PDF only, maximum 5 MB.");
-  const errorSummary = useRef<HTMLDivElement>(null);
-
+export function JoinFormPrototype({ context, jobId }: { context: IntakeContext; jobId?: string }) {
+  const [pending, setPending] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<{ field?: string; message: string }>();
+  const busy = useRef(false);
+  const key = useRef<string | undefined>(undefined);
+  const summary = useRef<HTMLDivElement>(null);
+  const success = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (Object.keys(errors).length) errorSummary.current?.focus();
-  }, [errors]);
-
-  function validate(form: HTMLFormElement) {
-    const data = new FormData(form);
-    const next: Errors = {};
-    const requiredFields: Array<[FieldName, string]> = [
-      ["fullName", "Enter your full name."],
-      ["email", "Enter your email address."],
-      ["professionalFocus", "Describe your current or most recent professional focus."],
-      ["discipline", "Choose your most relevant discipline."],
-      ["introduction", "Add a short introduction."],
-    ];
-
-    for (const [field, message] of requiredFields) {
-      if (!String(data.get(field) ?? "").trim()) next[field] = message;
-    }
-
-    const email = String(data.get("email") ?? "").trim();
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) next.email = "Enter an email address in the correct format.";
-
-    const portfolioUrl = String(data.get("portfolioUrl") ?? "").trim();
-    if (portfolioUrl && !isValidUrl(portfolioUrl)) {
-      next.portfolioUrl = "Enter a complete portfolio URL, including https://.";
-    }
-
-    if (!data.get("acknowledgement")) {
-      next.acknowledgement = "Confirm that you understand this prototype before continuing.";
-    }
-
-    setErrors(next);
-    return next;
-  }
-
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const nextErrors = validate(event.currentTarget);
-    setSubmitted(Object.keys(nextErrors).length === 0);
-  }
-
-  function selectDocument(file?: File) {
-    setErrors((current) => {
-      const next = { ...current };
-      delete next.document;
-
-      if (!file) {
-        setFileMessage("No file selected. PDF only, maximum 5 MB.");
-      } else if (file.type !== "application/pdf") {
-        next.document = "Choose a PDF file.";
-        setFileMessage("The selected file has not been uploaded or stored.");
-      } else if (file.size > 5 * 1024 * 1024) {
-        next.document = "Choose a PDF no larger than 5 MB.";
-        setFileMessage("The selected file has not been uploaded or stored.");
-      } else {
-        setFileMessage(`${file.name} has not been uploaded, stored or security-reviewed.`);
-      }
-
-      return next;
-    });
-  }
-
-  if (submitted) {
-    return (
-      <section className="join-success" aria-labelledby="join-success-title" aria-live="polite">
-        <p>Prototype success state</p>
-        <h2 id="join-success-title">Your information would be received by the future production service.</h2>
-        <p>Prototype reference: PD-APPLICATION-EXAMPLE. This does not confirm a response, interview or employment, and no information has been sent from this prototype.</p>
-        <Link className="button button-primary" href="/careers">Return to Careers</Link>
-      </section>
-    );
-  }
-
-  return (
-    <form className="join-form" noValidate onSubmit={submit} aria-describedby="join-form-boundary">
-      <p id="join-form-boundary" className="join-form__boundary">This form runs entirely in the browser for visual review. It does not send, store or upload candidate information.</p>
-
-      {Object.keys(errors).length > 0 && (
-        <div className="join-error-summary" ref={errorSummary} tabIndex={-1} role="alert" aria-labelledby="join-errors-title">
-          <h2 id="join-errors-title">Check the information below</h2>
-          <ul>{Object.entries(errors).map(([field, message]) => <li key={field}><a href={`#${field}`}>{message}</a></li>)}</ul>
-        </div>
-      )}
-
-      <fieldset>
-        <legend>About you</legend>
-        <div className="join-form__grid">
-          <div className="join-form__field"><label htmlFor="fullName">Full name <span aria-hidden="true">*</span></label><input id="fullName" name="fullName" autoComplete="name" required aria-invalid={Boolean(errors.fullName)} aria-describedby={errors.fullName ? "fullName-error" : undefined} />{errors.fullName && <p id="fullName-error" className="join-field-error">{errors.fullName}</p>}</div>
-          <div className="join-form__field"><label htmlFor="email">Email <span aria-hidden="true">*</span></label><input id="email" name="email" type="email" autoComplete="email" required aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} />{errors.email && <p id="email-error" className="join-field-error">{errors.email}</p>}</div>
-          <div className="join-form__field"><label htmlFor="phone">Phone <span className="join-form__optional">Optional</span></label><input id="phone" name="phone" type="tel" autoComplete="tel" /></div>
-          <div className="join-form__field"><label htmlFor="location">City or location <span className="join-form__optional">Optional</span></label><input id="location" name="location" autoComplete="address-level2" /></div>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>{job ? "Selected opportunity" : "How would you like to work with us?"}</legend>
-        {job ? (
-          <div className="join-job-context"><p>Applying for a prototype role</p><h2>{job.title}</h2><dl><div><dt>Department</dt><dd>{job.department}</dd></div><div><dt>Arrangement</dt><dd>{job.arrangement}</dd></div></dl><input type="hidden" name="job" value={job.slug} /></div>
-        ) : (
-          <div className="join-choices"><label><input type="radio" name="engagement" value="permanent" />Permanent opportunities</label><label><input type="radio" name="engagement" value="freelance" />Freelance or project collaboration</label><label><input type="radio" name="engagement" value="early-career" />Internship or early-career</label><label><input type="radio" name="engagement" value="portfolio" />Portfolio introduction</label></div>
-        )}
-      </fieldset>
-
-      <fieldset>
-        <legend>Professional information</legend>
-        <div className="join-form__grid">
-          <div className="join-form__field join-form__field--wide"><label htmlFor="professionalFocus">Current or most recent professional focus <span aria-hidden="true">*</span></label><input id="professionalFocus" name="professionalFocus" required aria-invalid={Boolean(errors.professionalFocus)} aria-describedby={errors.professionalFocus ? "professionalFocus-error" : undefined} />{errors.professionalFocus && <p id="professionalFocus-error" className="join-field-error">{errors.professionalFocus}</p>}</div>
-          <div className="join-form__field"><label htmlFor="discipline">Primary discipline <span aria-hidden="true">*</span></label><select id="discipline" name="discipline" defaultValue="" required aria-invalid={Boolean(errors.discipline)} aria-describedby={errors.discipline ? "discipline-error" : undefined}><option value="">Choose a discipline</option><option>Design</option><option>Development</option><option>Engineering</option><option>Marketing and content</option><option>Sales</option><option>Operations and project functions</option></select>{errors.discipline && <p id="discipline-error" className="join-field-error">{errors.discipline}</p>}</div>
-          <div className="join-form__field"><label htmlFor="experience">Experience level <span className="join-form__optional">Optional</span></label><select id="experience" name="experience" defaultValue=""><option value="">Select if useful</option><option>Early career</option><option>Mid-level</option><option>Senior</option><option>Independent specialist</option></select></div>
-          <div className="join-form__field join-form__field--wide"><label htmlFor="introduction">Short introduction <span aria-hidden="true">*</span></label><textarea id="introduction" name="introduction" rows={5} required aria-invalid={Boolean(errors.introduction)} aria-describedby={errors.introduction ? "introduction-error" : undefined} />{errors.introduction && <p id="introduction-error" className="join-field-error">{errors.introduction}</p>}</div>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Portfolio and document</legend>
-        <div className="join-form__grid">
-          <div className="join-form__field"><label htmlFor="portfolioUrl">Portfolio URL <span className="join-form__optional">Optional</span></label><input id="portfolioUrl" name="portfolioUrl" type="url" inputMode="url" placeholder="https://" aria-invalid={Boolean(errors.portfolioUrl)} aria-describedby={errors.portfolioUrl ? "portfolioUrl-error" : undefined} />{errors.portfolioUrl && <p id="portfolioUrl-error" className="join-field-error">{errors.portfolioUrl}</p>}</div>
-          <div className="join-form__field"><label htmlFor="profileUrl">LinkedIn or professional profile <span className="join-form__optional">Optional</span></label><input id="profileUrl" name="profileUrl" type="url" inputMode="url" placeholder="https://" /></div>
-          <div className="join-form__field join-form__field--wide"><label htmlFor="document">CV or relevant PDF <span className="join-form__optional">Optional prototype</span></label><input id="document" name="document" type="file" accept="application/pdf,.pdf" onChange={(event) => selectDocument(event.currentTarget.files?.[0])} aria-invalid={Boolean(errors.document) || undefined} aria-describedby={errors.document ? "document-help document-error" : "document-help"} /><p id="document-help" className="join-form__help">{fileMessage}</p>{errors.document && <p id="document-error" className="join-field-error">{errors.document}</p>}</div>
-        </div>
-      </fieldset>
-
-      <fieldset className="join-form__acknowledgement">
-        <legend>Prototype notice</legend>
-        <label><input id="acknowledgement" name="acknowledgement" type="checkbox" required aria-invalid={Boolean(errors.acknowledgement)} aria-describedby={errors.acknowledgement ? "acknowledgement-error" : undefined} />I understand that this is a non-submitting visual prototype, not a legal privacy or consent notice.</label>
-        {errors.acknowledgement && <p id="acknowledgement-error" className="join-field-error">{errors.acknowledgement}</p>}
-        <p>Production implementation needs approved privacy, lawful-processing and retention information. Optional talent-network consent must remain separate from a job application.</p>
-      </fieldset>
-
-      <div className="join-form__actions"><button className="button button-primary" type="submit">Review prototype submission</button><a className="text-link" href="/join?demo=errors">View validation state</a><a className="text-link" href="/join?demo=success">View success state</a></div>
-    </form>
+    if (submitted) success.current?.focus();
+    else if (error) summary.current?.focus();
+  }, [submitted, error]);
+  const job = context.jobs.find((item) => item.id === jobId);
+  const errorProps = (field: string) => ({
+    "aria-invalid": error?.field === field || undefined,
+    "aria-describedby": error?.field === field ? "intake-error" : undefined,
+  });
+  const field = (name: string, label: string, maxLength: number, required = false, type = "text", autoComplete?: string) => (
+    <div className="join-form__field" key={name}>
+      <label htmlFor={name}>{label} {required ? <span aria-hidden="true">*</span> : <span className="join-form__optional">Optional</span>}</label>
+      <input id={name} name={name} type={type} required={required} maxLength={maxLength} autoComplete={autoComplete} {...errorProps(name)} />
+    </div>
   );
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy.current) return;
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+    const data = new URLSearchParams();
+    for (const [name, value] of new FormData(form)) if (typeof value === "string") data.append(name, value);
+    key.current ??= crypto.randomUUID();
+    data.set("idempotencyKey", key.current);
+    busy.current = true; setPending(true); setError(undefined);
+    try {
+      const response = await fetch("/api/applications", { method: "POST", body: data, credentials: "same-origin", cache: "no-store" });
+      const result = await response.json();
+      if (response.ok && result.ok === true) {
+        setSubmitted(true);
+      } else {
+        setError({ field: typeof result.field === "string" ? result.field : undefined, message: typeof result.message === "string" ? result.message : "Submission could not be completed." });
+      }
+    } catch {
+      setError({ message: "The result could not be confirmed. Retry this form to safely check the same submission." });
+    } finally { busy.current = false; setPending(false); }
+  }
+
+  if (submitted) return <section className="join-success" ref={success} tabIndex={-1} aria-labelledby="join-success-title" aria-live="polite">
+    <p>Synthetic submission complete</p><h2 id="join-success-title">Your synthetic application was received.</h2>
+    <p>No CV or file was submitted. This test does not represent a real application, interview or employment decision.</p>
+    <Link className="button button-primary" href="/careers">Return to Careers</Link>
+  </section>;
+
+  return <form className="join-form" method="post" action="/api/applications" onSubmit={submit} aria-describedby="join-form-boundary" aria-busy={pending}>
+    <p id="join-form-boundary" className="join-form__boundary">Controlled synthetic review only. Use a name beginning “Synthetic ” and an email at example.invalid. This form saves synthetic information to the development service. Do not enter real candidate information.</p>
+    {error && <div className="join-error-summary" ref={summary} tabIndex={-1} role="alert" aria-labelledby="join-errors-title">
+      <h2 id="join-errors-title">Check your submission</h2><p id="intake-error">{error.message}</p>
+      {error.field && error.field !== "form" && <a className="text-link" href={`#${error.field}`}>Review the field</a>}
+    </div>}
+    <input type="hidden" name="applicationType" value={job ? "JOB_APPLICATION" : "TALENT_NETWORK"} />
+    <input type="hidden" name="consentDefinitionId" value={context.consent.id} />
+    {job && <input type="hidden" name="jobId" value={job.id} />}
+    <fieldset disabled={pending}><legend>About you</legend><div className="join-form__grid">
+      {field("fullName", "Full name", 160, true, "text", "off")}
+      {field("email", "Email", 320, true, "email", "off")}
+      {field("phoneOrWhatsApp", "Phone", 40, false, "tel", "off")}
+      {field("city", "City or location", 120, true, "text", "off")}
+    </div></fieldset>
+    <fieldset disabled={pending}><legend>{job ? "Selected opportunity" : "How would you like to work with us?"}</legend>
+      {job ? <div className="join-job-context"><p>Synthetic role</p><h2>{job.title}</h2></div> : <>
+        <div className="join-form__field"><label htmlFor="engagementType">Engagement <span aria-hidden="true">*</span></label>
+          <select id="engagementType" name="engagementType" defaultValue="" required {...errorProps("engagementType")}>
+            <option value="">Choose an engagement</option><option value="PERMANENT_INTEREST">Permanent opportunities</option>
+            <option value="FREELANCE_PROJECT">Freelance or project collaboration</option><option value="INTERNSHIP_EARLY_CAREER">Internship or early career</option>
+            <option value="PORTFOLIO_INTRODUCTION">Portfolio introduction</option>
+          </select>
+        </div>
+        <div className="join-form__field"><label htmlFor="departmentId">Department <span aria-hidden="true">*</span></label>
+          <select id="departmentId" name="departmentId" defaultValue="" required {...errorProps("departmentId")}><option value="">Choose a department</option>
+            {context.departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
+          </select>
+        </div>
+      </>}
+    </fieldset>
+    <fieldset disabled={pending}><legend>Professional information</legend><div className="join-form__grid">
+      {field("experienceLevel", "Experience level", 40, true)}
+      {field("portfolioUrl", "Portfolio URL", 500, false, "url")}
+      {field("professionalUrl", "Professional profile URL", 500, false, "url")}
+      <div className="join-form__field join-form__field--wide"><label htmlFor="shortIntroduction">Short introduction <span className="join-form__optional">Optional</span></label>
+        <textarea id="shortIntroduction" name="shortIntroduction" rows={5} maxLength={2000} {...errorProps("shortIntroduction")} /></div>
+    </div><p className="join-form__help">Use complete HTTPS URLs. A portfolio introduction requires a portfolio or professional profile URL.</p></fieldset>
+    {context.questions.length > 0 && <fieldset disabled={pending}><legend>Role questions</legend>{context.questions.map((question) => {
+      const name = `answer.${question.id}`;
+      return <div className="join-form__field" key={question.id}><label htmlFor={name}>{question.prompt} {question.required ? <span aria-hidden="true">*</span> : <span className="join-form__optional">Optional</span>}</label>
+        {question.questionType === "SELECT" || question.questionType === "YES_NO" ? <select id={name} name={name} defaultValue="" required={question.required} {...errorProps(name)}>
+          <option value="">Choose an answer</option>{question.questionType === "YES_NO" ? <><option value="yes">Yes</option><option value="no">No</option></> : question.options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+        </select> : question.questionType === "LONG_TEXT" ? <textarea id={name} name={name} maxLength={4000} required={question.required} {...errorProps(name)} />
+          : <input id={name} name={name} maxLength={500} required={question.required} {...errorProps(name)} />}
+      </div>;
+    })}</fieldset>}
+    <fieldset><legend>CV and documents</legend><p className="join-form__help">File submission is unavailable. This file-free flow sends no CV or document.</p></fieldset>
+    <fieldset disabled={pending} className="join-form__acknowledgement"><legend>Synthetic consent evidence</legend>
+      <p>{context.consent.contentText}</p>
+      <label><input id="consent" name="consent" type="checkbox" value="accepted" required {...errorProps("consent")} />Record acceptance of the displayed synthetic consent fixture for this test.</label>
+      <p>Final privacy wording and purpose-specific retention remain approval gates before real intake.</p>
+    </fieldset>
+    <div className="join-form__actions"><button className="button button-primary" type="submit" disabled={pending}>{pending ? "Submitting…" : "Submit synthetic application"}</button><span role="status" aria-live="polite">{pending ? "Please wait. Your submission is being processed." : ""}</span></div>
+  </form>;
 }

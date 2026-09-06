@@ -52,10 +52,13 @@ Therefore an expired job stops accepting applications and stops emitting `JobPos
 
 No durable candidate draft is stored. A short-lived idempotent submission intent precedes or creates `SUBMISSION_PENDING`; it is not a candidate account or resumable profile (FR-019).
 
+Phase 2G adds the owner-approved file-free completion path in [ADR 0015](decisions/0015-file-free-application-submission.md). The server alone sets immutable `requiresClearedFile = false` for that flow. Existing records and file-required flows retain `true`. Complete structured evidence and accepted consent permit file-free `SUBMITTED`; any active attached file still requires clearance. File metadata changes serialize through the application and recheck final submission evidence. The binary workflow below remains deferred to Phase 2H.
+
 ```mermaid
 stateDiagram-v2
     [*] --> SUBMISSION_PENDING: valid intent
     SUBMISSION_PENDING --> SECURITY_PENDING: data + consent + quarantined file linked
+    SUBMISSION_PENDING --> SUBMITTED: approved file-free flow + structured evidence + consent
     SUBMISSION_PENDING --> FAILED: validation/storage failure
     SECURITY_PENDING --> SUBMITTED: required file cleared
     SECURITY_PENDING --> FAILED: terminal technical/security rejection
@@ -70,6 +73,7 @@ stateDiagram-v2
 | Transition | Authorization/actor | Invariants |
 | --- | --- | --- |
 | Start -> `SUBMISSION_PENDING` | Anonymous public server flow after Turnstile/rate/idempotency checks | Job/talent context valid; scoped idempotency key reserved; no receipt yet. |
+| `SUBMISSION_PENDING` -> `SUBMITTED` (file-free) | Approved Phase 2G server flow | Immutable file requirement is false; authoritative structured validation, consent, retention and initial hiring history complete atomically with idempotency. No file is accepted; Turnstile remains a later production gate. |
 | `SUBMISSION_PENDING` -> `SECURITY_PENDING` | System in submission transaction/workflow | Required structured fields and consent versions stored; one candidate file durably linked in private quarantine; validation state known; no public/Drive URL. |
 | Pending -> `FAILED` | System | Safe failure/reason code recorded; no ambiguous receipt; any external Drive object queued for reconciliation. |
 | `SECURITY_PENDING` -> `SUBMITTED` | System after file-clear transaction | Required consent accepted; file validation passed; security status `CLEARED`; cleared hash/version matches; retention policy and expiry applied; unique public reference committed. Current hiring status becomes `NEW`. |
@@ -77,7 +81,7 @@ stateDiagram-v2
 | `FAILED` -> `SUBMISSION_PENDING` | Anonymous/system through same valid submission intent or support-approved retry | Retry remains within idempotency lifetime; request hash/context still matches; no second accepted application is created. A replacement file is a new `CandidateFile` row. |
 | Any non-withdrawn -> `WITHDRAWN` | `HIRING_MANAGER`/`ADMIN` after a verified candidate request; system only for an authenticated future flow | `withdrawnAt` set; hiring state also becomes `WITHDRAWN` if it existed; future access/deletion follows approved policy. |
 
-`SUBMITTED` means technically complete and eligible for authorised hiring review. It does not mean shortlisted, safe for public use, or guaranteed a response. Hiring state is null before submission and separate afterward.
+`SUBMITTED` means technically complete and eligible for authorised hiring review. The approved file-free path sets hiring state to `NEW` in the same transaction as structured evidence, consent and idempotency completion. It does not mean shortlisted, safe for public use, or guaranteed a response. Hiring state is null before submission and separate afterward.
 
 ## Candidate file lifecycle
 
@@ -236,7 +240,7 @@ Initial job types are receipt email, candidate retention/deletion, abandoned sub
 ## Cross-machine invariants
 
 1. A job can accept an application only while effectively published and before its deadline.
-2. An application cannot become `SUBMITTED` without required consent and a matching cleared file.
+2. An application cannot become `SUBMITTED` without required consent and structured evidence. A matching cleared file is mandatory when immutable `requiresClearedFile` is true or an active file is attached (ADR 0015).
 3. Hiring state cannot start or change before technical submission, and never changes file security state.
 4. File validation is not malware clearance; only an immutable review can clear a file.
 5. Uncleared, validation-failed, processing-failed, rejected, expired, deletion-pending, and deleted files are inaccessible to ordinary hiring review.
