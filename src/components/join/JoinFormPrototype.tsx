@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { IntakeContext } from "@/lib/server/public-intake";
 
-export function JoinFormPrototype({ context, jobId }: { context: IntakeContext; jobId?: string }) {
+export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { context: IntakeContext; jobId?: string; fileUploadAvailable: boolean }) {
   const [pending, setPending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedFile, setSubmittedFile] = useState(false);
+  const [selectedFilename, setSelectedFilename] = useState("");
   const [error, setError] = useState<{ field?: string; message: string }>();
   const busy = useRef(false);
   const key = useRef<string | undefined>(undefined);
@@ -33,16 +35,17 @@ export function JoinFormPrototype({ context, jobId }: { context: IntakeContext; 
     if (busy.current) return;
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
-    const data = new URLSearchParams();
-    for (const [name, value] of new FormData(form)) if (typeof value === "string") data.append(name, value);
+    const formData = new FormData(form);
     key.current ??= crypto.randomUUID();
-    data.set("idempotencyKey", key.current);
+    formData.set("idempotencyKey", key.current);
+    const data = new URLSearchParams();
+    if (!fileUploadAvailable) for (const [name, value] of formData) if (typeof value === "string") data.append(name, value);
     busy.current = true; setPending(true); setError(undefined);
     try {
-      const response = await fetch("/api/applications", { method: "POST", body: data, credentials: "same-origin", cache: "no-store" });
+      const response = await fetch("/api/applications", { method: "POST", body: fileUploadAvailable ? formData : data, credentials: "same-origin", cache: "no-store" });
       const result = await response.json();
       if (response.ok && result.ok === true) {
-        setSubmitted(true);
+        setSubmittedFile(fileUploadAvailable); setSubmitted(true);
       } else {
         setError({ field: typeof result.field === "string" ? result.field : undefined, message: typeof result.message === "string" ? result.message : "Submission could not be completed." });
       }
@@ -53,11 +56,11 @@ export function JoinFormPrototype({ context, jobId }: { context: IntakeContext; 
 
   if (submitted) return <section className="join-success" ref={success} tabIndex={-1} aria-labelledby="join-success-title" aria-live="polite">
     <p>Synthetic submission complete</p><h2 id="join-success-title">Your synthetic application was received.</h2>
-    <p>No CV or file was submitted. This test does not represent a real application, interview or employment decision.</p>
+    <p>{submittedFile ? "The synthetic PDF is stored in private quarantine and remains untrusted until an authorized security review clears its exact content." : "No CV or file was submitted."} This test does not represent a real application, interview or employment decision.</p>
     <Link className="button button-primary" href="/careers">Return to Careers</Link>
   </section>;
 
-  return <form className="join-form" method="post" action="/api/applications" onSubmit={submit} aria-describedby="join-form-boundary" aria-busy={pending}>
+  return <form className="join-form" method="post" action="/api/applications" encType={fileUploadAvailable ? "multipart/form-data" : undefined} onSubmit={submit} aria-describedby="join-form-boundary" aria-busy={pending}>
     <p id="join-form-boundary" className="join-form__boundary">Controlled synthetic review only. Use a name beginning “Synthetic ” and an email at example.invalid. This form saves synthetic information to the development service. Do not enter real candidate information.</p>
     {error && <div className="join-error-summary" ref={summary} tabIndex={-1} role="alert" aria-labelledby="join-errors-title">
       <h2 id="join-errors-title">Check your submission</h2><p id="intake-error">{error.message}</p>
@@ -104,12 +107,20 @@ export function JoinFormPrototype({ context, jobId }: { context: IntakeContext; 
           : <input id={name} name={name} maxLength={500} required={question.required} {...errorProps(name)} />}
       </div>;
     })}</fieldset>}
-    <fieldset><legend>CV and documents</legend><p className="join-form__help">File submission is unavailable. This file-free flow sends no CV or document.</p></fieldset>
+    <fieldset disabled={pending}><legend>CV and documents</legend>{fileUploadAvailable ? <div className="join-form__field">
+      <label htmlFor="cv">CV in PDF format <span aria-hidden="true">*</span></label>
+      <input id="cv" name="cv" type="file" accept=".pdf,application/pdf" required
+        aria-invalid={error?.field === "cv" || undefined}
+        aria-describedby={error?.field === "cv" ? "cv-help cv-selected intake-error" : "cv-help cv-selected"}
+        onChange={(event) => setSelectedFilename(event.currentTarget.files?.[0]?.name ?? "")} />
+      <p id="cv-help" className="join-form__help">PDF only, maximum 5 MiB. Upload stores the file in private quarantine; it does not mean the file is safe or cleared.</p>
+      <p id="cv-selected" className="join-form__file-name" aria-live="polite">{selectedFilename ? `Selected: ${selectedFilename}` : "No file selected."}</p>
+    </div> : <p className="join-form__help">File submission is unavailable until private storage is configured. This file-free flow sends no CV or document.</p>}</fieldset>
     <fieldset disabled={pending} className="join-form__acknowledgement"><legend>Synthetic consent evidence</legend>
       <p>{context.consent.contentText}</p>
       <label><input id="consent" name="consent" type="checkbox" value="accepted" required {...errorProps("consent")} />Record acceptance of the displayed synthetic consent fixture for this test.</label>
       <p>Final privacy wording and purpose-specific retention remain approval gates before real intake.</p>
     </fieldset>
-    <div className="join-form__actions"><button className="button button-primary" type="submit" disabled={pending}>{pending ? "Submitting…" : "Submit synthetic application"}</button><span role="status" aria-live="polite">{pending ? "Please wait. Your submission is being processed." : ""}</span></div>
+    <div className="join-form__actions"><button className="button button-primary" type="submit" disabled={pending}>{pending ? (fileUploadAvailable ? "Uploading…" : "Submitting…") : "Submit synthetic application"}</button><span role="status" aria-live="polite">{pending ? (fileUploadAvailable ? "Please wait. Your PDF is being validated and stored in quarantine." : "Please wait. Your submission is being processed.") : ""}</span></div>
   </form>;
 }

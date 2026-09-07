@@ -3,7 +3,7 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { hasSameOriginMutation } from "./auth/csrf.ts";
-import { createFileFreeApplication, type CreateApplicationInput, type TalentEngagementType } from "./repositories/applications.ts";
+import { createFileFreeApplication, createFileRequiredApplication, type CreateApplicationInput, type TalentEngagementType } from "./repositories/applications.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const engagements = ["PERMANENT_INTEREST", "FREELANCE_PROJECT", "INTERNSHIP_EARLY_CAREER", "PORTFOLIO_INTRODUCTION"] as const;
@@ -41,6 +41,16 @@ export function syntheticIntakeEnabled(origin: string) {
       && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
       && ["http:", "https:"].includes(url.protocol);
   } catch { return false; }
+}
+
+export function intakeRequestAllowed(request: Request) {
+  const target = new URL(request.url);
+  const effectiveOrigin = request.headers.get("host") ? `${target.protocol}//${request.headers.get("host")}` : target.origin;
+  const localAlias = syntheticIntakeEnabled(request.url) && syntheticIntakeEnabled(effectiveOrigin)
+    && new URL(effectiveOrigin).port === target.port && request.headers.get("origin") === effectiveOrigin;
+  return (hasSameOriginMutation(request) || localAlias) && syntheticIntakeEnabled(request.url)
+    && syntheticIntakeEnabled(effectiveOrigin) && request.headers.get("origin") === effectiveOrigin
+    && request.headers.get("sec-fetch-site") !== "cross-site";
 }
 
 async function policies(executor: DatabaseExecutor) {
@@ -134,9 +144,10 @@ export function validateIntake(data: URLSearchParams) {
   return { ...snapshot, ...context, consentDefinitionId, idempotencyKey, answers };
 }
 
-export async function submitIntake(data: URLSearchParams, executor: DatabaseExecutor) {
+export async function submitIntake(data: URLSearchParams, executor: DatabaseExecutor, fileDigest?: string) {
   const input = validateIntake(data);
-  const requestHash = digest(JSON.stringify(input));
+  if (fileDigest !== undefined && !/^[a-f0-9]{64}$/.test(fileDigest)) invalid("form");
+  const requestHash = digest(JSON.stringify(fileDigest ? { input, fileDigest } : input));
   const keyHash = digest(`public-intake:${input.idempotencyKey}`);
   const retry = await executor.query<{ requestHash: string; state: string; expiresAt: Date; resultReference: string | null }>(
     `SELECT "requestHash", "state", "expiresAt", "resultReference" FROM public."IdempotencyRecord"
@@ -179,7 +190,7 @@ export async function submitIntake(data: URLSearchParams, executor: DatabaseExec
   const policy = await policies(executor);
   const { idempotencyKey: _idempotencyKey, ...snapshot } = input;
   void _idempotencyKey;
-  return createFileFreeApplication({
+  return (fileDigest ? createFileRequiredApplication : createFileFreeApplication)({
     ...snapshot, answers, source: "SYNTHETIC_PUBLIC_INTAKE", requestId: randomUUID(),
     retentionPolicyId: policy.retentionPolicyId, idempotencyKeyHash: keyHash,
     requestHash, idempotencyExpiresAt: new Date(Date.now() + 86_400_000),
@@ -208,13 +219,7 @@ export async function handleIntakeRequest(request: Request, dependencies = { tra
   const response = (status: number, body: object) => Response.json(body, { status, headers: { "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
   // Next's local server can canonicalize 127.0.0.1 to localhost in Request.url.
   // Validate the actual Host and exact Origin, never forwarded host/IP headers.
-  const target = new URL(request.url);
-  const effectiveOrigin = request.headers.get("host") ? `${target.protocol}//${request.headers.get("host")}` : target.origin;
-  const localAlias = syntheticIntakeEnabled(request.url) && syntheticIntakeEnabled(effectiveOrigin)
-    && new URL(effectiveOrigin).port === target.port && request.headers.get("origin") === effectiveOrigin;
-  if ((!hasSameOriginMutation(request) && !localAlias) || !syntheticIntakeEnabled(request.url)
-    || !syntheticIntakeEnabled(effectiveOrigin) || request.headers.get("origin") !== effectiveOrigin
-    || request.headers.get("sec-fetch-site") === "cross-site") return response(403, { ok: false, message: "Submission is unavailable." });
+  if (!intakeRequestAllowed(request)) return response(403, { ok: false, message: "Submission is unavailable." });
   try {
     if (!(await dependencies.consumeLimit())) return response(429, { ok: false, message: "Please wait a minute before retrying." });
     if (!/^application\/x-www-form-urlencoded(?:;\s*charset=utf-8)?$/i.test(request.headers.get("content-type") ?? "")) return response(415, { ok: false, message: "Submission is unavailable." });

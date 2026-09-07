@@ -33,19 +33,23 @@ const submittedState = {
   inRecruitmentScope: true,
 };
 const clearedFileState = {
+  technicalStatus: "SUBMITTED",
   validationStatus: "PASSED",
   fileTechnicalStatus: "QUARANTINED",
   securityStatus: "CLEARED",
   retentionPermitsAccess: true,
   deletionCompleted: false,
   hashMatchesReview: true,
+  inRecruitmentScope: true,
 };
 const quarantinedFileState = {
+  technicalStatus: "SECURITY_PENDING",
   validationStatus: "PASSED",
   fileTechnicalStatus: "QUARANTINED",
   securityStatus: "UNREVIEWED",
   retentionPermitsAccess: true,
   deletionCompleted: false,
+  inRecruitmentScope: true,
 };
 
 function principal(roles, assuranceLevel = "aal2") {

@@ -313,6 +313,8 @@ try {
   const source = await readFile("src/lib/server/public-intake.ts", "utf8");
   assert(!/console\.(log|error)|x-forwarded-for|x-real-ip|PrismaClient/.test(source));
   const form = await readFile("src/components/join/JoinFormPrototype.tsx", "utf8");
-  assert(!/type="file"|demo=success|localStorage|sessionStorage|dangerouslySetInnerHTML/.test(form));
+  assert(!/demo=success|localStorage|sessionStorage|dangerouslySetInnerHTML/.test(form));
+  assert(/body: fileUploadAvailable \? formData : data/.test(form));
+  assert(/File submission is unavailable until private storage is configured/.test(form));
   console.log(`PHASE_2G_PUBLIC_INTAKE_OK checks=${checks} rollback=verified`);
 } finally { await db.closeDatabasePool(); }

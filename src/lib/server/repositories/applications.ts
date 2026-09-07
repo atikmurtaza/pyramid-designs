@@ -371,6 +371,10 @@ export async function createFileFreeApplication(input: CreateApplicationInput, e
   return createApplicationWithExecutor(input, executor, true);
 }
 
+export async function createFileRequiredApplication(input: CreateApplicationInput, executor: DatabaseExecutor) {
+  return createApplicationWithExecutor(input, executor, false);
+}
+
 async function changeHiringStatusWithExecutor(executor: DatabaseExecutor, input: {
   applicationId: string;
   actorStaffUserId: string;

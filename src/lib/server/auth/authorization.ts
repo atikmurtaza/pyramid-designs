@@ -231,13 +231,14 @@ function fileStateAllows(
   operation: AuthorizationOperation,
   state: AuthorizationState | undefined,
 ) {
-  if (!state || state.deletionCompleted === true) return false;
+  if (!state || state.deletionCompleted === true || state.inRecruitmentScope !== true) return false;
 
   if (operation === "candidate_file.state.read") {
     return state.fileTechnicalStatus !== "DELETED" && state.retentionPermitsAccess === true;
   }
   if (operation === "candidate_file.cleared.download") {
     return (
+      state.technicalStatus === "SUBMITTED" &&
       state.validationStatus === "PASSED" &&
       state.fileTechnicalStatus === "QUARANTINED" &&
       state.securityStatus === "CLEARED" &&
@@ -253,6 +254,7 @@ function fileStateAllows(
   }
 
   const reviewable =
+    state.technicalStatus === "SECURITY_PENDING" &&
     state.validationStatus === "PASSED" &&
     state.fileTechnicalStatus === "QUARANTINED" &&
     state.retentionPermitsAccess === true;
