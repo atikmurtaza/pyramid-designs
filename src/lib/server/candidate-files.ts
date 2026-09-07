@@ -10,6 +10,7 @@ import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { googleDriveStorage, type CandidateStorage } from "./google-drive.ts";
 import { consumeIntakeLimit, intakeRequestAllowed, submitIntake } from "./public-intake.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
+import { enqueueBackgroundJob, claimUploadJob, requireJobOwnership, completeBackgroundJob, type ClaimedBackgroundJob } from "./repositories/background-jobs.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type TransactionRunner = <T>(work: (executor: DatabaseExecutor) => Promise<T>) => Promise<T>;
@@ -28,7 +29,7 @@ async function loadFile(executor: DatabaseExecutor, candidateFileId: string, loc
       file."sizeBytes", file."contentHash", file."validationStatus", file."technicalStatus" AS "fileTechnicalStatus",
       file."securityStatus", file."clearanceMethod", file."clearedAt", file."version", file."createdAt",
       application."technicalStatus" AS "applicationTechnicalStatus",
-      application."expiresAt" > clock_timestamp() AS "retentionPermitsAccess",
+      (application."expiresAt" > clock_timestamp() AND application."deletionRequestedAt" IS NULL) AS "retentionPermitsAccess",
       application."deletionCompletedAt" IS NOT NULL AS "deletionCompleted",
       EXISTS (SELECT 1 FROM public."FileSecurityReview" review WHERE review."candidateFileId" = file."id"
         AND review."outcome" = 'CLEARED' AND review."method" = file."clearanceMethod"
@@ -60,7 +61,7 @@ async function reserveCandidateFile(
 ) {
   const application = await executor.query<{ id: string }>(`SELECT "id" FROM public."Application"
     WHERE "id" = $1 AND "requiresClearedFile" = true AND "technicalStatus" IN ('SUBMISSION_PENDING', 'SECURITY_PENDING')
-      AND "expiresAt" > clock_timestamp() AND "deletionCompletedAt" IS NULL FOR UPDATE`, [applicationId]);
+      AND "expiresAt" > clock_timestamp() AND "deletionRequestedAt" IS NULL AND "deletionCompletedAt" IS NULL FOR UPDATE`, [applicationId]);
   if (!application.rows[0]) fileUnavailable();
   const existing = await executor.query<{ id: string; driveFileId: string | null; storedFilename: string; contentHash: string | null; sizeBytes: number }>(
     `SELECT "id", "driveFileId", "storedFilename", "contentHash", "sizeBytes" FROM public."CandidateFile"
@@ -79,13 +80,14 @@ async function reserveCandidateFile(
      VALUES ($1, $2, $3, 'CANDIDATE_QUARANTINE', $4, 'pdf', 'application/pdf', 'application/pdf', $5, $6, 'PASSED', clock_timestamp())
      RETURNING "id", "driveFileId", "storedFilename", "contentHash", "sizeBytes"`,
     [id, applicationId, allocatedDriveId, storedFilename, sizeBytes, contentHash]);
-  await executor.query(`INSERT INTO public."BackgroundJob" ("id", "jobType", "candidateFileId", "dedupeKey", "safePayload", "updatedAt")
-    VALUES ($1, 'CANDIDATE_FILE_STORAGE_RECONCILE', $2, $3, '{"operation":"VERIFY_OR_DELETE"}'::jsonb, clock_timestamp())
-    ON CONFLICT ("dedupeKey") DO NOTHING`, [randomUUID(), id, `candidate-file-reconcile:${id}`]);
+  await enqueueBackgroundJob({ jobType: "CANDIDATE_FILE_STORAGE_RECONCILE", candidateFileId: id,
+    dedupeKey: `candidate-file-reconcile:${id}`, safePayload: { operation: "VERIFY_OR_DELETE" } }, executor);
   return inserted.rows[0];
 }
 
-async function finalizeCandidateFile(executor: DatabaseExecutor, candidateFileId: string, contentHash: string) {
+export async function finalizeCandidateFile(executor: DatabaseExecutor, candidateFileId: string, contentHash: string,
+  job: Pick<ClaimedBackgroundJob, "id" | "claimToken">) {
+  await requireJobOwnership(job, executor);
   const row = await loadFile(executor, candidateFileId, true);
   if (!row.driveFileId || row.contentHash !== contentHash || row.validationStatus !== "PASSED"
     || !["UPLOAD_PENDING", "QUARANTINED"].includes(row.fileTechnicalStatus)
@@ -99,9 +101,9 @@ async function finalizeCandidateFile(executor: DatabaseExecutor, candidateFileId
   const applicationUpdated = await executor.query(`UPDATE public."Application" SET "technicalStatus" = 'SECURITY_PENDING', "updatedAt" = clock_timestamp()
     WHERE "id" = $1 AND "technicalStatus" = 'SUBMISSION_PENDING'`, [row.applicationId]);
   if (applicationUpdated.rowCount !== (row.applicationTechnicalStatus === "SUBMISSION_PENDING" ? 1 : 0)) fileUnavailable();
-  const jobUpdated = await executor.query(`UPDATE public."BackgroundJob" SET "state" = 'SUCCEEDED', "completedAt" = clock_timestamp(),
-    "updatedAt" = clock_timestamp() WHERE "dedupeKey" = $1`, [`candidate-file-reconcile:${row.id}`]);
-  if (jobUpdated.rowCount !== 1) fileUnavailable();
+  await appendAuditEvent({ actorType: "SYSTEM", actionCode: "CANDIDATE_FILE_STORAGE_VERIFIED", targetType: "CANDIDATE_FILE",
+    targetId: row.id, outcome: "SUCCEEDED", correlationId: job.id }, executor);
+  if (!await completeBackgroundJob(job.id, job.claimToken, executor)) fileUnavailable();
 }
 
 export async function storeCandidateApplication(
@@ -116,10 +118,15 @@ export async function storeCandidateApplication(
   const reservation = await runTransaction(async (executor) => {
     const application = await submitIntake(fields, executor, contentHash);
     const file = await reserveCandidateFile(executor, application.id, allocatedDriveId, contentHash, sizeBytes);
-    return { application, file };
+    const jobId = await enqueueBackgroundJob({ jobType: "CANDIDATE_FILE_STORAGE_RECONCILE", candidateFileId: file.id,
+      dedupeKey: `candidate-file-reconcile:${file.id}`, safePayload: { operation: "VERIFY_OR_DELETE" } }, executor);
+    const existing = await executor.query<{ state: string }>('SELECT "state" FROM public."BackgroundJob" WHERE "id" = $1 FOR UPDATE', [jobId]);
+    const job = existing.rows[0]?.state === "SUCCEEDED" ? null : await claimUploadJob(jobId, executor);
+    return { application, file, job };
   });
+  if (!reservation.job) return reservation.application;
   await storage.put(reservation.file.driveFileId!, reservation.file.storedFilename, bytes, contentHash);
-  await runTransaction((executor) => finalizeCandidateFile(executor, reservation.file.id, contentHash));
+  await runTransaction((executor) => finalizeCandidateFile(executor, reservation.file.id, contentHash, reservation.job!));
   return reservation.application;
 }
 
@@ -141,7 +148,7 @@ export async function handleCandidateFileIntakeRequest(request: Request, depende
       throw error;
     }
     await storeCandidateApplication(upload.fields, upload.bytes, upload.contentHash, upload.sizeBytes,
-      (dependencies.storage ?? googleDriveStorage)(), dependencies.runTransaction);
+      (dependencies.storage ?? (() => googleDriveStorage(AbortSignal.timeout(20_000))))(), dependencies.runTransaction);
     return response(200, { ok: true, message: "Synthetic application and CV stored in private quarantine. The CV is not cleared or trusted." });
   } catch {
     return response(503, { ok: false, message: "Submission could not be completed. Retry the same form without changing the selected file." });

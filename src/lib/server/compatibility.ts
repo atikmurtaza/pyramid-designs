@@ -2,7 +2,7 @@ import "server-only";
 
 import { timingSafeEqual } from "node:crypto";
 
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server.js";
 
 export function hasBearerSecret(request: Request, expected: string) {
   const authorization = request.headers.get("authorization");

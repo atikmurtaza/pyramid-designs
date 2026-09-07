@@ -219,7 +219,9 @@ try {
     });
     await checkpoint(executor, async () => {
       const id = await rawApplication(executor, true); await attachMetadata(executor, id, true); await markSubmitted(executor, id); await forceConstraints(executor);
-      await executor.query(`DELETE FROM public."CandidateFile" WHERE "applicationId" = $1`, [id]).then(() => forceConstraints(executor)).then(() => assert.fail("Required file deletion accepted"), (error) => assert(["23514", "23503"].includes(error.code)));
+      // PostgreSQL 18 reports the RESTRICT-specific SQLSTATE 23001; older versions
+      // report 23503. Both prove deletion was rejected by the historical evidence FK.
+      await executor.query(`DELETE FROM public."CandidateFile" WHERE "applicationId" = $1`, [id]).then(() => forceConstraints(executor)).then(() => assert.fail("Required file deletion accepted"), (error) => assert(["23514", "23503", "23001"].includes(error.code)));
     });
     await checkpoint(executor, async () => {
       await assert.rejects(executor.query(`UPDATE public."Application" SET "requiresClearedFile" = true WHERE "id" = $1`, [result.id]), { code: "55000" });

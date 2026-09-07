@@ -23,7 +23,10 @@
     "test:phase2e": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2e-staff-portal.mjs",
     "test:phase2f": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2f-staff-mutations.mjs",
     "test:phase2g": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2g-public-intake.mjs",
-    "test:phase2h": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2h-candidate-files.mjs"
+    "test:phase2h": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2h-candidate-files.mjs",
+    "test:phase2ib": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2ib-worker.mjs",
+    "test:phase2ib:replay": "node scripts/replay-phase-2ib-migrations.mjs",
+    "test:phase2ib:smoke": "node scripts/verify-phase-2ib-production-smoke.cjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.7.0",

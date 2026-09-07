@@ -250,11 +250,14 @@ try {
       check(typeof failedStorage.lastPutId, "string");
       const pending = (await executor.query(`SELECT file."id", file."technicalStatus", job."state" FROM public."CandidateFile" file
         JOIN public."BackgroundJob" job ON job."candidateFileId" = file."id" WHERE file."driveFileId" = $1`, [failedStorage.lastPutId])).rows[0];
-      check(pending.technicalStatus, "UPLOAD_PENDING"); check(pending.state, "QUEUED");
+      check(pending.technicalStatus, "UPLOAD_PENDING"); check(pending.state, "RUNNING");
+      // Phase 2I-B uploader ownership survives an ambiguous provider failure.
+      await assert.rejects(() => files.storeCandidateApplication(payload(failedKey), validPdf, policy.sha256(validPdf), validPdf.length, failedStorage, run)); checks++;
       await expectedFailure(executor, () => executor.query(`INSERT INTO public."CandidateFile" ("id", "applicationId", "driveFileId", "storedFilename",
         "extension", "declaredMime", "detectedMime", "sizeBytes", "contentHash", "validationStatus", "updatedAt")
         VALUES ($1, (SELECT "applicationId" FROM public."CandidateFile" WHERE "id" = $2), $3, $4, 'pdf', 'application/pdf',
         'application/pdf', 100, $5, 'PASSED', clock_timestamp())`, [randomUUID(), pending.id, `syntheticDrive${randomUUID().replaceAll("-", "")}`, `${randomUUID()}.pdf`, "b".repeat(64)]));
+      await executor.query(`UPDATE public."BackgroundJob" SET "leaseUntil" = clock_timestamp() - interval '1 second' WHERE "candidateFileId" = $1`, [pending.id]);
       await files.storeCandidateApplication(payload(failedKey), validPdf, policy.sha256(validPdf), validPdf.length, failedStorage, run);
 
       const splitStorage = new FakeStorage();
@@ -264,7 +267,8 @@ try {
       const split = (await executor.query(`SELECT file."id", file."driveFileId", file."technicalStatus", job."state" FROM public."CandidateFile" file
         JOIN public."BackgroundJob" job ON job."candidateFileId" = file."id" JOIN public."Application" application ON application."id" = file."applicationId"
         WHERE application."technicalStatus" = 'SUBMISSION_PENDING' ORDER BY application."createdAt" DESC LIMIT 1`)).rows[0];
-      check(split.technicalStatus, "UPLOAD_PENDING"); check(split.state, "QUEUED"); check(splitStorage.objects.has(split.driveFileId));
+      check(split.technicalStatus, "UPLOAD_PENDING"); check(split.state, "RUNNING"); check(splitStorage.objects.has(split.driveFileId));
+      await executor.query(`UPDATE public."BackgroundJob" SET "leaseUntil" = clock_timestamp() - interval '1 second' WHERE "candidateFileId" = $1`, [split.id]);
       await files.storeCandidateApplication(payload(splitKey), validPdf, policy.sha256(validPdf), validPdf.length, splitStorage, run);
 
       const rejectedStorage = new FakeStorage();
