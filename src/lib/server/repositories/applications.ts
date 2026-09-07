@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 
 import { transaction, type DatabaseExecutor } from "../database.ts";
 import { appendAuditEvent } from "./audit.ts";
+import { enqueueCandidateConfirmation } from "../candidate-notifications.ts";
 
 export type TalentEngagementType =
   | "PERMANENT_INTEREST"
@@ -349,6 +350,7 @@ async function createApplicationWithExecutor(
         WHERE "id" = $1
         RETURNING "id", "publicReference", "applicationType", "jobId", "technicalStatus", "hiringStatus", "expiresAt", "createdAt"`, [applicationId]);
       inserted.rows[0] = completed.rows[0];
+      await enqueueCandidateConfirmation(applicationId, executor);
       await executor.query(`INSERT INTO public."ApplicationStatusEvent"
         ("id", "applicationId", "toStatus", "actorType", "systemActorCode", "reasonCode")
         VALUES ($1, $2, 'NEW', 'SYSTEM', 'PUBLIC_INTAKE', 'STRUCTURED_SUBMISSION_COMPLETED')`, [randomUUID(), applicationId]);

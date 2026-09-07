@@ -1,4 +1,5 @@
 import "server-only";
+import { enqueueCandidateConfirmation } from "./candidate-notifications.ts";
 
 import { randomUUID } from "node:crypto";
 
@@ -284,6 +285,7 @@ export async function recordCandidateFileReview(
       const applicationUpdated = await executor.query(`UPDATE public."Application" SET "technicalStatus" = 'SUBMITTED', "hiringStatus" = 'NEW',
         "submittedAt" = clock_timestamp(), "updatedAt" = clock_timestamp() WHERE "id" = $1 AND "technicalStatus" = 'SECURITY_PENDING'`, [row.applicationId]);
       if (applicationUpdated.rowCount !== 1) fileUnavailable();
+      await enqueueCandidateConfirmation(row.applicationId, executor);
       await executor.query(`INSERT INTO public."ApplicationStatusEvent" ("id", "applicationId", "toStatus", "actorType",
         "actorStaffUserId", "reasonCode") VALUES ($1, $2, 'NEW', 'STAFF', $3, 'CLEARED_FILE_SUBMISSION_COMPLETED')`,
       [randomUUID(), row.applicationId, boundary.principal.staffUserId]);

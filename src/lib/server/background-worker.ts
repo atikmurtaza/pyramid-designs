@@ -7,6 +7,8 @@ import { transaction, type DatabaseExecutor } from "./database.ts";
 import { finalizeCandidateFile } from "./candidate-files.ts";
 import { googleDriveStorage, googleStorageConfigured, StorageOperationError, type WorkerStorage, type ExpectedStoredFile } from "./google-drive.ts";
 import { CandidateFileUnavailable } from "./candidate-file-policy.ts";
+import { NOTIFICATION_JOB, validateNotificationJob, sendCandidateConfirmation, unavailableEmailAdapter,
+  emailReadiness, type EmailAdapter } from "./candidate-notifications.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
 import { claimBackgroundJobs, completeBackgroundJob, enqueueBackgroundJob, failBackgroundJob,
   recoverExhaustedJobs, requireJobOwnership, type ClaimedBackgroundJob, type JobFailure } from "./repositories/background-jobs.ts";
@@ -39,6 +41,10 @@ export function validateWorkerJob(job: ClaimedBackgroundJob) {
   if (!uuid.test(job.id) || job.payloadReference !== null || !Number.isInteger(job.maxAttempts)
     || job.maxAttempts < 1 || job.maxAttempts > 10) fail("PAYLOAD");
   const payload = job.safePayload;
+  if (job.jobType === NOTIFICATION_JOB) {
+    try { validateNotificationJob(job); } catch { fail("PAYLOAD"); }
+    return "notification";
+  }
   if (!payload || Array.isArray(payload) || Object.keys(payload).length !== 1) fail("PAYLOAD");
   if (job.jobType === "CANDIDATE_FILE_STORAGE_RECONCILE") {
     if (!job.candidateFileId || !uuid.test(job.candidateFileId) || job.applicationId !== null
@@ -134,6 +140,22 @@ export async function deleteRetainedApplication(job: ClaimedBackgroundJob, stora
     const a = result.rows[0] ?? fail("DOMAIN");
     if (!approvedRetentionPolicy(a)) fail("CONFIGURATION");
     if (!a.due || a.deletionCompletedAt) fail("DOMAIN");
+    // Serialize send admission with erasure responsibility on the application lock.
+    // A claimed notification can hold recipient data until its bounded call finishes.
+    const sending = await executor.query(`SELECT "id" FROM public."BackgroundJob"
+      WHERE "applicationId" = $1 AND "jobType" = 'CANDIDATE_SUBMISSION_NOTIFICATION'
+        AND "state" = 'RUNNING' AND "leaseUntil" > clock_timestamp() LIMIT 1`, [a.id]);
+    if (sending.rowCount) fail("TRANSIENT");
+    // Timeout/lease expiry does not cancel an external effect. Unresolved send intent
+    // requires manual reconciliation before erasure can overtake a possible late send.
+    const uncertainSend = await executor.query(`SELECT j."id" FROM public."BackgroundJob" j
+      JOIN public."AuditEvent" i ON i."targetType" = 'BACKGROUND_JOB' AND i."targetId" = j."id"
+      WHERE j."applicationId" = $1 AND j."jobType" = 'CANDIDATE_SUBMISSION_NOTIFICATION' AND j."state" <> 'SUCCEEDED'
+        AND i."actorType" = 'SYSTEM' AND i."actionCode" = 'NOTIFICATION_SEND_INTENT'
+        AND NOT EXISTS (SELECT 1 FROM public."AuditEvent" r WHERE r."targetType" = i."targetType"
+          AND r."targetId" = i."targetId" AND r."actorType" = 'SYSTEM' AND r."correlationId" = i."correlationId"
+          AND r."actionCode" = 'NOTIFICATION_NOT_ACCEPTED' AND r."safeMetadata" = i."safeMetadata") LIMIT 1`, [a.id]);
+    if (uncertainSend.rowCount) fail("EMAIL_AMBIGUOUS");
     const ids = await executor.query<{ id: string }>('SELECT "id" FROM public."CandidateFile" WHERE "applicationId" = $1 AND "technicalStatus" <> \'DELETED\' ORDER BY "id" LIMIT 2 FOR UPDATE', [a.id]);
     if (ids.rows.length > 1) fail("DOMAIN");
     const file = ids.rows[0] ? await loadFile(ids.rows[0].id, executor) : null;
@@ -212,7 +234,8 @@ function classify(error: unknown): JobFailure {
   return "TRANSIENT";
 }
 
-export async function runBackgroundWorker(dependencies: { run?: RunTransaction; storage?: (signal: AbortSignal) => WorkerStorage } = {}) {
+export async function runBackgroundWorker(dependencies: { run?: RunTransaction; storage?: (signal: AbortSignal) => WorkerStorage;
+  email?: EmailAdapter } = {}) {
   const rawRun = dependencies.run ?? workerTransaction;
   const started = performance.now();
   const invocationId = randomUUID();
@@ -240,7 +263,7 @@ export async function runBackgroundWorker(dependencies: { run?: RunTransaction; 
     return work(bounded);
   });
   const result = { invocationId, admitted: false, claimed: 0, succeeded: 0, retried: 0, dead: 0, recovered: 0,
-    reconciled: 0, deleted: 0, unresolved: 0, due: 0, oldestDueSeconds: 0 };
+    reconciled: 0, deleted: 0, unresolved: 0, due: 0, oldestDueSeconds: 0, emailReadiness: emailReadiness() };
   const admitted = await run(async (executor) => {
     const admission = await executor.query(`INSERT INTO public."IdempotencyRecord"
       ("id", "scope", "keyHash", "requestHash", "state", "expiresAt") VALUES ($1, $2, $3, $4, 'IN_PROGRESS', clock_timestamp() + interval '60 seconds')
@@ -275,9 +298,16 @@ export async function runBackgroundWorker(dependencies: { run?: RunTransaction; 
       result.claimed++;
       try {
         const kind = validateWorkerJob(job);
-        if (!dependencies.storage && !googleStorageConfigured()) fail("CONFIGURATION");
         if (remaining() <= WORKER_BOUNDS.finalizationMs) fail("TRANSIENT");
         const signal = AbortSignal.timeout(Math.floor(Math.min(WORKER_BOUNDS.externalMs, remaining() - WORKER_BOUNDS.finalizationMs)));
+        if (kind === "notification") {
+          const state = await sendCandidateConfirmation(job, dependencies.email ?? unavailableEmailAdapter, signal, run);
+          if (state === "SUCCEEDED") result.succeeded++;
+          else if (state === "QUEUED") result.retried++;
+          else result.dead++;
+          continue;
+        }
+        if (!dependencies.storage && !googleStorageConfigured()) fail("CONFIGURATION");
         const adapter = (dependencies.storage ?? googleDriveStorage)(signal);
         const storage: WorkerStorage = { ...adapter,
           allocateId: () => adapter.allocateId(), put: (...args) => adapter.put(...args), get: id => adapter.get(id), delete: id => adapter.delete(id),

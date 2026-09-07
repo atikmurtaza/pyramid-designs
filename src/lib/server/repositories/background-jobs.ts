@@ -148,6 +148,10 @@ export const JOB_FAILURES = Object.freeze({
   SECURITY: "Object identity or security verification failed.",
   PAYLOAD: "Job type or payload is unsupported.",
   EXHAUSTED: "The permitted attempts were exhausted.",
+  EMAIL_AMBIGUOUS: "Acceptance is unknown; manual reconciliation is required before any resend.",
+  EMAIL_SUPPRESSED: "Candidate confirmation is no longer applicable.",
+  EMAIL_RECIPIENT: "The recipient was invalid or definitely rejected.",
+  EMAIL_AUTH: "Email authentication is unavailable.",
 });
 export type JobFailure = keyof typeof JOB_FAILURES;
 
