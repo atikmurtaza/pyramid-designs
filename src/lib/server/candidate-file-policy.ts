@@ -2,9 +2,10 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { inflateSync } from "node:zlib";
+import { MAX_MULTIPART_BYTES, MULTIPART_TYPE } from "./intake-abuse.ts";
 
 export const MAX_CV_BYTES = 5 * 1024 * 1024;
-export const MAX_UPLOAD_BYTES = MAX_CV_BYTES + 32 * 1024;
+export const MAX_UPLOAD_BYTES = MAX_MULTIPART_BYTES;
 export const sha256 = (bytes: Uint8Array | string) => createHash("sha256").update(bytes).digest("hex");
 
 export class CandidateFileUnavailable extends Error {
@@ -19,27 +20,29 @@ export async function readBoundedStream(
   declaredLength?: string | null,
   signal?: AbortSignal,
 ) {
-  if (declaredLength && (!/^\d+$/.test(declaredLength) || Number(declaredLength) > limit)) fileUnavailable();
+  if (declaredLength != null && (!/^\d{1,8}$/.test(declaredLength) || Number(declaredLength) > limit)) fileUnavailable();
   const reader = body?.getReader();
   if (!reader) fileUnavailable();
   let expired = false;
+  const started = performance.now();
   const timer = setTimeout(() => { expired = true; void reader.cancel().catch(() => {}); }, timeoutMs);
-  const chunks: Uint8Array[] = [];
+  const bytes = Buffer.allocUnsafe(limit);
   let size = 0;
   try {
     for (;;) {
       const { value, done } = await reader.read();
-      if (expired || signal?.aborted) fileUnavailable();
+      if (expired || signal?.aborted || performance.now() - started >= timeoutMs) fileUnavailable();
       if (done) break;
+      if (!value.byteLength) fileUnavailable();
       size += value.byteLength;
       if (size > limit) fileUnavailable();
-      chunks.push(value);
+      bytes.set(value, size - value.byteLength);
     }
     if (!size || (declaredLength && Number(declaredLength) !== size)) fileUnavailable();
-    return Buffer.concat(chunks, size);
+    return bytes.subarray(0, size);
   } finally {
     clearTimeout(timer);
-    await reader.cancel().catch(() => {});
+    void reader.cancel().catch(() => {});
     reader.releaseLock();
   }
 }
@@ -114,14 +117,57 @@ export function validateCandidatePdf(bytes: Buffer, transientName: string, advis
   return { sizeBytes: bytes.length, contentHash: sha256(bytes), detectedMime: "application/pdf" as const };
 }
 
+// Preflight raw framing before native formData can allocate one object per part.
+// Strict browser-generated subset; reject preambles, epilogues and nested multipart.
+function boundMultipartEnvelope(body: Buffer, contentType: string) {
+  const boundary = contentType.slice(contentType.indexOf("=") + 1).replaceAll('"', "");
+  const delimiter = Buffer.from(`\r\n--${boundary}`);
+  const first = Buffer.from(`--${boundary}\r\n`);
+  if (!body.subarray(0, first.length).equals(first)) fileUnavailable();
+  let offset = first.length, parts = 0, fieldBytes = 0, files = 0;
+  const names = new Set<string>();
+  for (;;) {
+    if (++parts > 66) fileUnavailable();
+    const endHeaders = body.indexOf("\r\n\r\n", offset);
+    if (endHeaders < offset || endHeaders - offset > 1024) fileUnavailable();
+    const headers = body.subarray(offset, endHeaders).toString("utf8").split("\r\n");
+    const disposition = /^Content-Disposition: form-data; name="([A-Za-z0-9_.-]{1,64})"(?:; filename="([^"\r\n]{1,160})")?$/i.exec(headers[0]);
+    if (!disposition || names.has(disposition[1])) fileUnavailable();
+    names.add(disposition[1]);
+    const file = disposition[2] !== undefined;
+    if (file) {
+      if (++files > 1 || disposition[1] !== "cv" || /[\x00-\x1f\x7f/\\:<>|?*]/.test(disposition[2])
+        || headers.length > 2 || (headers.length === 2 && !/^Content-Type: application\/pdf$/i.test(headers[1]))) fileUnavailable();
+    } else if (headers.length !== 1 || disposition[1] === "cv") fileUnavailable();
+    const start = endHeaders + 4;
+    const end = body.indexOf(delimiter, start);
+    if (end < start) fileUnavailable();
+    if (file) { if (end === start || end - start > MAX_CV_BYTES) fileUnavailable(); }
+    else {
+      fieldBytes += Buffer.byteLength(disposition[1]) + end - start;
+      if (fieldBytes > 24_576) fileUnavailable();
+      try { new TextDecoder("utf-8", { fatal: true }).decode(body.subarray(start, end)); } catch { fileUnavailable(); }
+    }
+    offset = end + delimiter.length;
+    if (body.subarray(offset, offset + 2).toString() === "--") {
+      const tail = body.subarray(offset + 2).toString();
+      if ((tail !== "" && tail !== "\r\n") || files !== 1) fileUnavailable();
+      return;
+    }
+    if (body.subarray(offset, offset + 2).toString() !== "\r\n") fileUnavailable();
+    offset += 2;
+  }
+}
+
 let activeParsers = 0;
-export async function parseCandidateUpload(request: Request) {
+export async function parseCandidateUpload(request: Request, validateFields?: (fields: URLSearchParams) => unknown) {
   const contentType = request.headers.get("content-type") ?? "";
-  if (!/^multipart\/form-data;\s*boundary=(?:[\w'-]{1,70}|"[\w'-]{1,70}")$/i.test(contentType)
+  if (!MULTIPART_TYPE.test(contentType)
     || activeParsers >= 2) fileUnavailable();
   activeParsers++;
   try {
     const body = await readBoundedStream(request.body, MAX_UPLOAD_BYTES, 10_000, request.headers.get("content-length"), request.signal);
+    boundMultipartEnvelope(body, contentType);
     let form: FormData;
     try { form = await new Response(new Uint8Array(body), { headers: { "Content-Type": contentType } }).formData(); }
     catch { fileUnavailable(); }
@@ -139,6 +185,7 @@ export async function parseCandidateUpload(request: Request) {
       } else fileUnavailable();
     }
     if (!file || file.size > MAX_CV_BYTES) fileUnavailable();
+    validateFields?.(fields);
     const bytes = Buffer.from(await file.arrayBuffer());
     const metadata = validateCandidatePdf(bytes, file.name, file.type);
     return { fields, bytes, ...metadata };

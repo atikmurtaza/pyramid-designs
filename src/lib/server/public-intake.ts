@@ -3,13 +3,14 @@ import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { hasSameOriginMutation } from "./auth/csrf.ts";
+import { acquireIntakeSlot, intakeResponse, intakeShapeFailure, MAX_INTAKE_BYTES } from "./intake-abuse.ts";
 import { createFileFreeApplication, createFileRequiredApplication, type CreateApplicationInput, type TalentEngagementType } from "./repositories/applications.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const engagements = ["PERMANENT_INTEREST", "FREELANCE_PROJECT", "INTERNSHIP_EARLY_CAREER", "PORTFOLIO_INTRODUCTION"] as const;
 const fields = ["applicationType", "jobId", "departmentId", "engagementType", "fullName", "email", "city", "phoneOrWhatsApp", "experienceLevel", "portfolioUrl", "professionalUrl", "shortIntroduction", "consentDefinitionId", "consent", "idempotencyKey"];
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
-const maxBodyBytes = 24_576;
+const maxBodyBytes = MAX_INTAKE_BYTES;
 
 export class IntakeValidationError extends Error {
   field: string;
@@ -44,13 +45,18 @@ export function syntheticIntakeEnabled(origin: string) {
 }
 
 export function intakeRequestAllowed(request: Request) {
-  const target = new URL(request.url);
-  const effectiveOrigin = request.headers.get("host") ? `${target.protocol}//${request.headers.get("host")}` : target.origin;
-  const localAlias = syntheticIntakeEnabled(request.url) && syntheticIntakeEnabled(effectiveOrigin)
-    && new URL(effectiveOrigin).port === target.port && request.headers.get("origin") === effectiveOrigin;
-  return (hasSameOriginMutation(request) || localAlias) && syntheticIntakeEnabled(request.url)
-    && syntheticIntakeEnabled(effectiveOrigin) && request.headers.get("origin") === effectiveOrigin
-    && request.headers.get("sec-fetch-site") !== "cross-site";
+  try {
+    if (request.url.length > 2048 || (request.headers.get("host")?.length ?? 0) > 256
+      || (request.headers.get("origin")?.length ?? 0) > 256) return false;
+    const target = new URL(request.url);
+    const effectiveOrigin = request.headers.get("host") ? `${target.protocol}//${request.headers.get("host")}` : target.origin;
+    if (new URL(effectiveOrigin).origin !== effectiveOrigin) return false;
+    const localAlias = syntheticIntakeEnabled(request.url) && syntheticIntakeEnabled(effectiveOrigin)
+      && new URL(effectiveOrigin).port === target.port && request.headers.get("origin") === effectiveOrigin;
+    return (hasSameOriginMutation(request) || localAlias) && syntheticIntakeEnabled(request.url)
+      && syntheticIntakeEnabled(effectiveOrigin) && request.headers.get("origin") === effectiveOrigin
+      && [null, "same-origin", "none"].includes(request.headers.get("sec-fetch-site"));
+  } catch { return false; }
 }
 
 async function policies(executor: DatabaseExecutor) {
@@ -81,7 +87,7 @@ export async function getIntakeContext(jobId?: string, executor: DatabaseExecuto
       FILTER (WHERE o."id" IS NOT NULL), '[]'::jsonb) AS "options"
     FROM public."JobQuestion" q LEFT JOIN public."JobQuestionOption" o ON o."jobQuestionId" = q."id"
     WHERE q."jobId" = $1 AND q."active" = true GROUP BY q."id" ORDER BY q."sortOrder" LIMIT 51`, [jobId]) : { rows: [] };
-  if (questions.rows.length > 50) throw new Error("Intake unavailable.");
+  if (questions.rows.length > 50 || questions.rows.some((question) => question.options.length > 50)) throw new Error("Intake unavailable.");
   return { jobs: jobs.rows, departments: departments.rows, consent, questions: questions.rows };
 }
 
@@ -130,7 +136,7 @@ export function validateIntake(data: URLSearchParams) {
     if (!uuid.test(questionId)) invalid("form");
     return { questionId, value: text(key, 4000, false) };
   }).sort((a, b) => a.questionId.localeCompare(b.questionId));
-  if (new Set(answers.map((answer) => answer.questionId)).size !== answers.length) invalid("form");
+  if (answers.length > 50 || new Set(answers.map((answer) => answer.questionId)).size !== answers.length) invalid("form");
   const context = applicationType === "JOB_APPLICATION"
     ? { applicationType, jobId: id("jobId") } as const
     : { applicationType, departmentId: id("departmentId"), engagementType: text("engagementType", 40) as TalentEngagementType } as const;
@@ -197,7 +203,8 @@ export async function submitIntake(data: URLSearchParams, executor: DatabaseExec
   }, executor);
 }
 
-export async function consumeIntakeLimit(executor?: DatabaseExecutor, now = Date.now()): Promise<boolean> {
+export async function consumeIntakeLimit(executor?: DatabaseExecutor, now?: number): Promise<boolean> {
+  if (now !== undefined && (process.env.NODE_ENV !== "test" || !Number.isSafeInteger(now))) throw new Error("Admission unavailable.");
   if (!executor) return transaction(async (limitedExecutor) => {
     await limitedExecutor.query(`SET LOCAL statement_timeout = '3s'`);
     return consumeIntakeLimit(limitedExecutor, now);
@@ -205,42 +212,51 @@ export async function consumeIntakeLimit(executor?: DatabaseExecutor, now = Date
   // Global budget deliberately avoids unproven proxy/IP headers and candidate identifiers.
   // One rolling row bounds storage without a scheduler. Hot-row contention limits throughput.
   const keyDigest = digest("public-intake-global");
-  return (await executor.query<{ count: number }>(`INSERT INTO public."RateLimitBucket"
+  const count = (await executor.query<{ count: number }>(`INSERT INTO public."RateLimitBucket"
     ("id", "scope", "keyDigest", "windowStartedAt", "count", "expiresAt")
-    VALUES ($1, 'PUBLIC_INTAKE_GLOBAL', $2, to_timestamp(0), 1, $3)
+    VALUES ($1, 'PUBLIC_INTAKE_GLOBAL', $2, to_timestamp(0), 1, COALESCE($3::timestamptz, statement_timestamp()) + interval '60 seconds')
     ON CONFLICT ("scope", "keyDigest", "windowStartedAt") DO UPDATE
-    SET "count" = CASE WHEN public."RateLimitBucket"."expiresAt" <= $4 THEN 1
+    SET "count" = CASE WHEN public."RateLimitBucket"."expiresAt" <= COALESCE($3::timestamptz, statement_timestamp()) THEN 1
       ELSE LEAST(public."RateLimitBucket"."count", 20) + 1 END,
-      "expiresAt" = CASE WHEN public."RateLimitBucket"."expiresAt" <= $4 THEN $3 ELSE public."RateLimitBucket"."expiresAt" END
-    RETURNING "count"`, [randomUUID(), keyDigest, new Date(now + 60_000), new Date(now)])).rows[0]?.count <= 20;
+      "expiresAt" = CASE WHEN public."RateLimitBucket"."expiresAt" <= COALESCE($3::timestamptz, statement_timestamp())
+        THEN COALESCE($3::timestamptz, statement_timestamp()) + interval '60 seconds' ELSE public."RateLimitBucket"."expiresAt" END
+    RETURNING "count"`, [randomUUID(), keyDigest, now === undefined ? null : new Date(now)])).rows[0]?.count;
+  if (!Number.isInteger(count) || count < 1 || count > 21) throw new Error("Admission unavailable.");
+  return count <= 20;
 }
 
 export async function handleIntakeRequest(request: Request, dependencies = { transaction, consumeLimit: consumeIntakeLimit }) {
-  const response = (status: number, body: object) => Response.json(body, { status, headers: { "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
+  const response = intakeResponse;
   // Next's local server can canonicalize 127.0.0.1 to localhost in Request.url.
   // Validate the actual Host and exact Origin, never forwarded host/IP headers.
   if (!intakeRequestAllowed(request)) return response(403, { ok: false, message: "Submission is unavailable." });
+  const shapeFailure = intakeShapeFailure(request, false);
+  if (shapeFailure) return shapeFailure;
+  const release = acquireIntakeSlot();
+  if (!release) return response(429, { ok: false, message: "Please wait a minute before retrying." });
   try {
     if (!(await dependencies.consumeLimit())) return response(429, { ok: false, message: "Please wait a minute before retrying." });
-    if (!/^application\/x-www-form-urlencoded(?:;\s*charset=utf-8)?$/i.test(request.headers.get("content-type") ?? "")) return response(415, { ok: false, message: "Submission is unavailable." });
     const declared = request.headers.get("content-length");
-    if (declared && (!/^\d+$/.test(declared) || Number(declared) > maxBodyBytes)) return response(413, { ok: false, message: "The submission is too large." });
     const reader = request.body?.getReader();
     if (!reader) return response(400, { ok: false, message: "Check the form." });
-    const chunks: Uint8Array[] = []; let size = 0;
-    const deadline = setTimeout(() => { void reader.cancel(); }, 5000);
+    const bytes = Buffer.allocUnsafe(maxBodyBytes); let size = 0;
+    const deadline = setTimeout(() => { void reader.cancel().catch(() => {}); }, 5000);
     const started = Date.now();
     try {
       for (;;) {
         const { done, value } = await reader.read();
-        if (Date.now() - started >= 5000) throw new Error("Read timeout.");
+        if (Date.now() - started >= 5000 || request.signal.aborted) throw new Error("Read timeout.");
         if (done) break;
         size += value.byteLength;
-        if (size > maxBodyBytes) { await reader.cancel(); return response(413, { ok: false, message: "The submission is too large." }); }
-        chunks.push(value);
+        if (size > maxBodyBytes) return response(413, { ok: false, message: "The submission is too large." });
+        bytes.set(value, size - value.byteLength);
       }
-    } finally { clearTimeout(deadline); reader.releaseLock(); }
-    const data = new URLSearchParams(Buffer.concat(chunks).toString("utf8"));
+    } finally { clearTimeout(deadline); void reader.cancel().catch(() => {}); reader.releaseLock(); }
+    if (!size || (declared !== null && Number(declared) !== size)) invalid("form");
+    let raw: string;
+    try { raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, size)); decodeURIComponent(raw); }
+    catch { invalid("form"); }
+    const data = new URLSearchParams(raw);
     validateIntake(data);
     // Keep domain failures inside this callback so the existing transaction helper remains generic.
     let field: string | undefined;
@@ -256,5 +272,5 @@ export async function handleIntakeRequest(request: Request, dependencies = { tra
   } catch (error) {
     if (error instanceof IntakeValidationError) return response(400, { ok: false, field: publicField(error.field), message: "Check this field and use synthetic information only." });
     return response(503, { ok: false, message: "Submission could not be completed. Retry with the same form, or reload if its details have changed." });
-  }
+  } finally { release(); }
 }

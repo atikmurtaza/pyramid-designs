@@ -261,9 +261,12 @@ try {
       await files.storeCandidateApplication(payload(failedKey), validPdf, policy.sha256(validPdf), validPdf.length, failedStorage, run);
 
       const splitStorage = new FakeStorage();
-      const splitKey = randomUUID(); let calls = 0;
+      const splitKey = randomUUID();
       await assert.rejects(() => files.storeCandidateApplication(payload(splitKey), validPdf, policy.sha256(validPdf), validPdf.length, splitStorage,
-        async (work) => { if (++calls === 2) throw new Error("synthetic database finalization failure"); return work(executor); })); checks++;
+        async (work) => work({ query: (sql, values) => {
+          if (sql.includes('SET "technicalStatus" = \'QUARANTINED\'')) throw new Error("synthetic database finalization failure");
+          return executor.query(sql, values);
+        } }))); checks++;
       const split = (await executor.query(`SELECT file."id", file."driveFileId", file."technicalStatus", job."state" FROM public."CandidateFile" file
         JOIN public."BackgroundJob" job ON job."candidateFileId" = file."id" JOIN public."Application" application ON application."id" = file."applicationId"
         WHERE application."technicalStatus" = 'SUBMISSION_PENDING' ORDER BY application."createdAt" DESC LIMIT 1`)).rows[0];

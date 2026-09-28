@@ -9,7 +9,8 @@ import { hasSameOriginMutation } from "./auth/csrf.ts";
 import { CandidateFileUnavailable, fileUnavailable, parseCandidateUpload, readBoundedStream, sha256 } from "./candidate-file-policy.ts";
 import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { googleDriveStorage, type CandidateStorage } from "./google-drive.ts";
-import { consumeIntakeLimit, intakeRequestAllowed, submitIntake } from "./public-intake.ts";
+import { consumeIntakeLimit, intakeRequestAllowed, submitIntake, validateIntake, IntakeValidationError } from "./public-intake.ts";
+import { acquireIntakeSlot, intakeResponse, intakeShapeFailure } from "./intake-abuse.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
 import { enqueueBackgroundJob, claimUploadJob, requireJobOwnership, completeBackgroundJob, type ClaimedBackgroundJob } from "./repositories/background-jobs.ts";
 
@@ -115,9 +116,26 @@ export async function storeCandidateApplication(
   storage: CandidateStorage,
   runTransaction: TransactionRunner = transaction,
 ) {
-  const allocatedDriveId = await storage.allocateId();
-  const reservation = await runTransaction(async (executor) => {
+  validateIntake(fields);
+  // Validate authoritative job/consent/idempotency before any Drive allocation.
+  // The committed file-required application remains pending if storage is unavailable.
+  const admitted = await runTransaction(async (executor) => {
+    await executor.query(`SET LOCAL statement_timeout = '8s'`);
+    await executor.query(`SET LOCAL lock_timeout = '3s'`);
     const application = await submitIntake(fields, executor, contentHash);
+    const eligible = await executor.query(`SELECT "id" FROM public."Application" WHERE "id" = $1
+      AND "requiresClearedFile" = true AND "technicalStatus" IN ('SUBMISSION_PENDING', 'SECURITY_PENDING')
+      AND "expiresAt" > clock_timestamp() AND "deletionRequestedAt" IS NULL AND "deletionCompletedAt" IS NULL FOR UPDATE`, [application.id]);
+    if (!eligible.rowCount) fileUnavailable();
+    const existing = await executor.query<{ driveFileId: string | null }>(`SELECT "driveFileId" FROM public."CandidateFile"
+      WHERE "applicationId" = $1 AND "technicalStatus" <> 'DELETED'`, [application.id]);
+    return { application, driveFileId: existing.rows[0]?.driveFileId };
+  });
+  const { application } = admitted;
+  const allocatedDriveId = admitted.driveFileId ?? await storage.allocateId();
+  const reservation = await runTransaction(async (executor) => {
+    await executor.query(`SET LOCAL statement_timeout = '8s'`);
+    await executor.query(`SET LOCAL lock_timeout = '3s'`);
     const file = await reserveCandidateFile(executor, application.id, allocatedDriveId, contentHash, sizeBytes);
     const jobId = await enqueueBackgroundJob({ jobType: "CANDIDATE_FILE_STORAGE_RECONCILE", candidateFileId: file.id,
       dedupeKey: `candidate-file-reconcile:${file.id}`, safePayload: { operation: "VERIFY_OR_DELETE" } }, executor);
@@ -136,15 +154,18 @@ export async function handleCandidateFileIntakeRequest(request: Request, depende
   storage?: () => CandidateStorage;
   runTransaction?: TransactionRunner;
 } = {}) {
-  const response = (status: number, body: object) => Response.json(body, { status, headers: {
-    "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff",
-  } });
+  const response = intakeResponse;
   if (!intakeRequestAllowed(request)) return response(403, { ok: false, message: "Submission is unavailable." });
+  const shapeFailure = intakeShapeFailure(request, true);
+  if (shapeFailure) return shapeFailure;
+  const release = acquireIntakeSlot();
+  if (!release) return response(429, { ok: false, message: "Please wait a minute before retrying." });
   try {
     if (!(await (dependencies.consumeLimit ?? consumeIntakeLimit)())) return response(429, { ok: false, message: "Please wait a minute before retrying." });
     let upload: Awaited<ReturnType<typeof parseCandidateUpload>>;
-    try { upload = await parseCandidateUpload(request); }
+    try { upload = await parseCandidateUpload(request, validateIntake); }
     catch (error) {
+      if (error instanceof IntakeValidationError) return response(400, { ok: false, field: "form", message: "Check the form and its current details." });
       if (error instanceof CandidateFileUnavailable) return response(400, { ok: false, field: "cv", message: "Choose one valid PDF no larger than 5 MiB." });
       throw error;
     }
@@ -153,7 +174,7 @@ export async function handleCandidateFileIntakeRequest(request: Request, depende
     return response(200, { ok: true, message: "Synthetic application and CV stored in private quarantine. The CV is not cleared or trusted." });
   } catch {
     return response(503, { ok: false, message: "Submission could not be completed. Retry the same form without changing the selected file." });
-  }
+  } finally { release(); }
 }
 
 function requireFileBoundary(principal: StaffPrincipal | null, operation: AuthorizationOperation, candidateFileId: string) {
