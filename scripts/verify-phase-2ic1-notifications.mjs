@@ -7,9 +7,13 @@ assert(["localhost", "127.0.0.1"].includes(url.hostname) && /^\/phase2ib_[a-z0-9
 process.env.DATABASE_URL = url.href;
 process.env.NODE_ENV = "test";
 process.env.PUBLIC_INTAKE_MODE = "synthetic";
+// Keep this provider-neutral suite offline even after local live configuration.
+process.env.EMAIL_PROVIDER = "";
+process.env.RESEND_API_KEY = "";
 const db = await import("../src/lib/server/database.ts");
 const jobs = await import("../src/lib/server/repositories/background-jobs.ts");
 const mail = await import("../src/lib/server/candidate-notifications.ts");
+const { emailReadiness } = await import("../src/lib/server/resend-email.ts");
 const worker = await import("../src/lib/server/background-worker.ts");
 const intake = await import("../src/lib/server/public-intake.ts");
 const files = await import("../src/lib/server/candidate-files.ts");
@@ -218,7 +222,7 @@ try {
       process.env.NODE_ENV = "test";
     } else { check(await send(c, adapter), "DEAD"); check((await queryJob(c.id)).failureClass, "CONFIGURATION"); }
   }
-  check(mail.emailReadiness(), "UNAVAILABLE_UNTIL_PHASE_2IC2");
+  check(emailReadiness(), "EMAIL_CONFIGURATION_UNAVAILABLE");
   // A genuinely production-scoped job cannot select the injected synthetic adapter either.
   const productionFields = fields();
   process.env.NODE_ENV = "production";
@@ -250,7 +254,7 @@ try {
   const results = await Promise.all([worker.runBackgroundWorker({ email: dispatchAdapter }), worker.runBackgroundWorker({ email: dispatchAdapter })]);
   check(results.filter(r => r.admitted).length, 1); check(dispatchAdapter.calls, 1);
   check((await queryJob(dispatched.j.id)).state, "SUCCEEDED");
-  check(results.find(r => r.admitted).emailReadiness, "UNAVAILABLE_UNTIL_PHASE_2IC2");
+  check(results.find(r => r.admitted).emailReadiness, "EMAIL_CONFIGURATION_UNAVAILABLE");
   console.info = originalInfo; console.error = originalError;
   // Inspect only safe persistence; never print envelopes or database content on success.
   const payloads = (await db.query('SELECT "safePayload", "dedupeKey", "errorSummary" FROM public."BackgroundJob" WHERE "jobType"=$1', [mail.NOTIFICATION_JOB])).rows;

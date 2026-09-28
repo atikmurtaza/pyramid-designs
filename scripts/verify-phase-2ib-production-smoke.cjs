@@ -4,13 +4,13 @@ const assert=require('node:assert/strict');
 const testUrl=new URL(process.env.PHASE2IB_TEST_DATABASE_URL ?? 'invalid:');
 assert(['localhost','127.0.0.1'].includes(testUrl.hostname) && /^\/phase2ib_[a-z0-9_]+$/.test(testUrl.pathname),'Smoke requires an explicit disposable database');
 process.env.DATABASE_URL=testUrl.href;process.env.DIRECT_URL=testUrl.href;
-const env=require('dotenv').parse(fs.readFileSync('.env.local'));
+const env=fs.existsSync('.env.local')?require('dotenv').parse(fs.readFileSync('.env.local')):{};
 const origin='http://localhost:3110';
-const keys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REFRESH_TOKEN','GOOGLE_DRIVE_ROOT_ID'];
+const keys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REFRESH_TOKEN','GOOGLE_DRIVE_ROOT_ID','RESEND_API_KEY'];
 const privateValues=keys.map(k=>env[k]).filter(Boolean);
 let log='';
 const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','localhost','--port','3110'],{
- windowsHide:true,env:{...process.env,NODE_ENV:'production',PUBLIC_INTAKE_MODE:'synthetic',CRON_SECRET:'synthetic-cron-secret-only-0000000000000000',GOOGLE_CLIENT_ID:'',GOOGLE_CLIENT_SECRET:'',GOOGLE_REFRESH_TOKEN:'',GOOGLE_DRIVE_ROOT_ID:''},stdio:['ignore','pipe','pipe']});
+ windowsHide:true,env:{...process.env,NODE_ENV:'production',PUBLIC_INTAKE_MODE:'synthetic',COMPATIBILITY_PROBE_SECRET:'synthetic-probe-secret-only-0000000000000000',CRON_SECRET:'synthetic-cron-secret-only-0000000000000000',GOOGLE_CLIENT_ID:'',GOOGLE_CLIENT_SECRET:'',GOOGLE_REFRESH_TOKEN:'',GOOGLE_DRIVE_ROOT_ID:'',EMAIL_PROVIDER:'',RESEND_API_KEY:''},stdio:['ignore','pipe','pipe']});
 server.stdout.on('data',d=>log+=d);server.stderr.on('data',d=>log+=d);
 (async()=>{let checks=0;const results=[];try{
  let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(origin+'/')).ok;}catch{}if(!ready)await new Promise(r=>setTimeout(r,250));}

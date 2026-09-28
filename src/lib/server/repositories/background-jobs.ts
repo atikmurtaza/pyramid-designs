@@ -156,22 +156,24 @@ export const JOB_FAILURES = Object.freeze({
 export type JobFailure = keyof typeof JOB_FAILURES;
 
 export async function failBackgroundJob(id: string, claimToken: string, failure: JobFailure,
-  executor?: DatabaseExecutor): Promise<"QUEUED" | "DEAD" | null> {
+  executor?: DatabaseExecutor, retryAfterSeconds = 0): Promise<"QUEUED" | "DEAD" | null> {
   if (!Object.hasOwn(JOB_FAILURES, failure)) throw new Error("Invalid job failure classification.");
-  if (!executor) return transaction(e => failBackgroundJob(id, claimToken, failure, e));
+  if (!Number.isInteger(retryAfterSeconds) || retryAfterSeconds < 0 || retryAfterSeconds > 3600)
+    throw new Error("Invalid job retry delay.");
+  if (!executor) return transaction(e => failBackgroundJob(id, claimToken, failure, e, retryAfterSeconds));
   await executor.query('SELECT "id" FROM public."BackgroundJob" WHERE "id" = $1 FOR UPDATE', [id]);
   const result = await executor.query<{ state: "QUEUED" | "DEAD" }>(`UPDATE public."BackgroundJob"
     SET "state" = CASE WHEN $3 = 'TRANSIENT' AND "attemptCount" < "maxAttempts"
           THEN 'QUEUED'::"BackgroundJobState" ELSE 'DEAD'::"BackgroundJobState" END,
         "availableAt" = CASE WHEN $3 = 'TRANSIENT' AND "attemptCount" < "maxAttempts"
-          THEN clock_timestamp() + make_interval(secs => least(3600, 60 * power(2, least("attemptCount" - 1, 6)))::int)
+          THEN clock_timestamp() + make_interval(secs => greatest($6, least(3600, 60 * power(2, least("attemptCount" - 1, 6))))::int)
           ELSE "availableAt" END,
         "completedAt" = CASE WHEN $3 = 'TRANSIENT' AND "attemptCount" < "maxAttempts" THEN NULL ELSE clock_timestamp() END,
         "failureClass" = CASE WHEN $3 = 'TRANSIENT' AND "attemptCount" >= "maxAttempts" THEN 'EXHAUSTED' ELSE $3 END,
         "errorSummary" = CASE WHEN $3 = 'TRANSIENT' AND "attemptCount" >= "maxAttempts" THEN $5 ELSE $4 END,
         "claimedAt" = NULL, "leaseUntil" = NULL, "claimToken" = NULL, "updatedAt" = clock_timestamp()
     WHERE "id" = $1 AND "state" = 'RUNNING' AND "claimToken" = $2 AND "leaseUntil" > clock_timestamp()
-    RETURNING "state"`, [id, claimToken, failure, JOB_FAILURES[failure], JOB_FAILURES.EXHAUSTED]);
+    RETURNING "state"`, [id, claimToken, failure, JOB_FAILURES[failure], JOB_FAILURES.EXHAUSTED, retryAfterSeconds]);
   return result.rowCount === 1 ? result.rows[0].state : null;
 }
 

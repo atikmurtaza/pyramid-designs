@@ -8,7 +8,8 @@ import { finalizeCandidateFile } from "./candidate-files.ts";
 import { googleDriveStorage, googleStorageConfigured, StorageOperationError, type WorkerStorage, type ExpectedStoredFile } from "./google-drive.ts";
 import { CandidateFileUnavailable } from "./candidate-file-policy.ts";
 import { NOTIFICATION_JOB, validateNotificationJob, sendCandidateConfirmation, unavailableEmailAdapter,
-  emailReadiness, type EmailAdapter } from "./candidate-notifications.ts";
+  type EmailAdapter } from "./candidate-notifications.ts";
+import { configuredEmailAdapter, emailReadiness } from "./resend-email.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
 import { claimBackgroundJobs, completeBackgroundJob, enqueueBackgroundJob, failBackgroundJob,
   recoverExhaustedJobs, requireJobOwnership, type ClaimedBackgroundJob, type JobFailure } from "./repositories/background-jobs.ts";
@@ -301,7 +302,10 @@ export async function runBackgroundWorker(dependencies: { run?: RunTransaction; 
         if (remaining() <= WORKER_BOUNDS.finalizationMs) fail("TRANSIENT");
         const signal = AbortSignal.timeout(Math.floor(Math.min(WORKER_BOUNDS.externalMs, remaining() - WORKER_BOUNDS.finalizationMs)));
         if (kind === "notification") {
-          const state = await sendCandidateConfirmation(job, dependencies.email ?? unavailableEmailAdapter, signal, run);
+          // Test workers require deliberate adapter injection, even when a local
+          // provider key exists. The bounded live CLI injects its own adapter.
+          const email = dependencies.email ?? (process.env.NODE_ENV === "test" ? unavailableEmailAdapter : configuredEmailAdapter());
+          const state = await sendCandidateConfirmation(job, email, signal, run);
           if (state === "SUCCEEDED") result.succeeded++;
           else if (state === "QUEUED") result.retried++;
           else result.dead++;
