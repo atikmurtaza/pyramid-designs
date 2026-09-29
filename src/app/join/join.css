@@ -52,6 +52,10 @@
 .join-intake-opportunities { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-5); }
 .join-form button:disabled { cursor: wait; opacity: 0.65; }
 .join-form fieldset:disabled { opacity: 0.75; }
+.join-challenge { display: grid; gap: var(--space-4); min-width: 0; }
+.join-challenge h2 { font-size: 1.45rem; letter-spacing: -0.05em; }
+.join-challenge .button { width: fit-content; max-width: 100%; }
+.join-challenge:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
 .join-form p, .join-intake-opportunities a { overflow-wrap: anywhere; }
 .join-error-summary:focus-visible, .join-success:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
 @media (max-width: 48rem) { .join-hero__layout, .join-introduction { grid-template-columns: 1fr; } .join-introduction { align-items: start; } .join-form__grid, .join-choices { grid-template-columns: 1fr; } .join-form__field--wide { grid-column: 1; } .join-form__actions .button { width: 100%; } }

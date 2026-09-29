@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { installChallengeFixture, challengedFields } from "./phase-2ie-challenge-fixture.mjs";
 import { randomUUID } from "node:crypto";
 import { deflateSync } from "node:zlib";
 import { syntheticPdf } from "./phase-2h-synthetic-pdf.mjs";
@@ -13,6 +14,7 @@ import { phase2CFixtures, seedPhase2CSynthetic } from "./seed-phase-2c-synthetic
 config({ path: ".env.local", quiet: true });
 process.env.NODE_ENV = "test";
 process.env.PUBLIC_INTAKE_MODE = "synthetic";
+installChallengeFixture();
 assert.equal(Number(process.versions.node.split(".")[0]), 22);
 
 const db = await import("../src/lib/server/database.ts");
@@ -33,7 +35,7 @@ function payload(idempotencyKey = randomUUID(), overrides = {}) {
 
 function uploadRequest(fields = payload(), bytes = validPdf, name = "Transient Synthetic CV.pdf", origin = "http://localhost") {
   const form = new FormData();
-  for (const [field, value] of fields) form.append(field, value);
+  for (const [field, value] of challengedFields(fields)) form.append(field, value);
   form.append("cv", new File([bytes], name, { type: "application/pdf" }));
   return new Request(`${origin}/api/applications`, { method: "POST", body: form,
     headers: { host: new URL(origin).host, origin, "sec-fetch-site": "same-origin" } });

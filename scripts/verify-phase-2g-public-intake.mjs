@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { installChallengeFixture, challengedFields } from "./phase-2ie-challenge-fixture.mjs";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { config } from "dotenv";
@@ -236,7 +237,8 @@ try {
     });
     process.env.PUBLIC_INTAKE_MODE = "synthetic";
     process.env.NODE_ENV = "test";
-    const request = (data, headers = {}) => new Request("http://localhost:3000/api/applications", { method: "POST", headers: { origin: "http://localhost:3000", "content-type": "application/x-www-form-urlencoded", ...headers }, body: data.toString() });
+    installChallengeFixture();
+    const request = (data, headers = {}) => new Request("http://localhost:3000/api/applications", { method: "POST", headers: { origin: "http://localhost:3000", "content-type": "application/x-www-form-urlencoded", ...headers }, body: challengedFields(data).toString() });
     const dependencies = { transaction: (work) => work(executor), consumeLimit: async () => true };
     await checkpoint(executor, async () => {
       const response = await intake.handleIntakeRequest(request(talent()), dependencies);

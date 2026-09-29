@@ -127,7 +127,7 @@ function boundMultipartEnvelope(body: Buffer, contentType: string) {
   let offset = first.length, parts = 0, fieldBytes = 0, files = 0;
   const names = new Set<string>();
   for (;;) {
-    if (++parts > 66) fileUnavailable();
+    if (++parts > 67) fileUnavailable();
     const endHeaders = body.indexOf("\r\n\r\n", offset);
     if (endHeaders < offset || endHeaders - offset > 1024) fileUnavailable();
     const headers = body.subarray(offset, endHeaders).toString("utf8").split("\r\n");
@@ -185,7 +185,7 @@ export async function parseCandidateUpload(request: Request, validateFields?: (f
       } else fileUnavailable();
     }
     if (!file || file.size > MAX_CV_BYTES) fileUnavailable();
-    validateFields?.(fields);
+    await validateFields?.(fields);
     const bytes = Buffer.from(await file.arrayBuffer());
     const metadata = validateCandidatePdf(bytes, file.name, file.type);
     return { fields, bytes, ...metadata };

@@ -11,6 +11,7 @@ import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { googleDriveStorage, type CandidateStorage } from "./google-drive.ts";
 import { consumeIntakeLimit, intakeRequestAllowed, submitIntake, validateIntake, IntakeValidationError } from "./public-intake.ts";
 import { acquireIntakeSlot, intakeResponse, intakeShapeFailure } from "./intake-abuse.ts";
+import { requireIntakeChallenge, IntakeChallengeUnavailable } from "./intake-challenge.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
 import { enqueueBackgroundJob, claimUploadJob, requireJobOwnership, completeBackgroundJob, type ClaimedBackgroundJob } from "./repositories/background-jobs.ts";
 
@@ -163,8 +164,12 @@ export async function handleCandidateFileIntakeRequest(request: Request, depende
   try {
     if (!(await (dependencies.consumeLimit ?? consumeIntakeLimit)())) return response(429, { ok: false, message: "Please wait a minute before retrying." });
     let upload: Awaited<ReturnType<typeof parseCandidateUpload>>;
-    try { upload = await parseCandidateUpload(request, validateIntake); }
+    try { upload = await parseCandidateUpload(request, async (fields) => {
+      await requireIntakeChallenge(fields, request.signal);
+      validateIntake(fields);
+    }); }
     catch (error) {
+      if (error instanceof IntakeChallengeUnavailable) return response(400, { ok: false, field: "intake-challenge", message: error.message });
       if (error instanceof IntakeValidationError) return response(400, { ok: false, field: "form", message: "Check the form and its current details." });
       if (error instanceof CandidateFileUnavailable) return response(400, { ok: false, field: "cv", message: "Choose one valid PDF no larger than 5 MiB." });
       throw error;

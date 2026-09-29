@@ -30,7 +30,8 @@
     "test:phase2ib:smoke": "node scripts/verify-phase-2ib-production-smoke.cjs",
     "test:phase2ic2b": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2ic2b-resend.mjs",
     "test:phase2ic2b:live": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2ic2b-live.mjs",
-    "test:phase2id": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2id-abuse.mjs"
+    "test:phase2id": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2id-abuse.mjs",
+    "test:phase2ie": "npx --yes node@22.22.0 --conditions=react-server --experimental-strip-types scripts/verify-phase-2ie-challenge.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.7.0",

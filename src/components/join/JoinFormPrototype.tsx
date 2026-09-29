@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import type { IntakeContext } from "@/lib/server/public-intake";
+import { IntakeChallenge } from "./IntakeChallenge";
 
-export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { context: IntakeContext; jobId?: string; fileUploadAvailable: boolean }) {
+export function JoinFormPrototype({ context, jobId, fileUploadAvailable, challengeSiteKey, nonce }: { context: IntakeContext; jobId?: string; fileUploadAvailable: boolean; challengeSiteKey?: string; nonce?: string }) {
   const [pending, setPending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedFile, setSubmittedFile] = useState(false);
@@ -14,6 +15,12 @@ export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { con
   const key = useRef<string | undefined>(undefined);
   const summary = useRef<HTMLDivElement>(null);
   const success = useRef<HTMLElement>(null);
+  const challengeToken = useRef("");
+  const [challengeReady, setChallengeReady] = useState(false);
+  const [challengeReset, setChallengeReset] = useState(0);
+  const onChallengeToken = useCallback((token: string) => {
+    challengeToken.current = token; setChallengeReady(Boolean(token));
+  }, []);
   useEffect(() => {
     if (submitted) success.current?.focus();
     else if (error) summary.current?.focus();
@@ -35,7 +42,12 @@ export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { con
     if (busy.current) return;
     const form = event.currentTarget;
     if (!form.reportValidity()) return;
+    if (!challengeToken.current) {
+      setError({ field: "intake-challenge", message: "Complete a fresh security check before submitting." }); return;
+    }
     const formData = new FormData(form);
+    formData.set("cf-turnstile-response", challengeToken.current);
+    onChallengeToken("");
     key.current ??= crypto.randomUUID();
     formData.set("idempotencyKey", key.current);
     const data = new URLSearchParams();
@@ -51,7 +63,11 @@ export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { con
       }
     } catch {
       setError({ message: "The result could not be confirmed. Retry this form to safely check the same submission." });
-    } finally { busy.current = false; setPending(false); }
+    } finally {
+      formData.delete("cf-turnstile-response"); data.delete("cf-turnstile-response");
+      onChallengeToken(""); setChallengeReset(value => value + 1);
+      busy.current = false; setPending(false);
+    }
   }
 
   if (submitted) return <section className="join-success" ref={success} tabIndex={-1} aria-labelledby="join-success-title" aria-live="polite">
@@ -121,6 +137,7 @@ export function JoinFormPrototype({ context, jobId, fileUploadAvailable }: { con
       <label><input id="consent" name="consent" type="checkbox" value="accepted" required {...errorProps("consent")} />Record acceptance of the displayed synthetic consent fixture for this test.</label>
       <p>Final privacy wording and purpose-specific retention remain approval gates before real intake.</p>
     </fieldset>
-    <div className="join-form__actions"><button className="button button-primary" type="submit" disabled={pending}>{pending ? (fileUploadAvailable ? "Uploading…" : "Submitting…") : "Submit synthetic application"}</button><span role="status" aria-live="polite">{pending ? (fileUploadAvailable ? "Please wait. Your PDF is being validated and stored in quarantine." : "Please wait. Your submission is being processed.") : ""}</span></div>
+    <IntakeChallenge siteKey={challengeSiteKey} nonce={nonce} resetKey={challengeReset} pending={pending} error={error?.field === "intake-challenge"} onToken={onChallengeToken} />
+    <div className="join-form__actions"><button className="button button-primary" type="submit" disabled={pending || !challengeReady} aria-describedby="intake-challenge-status">{pending ? (fileUploadAvailable ? "Uploading…" : "Submitting…") : "Submit synthetic application"}</button><span role="status" aria-live="polite">{pending ? (fileUploadAvailable ? "Please wait. Your PDF is being validated and stored in quarantine." : "Please wait. Your submission is being processed.") : ""}</span></div>
   </form>;
 }

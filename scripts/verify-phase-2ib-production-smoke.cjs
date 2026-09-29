@@ -6,7 +6,7 @@ assert(['localhost','127.0.0.1'].includes(testUrl.hostname) && /^\/phase2ib_[a-z
 process.env.DATABASE_URL=testUrl.href;process.env.DIRECT_URL=testUrl.href;
 const env=fs.existsSync('.env.local')?require('dotenv').parse(fs.readFileSync('.env.local')):{};
 const origin='http://localhost:3110';
-const keys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REFRESH_TOKEN','GOOGLE_DRIVE_ROOT_ID','RESEND_API_KEY'];
+const keys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REFRESH_TOKEN','GOOGLE_DRIVE_ROOT_ID','RESEND_API_KEY','TURNSTILE_SECRET_KEY','TURNSTILE_SITE_KEY'];
 const privateValues=keys.map(k=>env[k]).filter(Boolean);
 let log='';
 const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','localhost','--port','3110'],{
@@ -23,6 +23,16 @@ server.stdout.on('data',d=>log+=d);server.stderr.on('data',d=>log+=d);
  for(const [path,status] of cases){const r=await fetch(origin+path,{redirect:'manual'});const body=await r.text();
   if(status!==null)assert.equal(r.status,status,path);else {assert([200,307].includes(r.status));assert((r.headers.get('location')??body).includes('authentication_required'));assert((r.headers.get('cache-control')??'').includes('no-store'));assert(!body.includes('Application contact'));}
   if(path.startsWith('/join')){assert(body.includes('Applications are not open yet.'));assert(!body.includes('Submit synthetic application'));assert(!body.includes('type="file"'));}
+  if(path==='/join'){
+    const csp=r.headers.get('content-security-policy')||'';
+    assert(csp.includes('script-src') && /'nonce-[A-Za-z0-9+/=]+'/.test(csp));
+    assert(csp.includes('frame-src https://challenges.cloudflare.com'));
+    assert(csp.includes("connect-src 'self'") && csp.includes("frame-ancestors 'none'"));
+    assert(!csp.includes('unsafe-eval') && !csp.includes('*') && !csp.includes('https:;'));
+    const nonce=csp.match(/'nonce-([^']+)'/)[1];assert(body.includes('nonce="'+nonce+'"'));
+    assert(!body.includes('challenges.cloudflare.com/turnstile/v0/api.js'));
+    assert.equal(r.headers.get('x-content-type-options'),'nosniff');assert.equal(r.headers.get('referrer-policy'),'no-referrer');checks++;
+  }
   for(const value of privateValues)assert(!body.includes(value),'Private configuration in response');
   if(path.includes('/candidate-files/'))assert((r.headers.get('cache-control')??'').includes('no-store'));
   results.push({path,status:r.status});checks++;

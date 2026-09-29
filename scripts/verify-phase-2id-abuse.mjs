@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { installChallengeFixture, challengedFields } from "./phase-2ie-challenge-fixture.mjs";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import pg from "pg";
@@ -14,7 +15,7 @@ process.env.EMAIL_PROVIDER = "";
 process.env.RESEND_API_KEY = "";
 // Every HTTP request in this suite is intercepted before runtime imports.
 const nativeFetch = globalThis.fetch;
-globalThis.fetch = async () => { throw new Error("Live requests forbidden."); };
+installChallengeFixture();
 const db = await import("../src/lib/server/database.ts");
 const intake = await import("../src/lib/server/public-intake.ts");
 const abuse = await import("../src/lib/server/intake-abuse.ts");
@@ -32,12 +33,13 @@ const fields = (extra = {}) => new URLSearchParams({ applicationType: "TALENT_NE
   city: "Synthetic City", experienceLevel: "SYNTHETIC_LEVEL", consentDefinitionId: f.consentDefinitionId,
   consent: "accepted", idempotencyKey: randomUUID(), ...extra });
 const request = (body = fields(), headers = {}, path = "/api/applications") => new Request(`http://localhost${path}`, {
-  method: "POST", body: String(body), headers: { origin: "http://localhost", "content-type": "application/x-www-form-urlencoded", ...headers },
+  method: "POST", body: String(body instanceof URLSearchParams ? challengedFields(body) : body), headers: { origin: "http://localhost", "content-type": "application/x-www-form-urlencoded", ...headers },
 });
 const pdf = syntheticPdf();
 function multipart(data = fields(), bytes = pdf, name = "Synthetic.pdf", mime = "application/pdf") {
   const form = new FormData();
   for (const [key, value] of data) form.append(key, value);
+  form.append("cf-turnstile-response", challengedFields("").get("cf-turnstile-response"));
   form.append("cv", new File([bytes], name, { type: mime }));
   return new Request("http://localhost/api/applications", { method: "POST", headers: { origin: "http://localhost" }, body: form });
 }
@@ -151,7 +153,7 @@ try {
   check(abuse.intakeAbuseReadiness().trustedClientIp, "UNAVAILABLE_UNTIL_TRUSTED_PROXY_PROVEN");
   check(abuse.intakeAbuseReadiness().realCandidateIntake, false);
 
-  const parsed = await policy.parseCandidateUpload(multipart(), intake.validateIntake);
+  const parsed = await policy.parseCandidateUpload(multipart(), async fields => { await challenge.requireIntakeChallenge(fields); intake.validateIntake(fields); });
   check((await files.handleCandidateFileIntakeRequest(multipart(fields({ consent: "" })), { consumeLimit: async () => true })).status, 400);
   check(parsed.contentHash, policy.sha256(pdf));
   check(JSON.stringify(parsed).includes("Synthetic.pdf"), false);
@@ -220,11 +222,11 @@ try {
   check((await files.handleCandidateFileIntakeRequest(multipart(recoverFields), { storage: () => storage })).status, 200);
 
   // Offline actual Turnstile adapter: no production fake verifier injection API.
-  const config = { PUBLIC_INTAKE_CHALLENGE_PROVIDER: "turnstile", PUBLIC_INTAKE_ORIGIN: "https://challenge.example.invalid",
+  const config = { PUBLIC_INTAKE_CHALLENGE_PROVIDER: "turnstile", PUBLIC_INTAKE_ORIGIN: "https://pyramiddesigns.co",
     TURNSTILE_SECRET_KEY: "synthetic_private_test_value_no_credential", TURNSTILE_SITE_KEY: "synthetic_public_widget_identifier" };
   Object.assign(process.env, config);
   let calls = 0;
-  const accepted = () => ({ success: true, hostname: "challenge.example.invalid", action: "candidate_intake", challenge_ts: new Date().toISOString(), "error-codes": [] });
+  const accepted = () => ({ success: true, hostname: "pyramiddesigns.co", action: "candidate_intake", challenge_ts: new Date().toISOString(), "error-codes": [] });
   let respond = () => Response.json(accepted());
   globalThis.fetch = async (endpoint, init) => {
     calls++; check(endpoint, "https://challenges.cloudflare.com/turnstile/v0/siteverify"); check(init.redirect, "error");

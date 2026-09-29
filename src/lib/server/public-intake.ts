@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { database, transaction, type DatabaseExecutor } from "./database.ts";
 import { hasSameOriginMutation } from "./auth/csrf.ts";
 import { acquireIntakeSlot, intakeResponse, intakeShapeFailure, MAX_INTAKE_BYTES } from "./intake-abuse.ts";
+import { requireIntakeChallenge, IntakeChallengeUnavailable } from "./intake-challenge.ts";
 import { createFileFreeApplication, createFileRequiredApplication, type CreateApplicationInput, type TalentEngagementType } from "./repositories/applications.ts";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -257,6 +258,7 @@ export async function handleIntakeRequest(request: Request, dependencies = { tra
     try { raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, size)); decodeURIComponent(raw); }
     catch { invalid("form"); }
     const data = new URLSearchParams(raw);
+    await requireIntakeChallenge(data, request.signal);
     validateIntake(data);
     // Keep domain failures inside this callback so the existing transaction helper remains generic.
     let field: string | undefined;
@@ -270,6 +272,7 @@ export async function handleIntakeRequest(request: Request, dependencies = { tra
     } catch { if (field) return response(400, { ok: false, field: publicField(field), message: "Check this field and the current form details." }); throw new Error("Unavailable."); }
     return response(200, { ok: true, message: "Synthetic application received. No CV or file was submitted." });
   } catch (error) {
+    if (error instanceof IntakeChallengeUnavailable) return response(400, { ok: false, field: "intake-challenge", message: error.message });
     if (error instanceof IntakeValidationError) return response(400, { ok: false, field: publicField(error.field), message: "Check this field and use synthetic information only." });
     return response(503, { ok: false, message: "Submission could not be completed. Retry with the same form, or reload if its details have changed." });
   } finally { release(); }

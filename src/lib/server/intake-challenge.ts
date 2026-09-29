@@ -12,6 +12,7 @@ function configuration() {
   if (!["production", "development", "test"].includes(e.NODE_ENV ?? "")
     || e.PUBLIC_INTAKE_CHALLENGE_PROVIDER !== "turnstile"
     || origin.origin !== e.PUBLIC_INTAKE_ORIGIN || origin.protocol !== "https:"
+    || (e.NODE_ENV === "production" && origin.origin !== "https://pyramiddesigns.co")
     || !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(origin.hostname)
     || !/^[A-Za-z0-9_-]{20,200}$/.test(e.TURNSTILE_SECRET_KEY ?? "")
     || !/^[A-Za-z0-9_-]{20,200}$/.test(e.TURNSTILE_SITE_KEY ?? "")
@@ -26,7 +27,25 @@ export function intakeChallengeConfiguration(): "CONFIGURED_UNVERIFIED" | "UNAVA
   try { configuration(); return "CONFIGURED_UNVERIFIED"; } catch { return "UNAVAILABLE"; }
 }
 
-// Contract for a future approved production caller. Does not open the intake gate.
+// Only this public identifier may cross the server/client boundary.
+export function intakeChallengeSiteKey(): string | undefined {
+  try { configuration(); return process.env.TURNSTILE_SITE_KEY; } catch { return undefined; }
+}
+
+export class IntakeChallengeUnavailable extends Error {
+  constructor() { super("Verification could not be completed. Please try a new security check."); }
+}
+
+// Strip the credential before validation, hashing, transactions or PDF inspection.
+export async function requireIntakeChallenge(fields: URLSearchParams, signal?: AbortSignal) {
+  const tokens = fields.getAll("cf-turnstile-response");
+  fields.delete("cf-turnstile-response");
+  if (tokens.length !== 1 || await verifyIntakeChallenge(tokens[0], signal) !== "VERIFIED") {
+    throw new IntakeChallengeUnavailable();
+  }
+}
+
+// Does not open the production intake gate.
 // No injected runtime verifier, fake mode, IP, candidate data or acceptance cache.
 export async function verifyIntakeChallenge(token: unknown, signal?: AbortSignal): Promise<ChallengeResult> {
   let config: ReturnType<typeof configuration>;
