@@ -61,12 +61,22 @@ export function intakeRequestAllowed(request: Request) {
 }
 
 async function policies(executor: DatabaseExecutor) {
-  const consent = await executor.query<{ id: string; contentText: string }>(`SELECT "id", "contentText" FROM public."ConsentDefinition"
+  const selectedConsent = await executor.query<{ id: string }>(`SELECT "id" FROM public."ConsentDefinition"
     WHERE "consentType" = 'SYNTHETIC_APPLICATION_PROCESSING' AND "status" = 'ACTIVE'
-    AND "effectiveFrom" <= clock_timestamp() ORDER BY "effectiveFrom" DESC, "id" LIMIT 1 FOR SHARE`);
-  const retention = await executor.query<{ id: string }>(`SELECT "id" FROM public."RetentionPolicy"
+    AND "effectiveFrom" <= clock_timestamp() ORDER BY "effectiveFrom" DESC, "id" LIMIT 1`);
+  const selectedRetention = await executor.query<{ id: string }>(`SELECT "id" FROM public."RetentionPolicy"
     WHERE "category" = 'SYNTHETIC_JOB_APPLICATION' AND "status" = 'ACTIVE'
-    AND "effectiveFrom" <= clock_timestamp() ORDER BY "effectiveFrom" DESC, "id" LIMIT 1 FOR SHARE`);
+    AND "effectiveFrom" <= clock_timestamp() ORDER BY "effectiveFrom" DESC, "id" LIMIT 1`);
+  if (!selectedConsent.rows[0] || !selectedRetention.rows[0]) throw new Error("Intake unavailable.");
+  await executor.query(`SELECT pyramid_private.lock_reference('CONSENT', $1)`, [selectedConsent.rows[0].id]);
+  await executor.query(`SELECT pyramid_private.lock_reference('RETENTION', $1)`, [selectedRetention.rows[0].id]);
+  // Recheck those exact locked versions in a fresh statement snapshot.
+  const consent = await executor.query<{ id: string; contentText: string }>(`SELECT "id", "contentText" FROM public."ConsentDefinition"
+    WHERE "id" = $1 AND "consentType" = 'SYNTHETIC_APPLICATION_PROCESSING' AND "status" = 'ACTIVE'
+    AND "effectiveFrom" <= clock_timestamp()`, [selectedConsent.rows[0].id]);
+  const retention = await executor.query<{ id: string }>(`SELECT "id" FROM public."RetentionPolicy"
+    WHERE "id" = $1 AND "category" = 'SYNTHETIC_JOB_APPLICATION' AND "status" = 'ACTIVE'
+    AND "effectiveFrom" <= clock_timestamp()`, [selectedRetention.rows[0].id]);
   if (!consent.rows[0] || !retention.rows[0]) throw new Error("Intake unavailable.");
   // Synthetic verification policy only; purpose-specific approved versions gate real intake.
   return { consent: consent.rows[0], retentionPolicyId: retention.rows[0].id };
@@ -169,7 +179,7 @@ export async function submitIntake(data: URLSearchParams, executor: DatabaseExec
   }
   if (input.applicationType === "JOB_APPLICATION") {
     await executor.query(`SELECT "id" FROM public."Job" WHERE "id" = $1 FOR UPDATE`, [input.jobId]);
-    await executor.query(`SELECT "id" FROM public."JobQuestion" WHERE "jobId" = $1 FOR UPDATE`, [input.jobId]);
+    await executor.query(`SELECT pyramid_private.lock_reference('JOB_QUESTIONS', $1)`, [input.jobId]);
   }
   const context = await getIntakeContext(input.applicationType === "JOB_APPLICATION" ? input.jobId : undefined, executor);
   if (input.consentDefinitionId !== context.consent.id) invalid("consent");

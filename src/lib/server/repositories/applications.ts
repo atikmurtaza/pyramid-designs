@@ -114,10 +114,7 @@ function publicReference() {
 
 async function loadJobQuestions(executor: DatabaseExecutor, jobId: string) {
   // Parent locks also prevent question/option insertions during this snapshot.
-  await executor.query(`SELECT "id" FROM public."JobQuestion" WHERE "jobId" = $1 FOR UPDATE`, [jobId]);
-  await executor.query(`SELECT option."id" FROM public."JobQuestionOption" option
-    JOIN public."JobQuestion" question ON question."id" = option."jobQuestionId"
-    WHERE question."jobId" = $1 FOR SHARE OF option`, [jobId]);
+  await executor.query(`SELECT pyramid_private.lock_reference('JOB_QUESTIONS', $1)`, [jobId]);
   const result = await executor.query<JobQuestionRow>(
     `SELECT question."id", question."questionType", question."prompt", question."required",
             COALESCE(jsonb_agg(jsonb_build_object('id', option."id", 'label', option."label") ORDER BY option."sortOrder")
@@ -234,20 +231,20 @@ async function createApplicationWithExecutor(
       throw new Error("Application request is already in progress.");
     }
 
+    await executor.query(`SELECT pyramid_private.lock_reference('RETENTION', $1)`, [input.retentionPolicyId]);
     const retention = await executor.query<RetentionPolicyRow>(
       `SELECT "durationDays"
        FROM public."RetentionPolicy"
-       WHERE "id" = $1 AND "status" = 'ACTIVE' AND "effectiveFrom" <= CURRENT_TIMESTAMP
-       FOR SHARE`,
+       WHERE "id" = $1 AND "status" = 'ACTIVE' AND "effectiveFrom" <= CURRENT_TIMESTAMP`,
       [input.retentionPolicyId],
     );
     if (!retention.rows[0]) throw new Error("Retention policy is unavailable.");
 
+    await executor.query(`SELECT pyramid_private.lock_reference('CONSENT', $1)`, [input.consentDefinitionId]);
     const consent = await executor.query(
       `SELECT "id"
        FROM public."ConsentDefinition"
-       WHERE "id" = $1 AND "status" = 'ACTIVE' AND "effectiveFrom" <= CURRENT_TIMESTAMP
-       FOR SHARE`,
+       WHERE "id" = $1 AND "status" = 'ACTIVE' AND "effectiveFrom" <= CURRENT_TIMESTAMP`,
       [input.consentDefinitionId],
     );
     if (!consent.rows[0]) throw new Error("Consent definition is unavailable.");
@@ -271,7 +268,8 @@ async function createApplicationWithExecutor(
       questions = await loadJobQuestions(executor, input.jobId);
     } else {
       departmentId = input.departmentId;
-      const department = await executor.query(`SELECT "id" FROM public."Department" WHERE "id" = $1 AND "active" = true FOR SHARE`, [departmentId]);
+      await executor.query(`SELECT pyramid_private.lock_reference('DEPARTMENT', $1)`, [departmentId]);
+      const department = await executor.query(`SELECT "id" FROM public."Department" WHERE "id" = $1 AND "active" = true`, [departmentId]);
       if (!department.rowCount) throw new Error("Department is unavailable.");
       if (input.answers?.length) throw new Error("Talent-network answers cannot reference job questions.");
     }
@@ -385,8 +383,9 @@ async function changeHiringStatusWithExecutor(executor: DatabaseExecutor, input:
   summary?: string;
   correlationId: string;
 }) {
+  await executor.query(`SELECT pyramid_private.lock_reference('STAFF_USER', $1)`, [input.actorStaffUserId]);
   const actor = await executor.query(
-      `SELECT "id" FROM public."StaffUser" WHERE "id" = $1 AND "status" = 'ACTIVE' FOR SHARE`,
+      `SELECT "id" FROM public."StaffUser" WHERE "id" = $1 AND "status" = 'ACTIVE'`,
       [input.actorStaffUserId],
     );
     if (!actor.rows[0]) throw new Error("Staff actor is unavailable.");

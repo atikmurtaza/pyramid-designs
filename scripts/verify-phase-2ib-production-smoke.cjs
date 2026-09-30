@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const testUrl=new URL(process.env.PHASE2IB_TEST_DATABASE_URL ?? 'invalid:');
 assert(['localhost','127.0.0.1'].includes(testUrl.hostname) && /^\/phase2ib_[a-z0-9_]+$/.test(testUrl.pathname),'Smoke requires an explicit disposable database');
-process.env.DATABASE_URL=testUrl.href;process.env.DIRECT_URL=testUrl.href;
+process.env.DATABASE_URL=testUrl.href;process.env.DIRECT_URL='';
 const env=fs.existsSync('.env.local')?require('dotenv').parse(fs.readFileSync('.env.local')):{};
 const origin='http://localhost:3110';
 const keys=['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','GOOGLE_REFRESH_TOKEN','GOOGLE_DRIVE_ROOT_ID','RESEND_API_KEY','TURNSTILE_SECRET_KEY','TURNSTILE_SITE_KEY'];

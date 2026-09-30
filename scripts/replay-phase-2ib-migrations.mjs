@@ -30,7 +30,9 @@ try {
   const security = await client.query(`SELECT count(*)::int AS tables, count(*) FILTER (WHERE relrowsecurity)::int AS rls
     FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r'`);
   assert.equal(security.rows[0].tables, security.rows[0].rls);
-  assert.equal((await client.query("SELECT count(*)::int AS n FROM pg_policies WHERE schemaname='public'")).rows[0].n, 0);
+  const policies = (await client.query("SELECT roles::text[] AS roles FROM pg_policies WHERE schemaname='public'")).rows;
+  assert.equal(policies.length, 54);
+  assert(policies.every(p => p.roles.length === 1 && ["pyramid_runtime", "pyramid_reference_locker"].includes(p.roles[0])));
   const grants = await client.query(`SELECT count(*)::int AS n FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
     CROSS JOIN (VALUES ('anon'),('authenticated')) r(name)
     CROSS JOIN (VALUES ('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) p(name)

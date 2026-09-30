@@ -192,8 +192,7 @@ async function requireCurrentPrincipal(executor: DatabaseExecutor, principal: St
   if (lock) {
     // Keep active status and existing role grants stable through the authorized
     // transaction, including time spent waiting for the exact file lock.
-    await executor.query(`SELECT "id" FROM public."StaffUser" WHERE "id" = $1 FOR SHARE`, [principal.staffUserId]);
-    await executor.query(`SELECT "id" FROM public."UserRole" WHERE "staffUserId" = $1 ORDER BY "id" FOR SHARE`, [principal.staffUserId]);
+    await executor.query(`SELECT pyramid_private.lock_reference('STAFF', $1)`, [principal.staffUserId]);
   }
   const currentPrincipal = await executor.query<{ status: string; supabaseUserId: string; roles: string[] }>(
     `SELECT staff."status", staff."supabaseUserId", COALESCE(jsonb_agg(role."roleCode"::text ORDER BY role."roleCode")
@@ -284,7 +283,9 @@ export async function recordCandidateFileReview(
     const row = await loadFile(executor, candidateFileId, true);
     if (startedAt < row.createdAt) fileUnavailable();
     const duplicate = await executor.query<{ candidateFileId: string; fileHashSnapshot: string; outcomeCode: string }>(
-      `SELECT "candidateFileId", "fileHashSnapshot", "outcomeCode" FROM public."FileSecurityReview" WHERE "idempotencyKey" = $1 FOR UPDATE`,
+      // Exact Application/CandidateFile locks serialize same-target replay;
+      // the unique key rejects conflicting different-target transactions.
+      `SELECT "candidateFileId", "fileHashSnapshot", "outcomeCode" FROM public."FileSecurityReview" WHERE "idempotencyKey" = $1`,
       [input.idempotencyKey]);
     const outcomeCode = input.outcome === "CLEAN" ? "DEFENDER_CLEAN" : input.outcome === "REJECTED" ? "DEFENDER_REJECTED" : "DEFENDER_FAILED";
     if (duplicate.rows[0]) {

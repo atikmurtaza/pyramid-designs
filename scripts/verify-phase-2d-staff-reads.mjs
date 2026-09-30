@@ -369,7 +369,8 @@ try {
   );
   assert.equal(publicSecurity.rows[0]?.failures, 0);
   const publicPolicies = await database.query(
-    `SELECT COUNT(*)::integer AS "count" FROM pg_policies WHERE schemaname = 'public'`,
+    `SELECT COUNT(*)::integer AS "count" FROM pg_policies WHERE schemaname = 'public'
+      AND (cardinality(roles) <> 1 OR NOT roles::text[] <@ ARRAY['pyramid_runtime','pyramid_reference_locker'])`,
   );
   assert.equal(publicPolicies.rows[0]?.count, 0);
 

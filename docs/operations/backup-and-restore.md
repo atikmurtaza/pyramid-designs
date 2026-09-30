@@ -1,4 +1,8 @@
-# Supabase Backup and Restore Policy
+# Application Database Backup and Restore Policy
+
+**Current provider amendment, 2026-09-30:** Neon is the approved application database under [ADR 0017](../architecture/decisions/0017-neon-application-database-supabase-auth.md). Supabase Auth and its project/database remain intact. The provisional Supabase procedure below is historical source guidance; it does not establish a ready Neon production recovery plan. [B1 recovery inputs](../implementation/phase-b1-neon-production-database.md#backuprecovery-inputs) require a direct-endpoint logical export, isolated restore target, actual plan/history-window evidence, named credential owner/deputy, deletion replay and external-service reconciliation. No backup/restore rehearsal or production migration is authorized. After required Neon-only writes, an environment-only rollback to an older Supabase snapshot is unsafe without reconciliation.
+
+**B1-R1 permission amendment:** Restore/rehearsal preparation must provision the two NOLOGIN capability/locking roles and separate operator/runtime logins, replay all ten migrations under the intended object owner, then verify the 54 targeted policies, exact column/function/default privileges and operator-only ledger. Restore role ownership deliberately; never run application traffic with the restore credential or copy production candidates into disposable verification. B1's fresh synthetic replay is not a recovery rehearsal.
 
 **Status:** **PROVISIONAL OWNER/OPERATIONS POLICY**
 **Date:** 2026-08-27

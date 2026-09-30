@@ -275,7 +275,8 @@ try {
       (NOT rowsecurity OR has_table_privilege('anon', format('%I.%I', schemaname, tablename), 'SELECT,INSERT,UPDATE,DELETE')
       OR has_table_privilege('authenticated', format('%I.%I', schemaname, tablename), 'SELECT,INSERT,UPDATE,DELETE'))`)).rows[0];
     assert.equal(security.failures, 0);
-    assert.equal((await executor.query(`SELECT count(*)::int AS count FROM pg_policies WHERE schemaname = 'public'`)).rows[0].count, 0); checks++;
+    assert.equal((await executor.query(`SELECT count(*)::int AS count FROM pg_policies WHERE schemaname = 'public'
+      AND (cardinality(roles) <> 1 OR NOT roles::text[] <@ ARRAY['pyramid_runtime','pyramid_reference_locker'])`)).rows[0].count, 0); checks++;
     completed = true; throw new Error("Synthetic verification rollback");
     } catch (error) { if (!completed) { console.error(`PHASE2G_CHECK_FAILED checks=${checks} code=${error.code ?? error.name}`); console.error(error.stack?.split("\n").filter((line) => line.trim().startsWith("at ")).join("\n")); } throw error; }
   }), { name: "DatabaseTransactionError" });
