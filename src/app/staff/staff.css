@@ -166,11 +166,15 @@ body:has(.staff-portal) > .site-footer {
   gap: var(--space-3);
 }
 
-.staff-confirmation input {
+.staff-form .staff-confirmation input[type="checkbox"] {
   width: 1.25rem;
   height: 1.25rem;
+  min-height: 1.25rem;
+  padding: 0;
   flex: 0 0 auto;
 }
+
+.staff-confirmation span { min-width: 0; flex: 1; }
 
 .staff-actions {
   display: grid;
@@ -281,6 +285,13 @@ body:has(.staff-portal) > .site-footer {
   align-items: center;
   margin-bottom: var(--space-5);
 }
+
+.staff-form label { display: grid; gap: var(--space-2); min-width: 0; }
+.staff-form .staff-confirmation { display: flex; }
+.staff-form fieldset { min-width: 0; display: grid; gap: var(--space-3); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-media); padding: var(--space-4); }
+.staff-panel { overflow-wrap: anywhere; }
+.staff-panel + .staff-panel, .staff-panel + form { margin-top: var(--space-5); }
+.staff-form select, .staff-form input, .staff-form textarea { max-width: 100%; min-width: 0; }
 
 @media (max-width: 47.99rem) {
   .staff-header__inner,

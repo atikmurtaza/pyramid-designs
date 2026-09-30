@@ -76,19 +76,21 @@ try {
   check((await owner.query("SELECT count(*)::int AS n FROM pg_class WHERE relnamespace='public'::regnamespace AND relowner='pyramid_runtime'::regrole")).rows[0].n, 0);
   check((await owner.query("SELECT count(*)::int AS n FROM pg_class WHERE relnamespace='public'::regnamespace AND relkind='r' AND NOT relrowsecurity")).rows[0].n, 0);
   const tables = (await owner.query("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename")).rows.map(r => r.tablename);
-  check(tables.length, 28);
+  check(tables.length, 29);
   const readable = ["StaffUser", "UserRole", "Department", "Project", "JobLocation", "Job", "JobQuestion", "JobQuestionOption", "ConsentDefinition", "RetentionPolicy",
-    "Application", "ApplicationAnswer", "CandidateFile", "FileSecurityReview", "CandidateConsent", "ApplicationStatusEvent", "AuditEvent", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket"];
-  const insertable = ["Project", "Application", "ApplicationAnswer", "CandidateFile", "FileSecurityReview", "CandidateConsent", "ApplicationStatusEvent", "AuditEvent", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket"];
+    "Application", "ApplicationAnswer", "CandidateFile", "FileSecurityReview", "CandidateConsent", "ApplicationStatusEvent", "AuditEvent", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket",
+    "InternalNote", "Discipline", "Sector", "ProjectMedia", "ProjectCredit", "ProjectDiscipline", "ProjectSector"];
+  const insertable = ["Project", "Application", "ApplicationAnswer", "CandidateFile", "FileSecurityReview", "CandidateConsent", "ApplicationStatusEvent", "AuditEvent", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket",
+    "Job", "JobQuestion", "JobQuestionOption", "InternalNote", "ProjectCredit", "ProjectDiscipline", "ProjectSector"];
   for (const table of tables) for (const privilege of ["SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE", "REFERENCES", "TRIGGER"])
     check((await runtime.query("SELECT has_table_privilege(current_user,$1,$2) AS allowed", [`public.\"${table}\"`, privilege])).rows[0].allowed,
       privilege === "SELECT" ? readable.includes(table) : privilege === "INSERT" ? insertable.includes(table)
-        : privilege === "DELETE" ? ["ApplicationAnswer", "IdempotencyRecord"].includes(table) : false);
+        : privilege === "DELETE" ? ["ApplicationAnswer", "IdempotencyRecord", "ProjectCredit", "ProjectDiscipline", "ProjectSector", "JobQuestionOption"].includes(table) : false);
   check((await owner.query("SELECT count(*)::int AS n FROM pg_class WHERE relnamespace='public'::regnamespace AND relkind='r' AND relowner<>$1::regrole", [ownerUrl.username])).rows[0].n, 0);
   check((await owner.query("SELECT count(*)::int AS n FROM pg_auth_members WHERE member=$1::regrole AND (roleid<>'pyramid_runtime'::regrole OR admin_option)", [runtimeUrl.username])).rows[0].n, 0);
   const funcs = (await owner.query("SELECT p.oid,p.oid::regprocedure::text AS signature,p.prosecdef,p.proconfig,p.prorettype::regtype::text AS result FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname IN ('public','pyramid_private')")).rows
     .map(fn => ({ ...fn, signature: fn.signature.includes('.') ? fn.signature : `public.${fn.signature}` }));
-  check(funcs.length, 18);
+  check(funcs.length, 22);
   check(funcs.filter(f => f.prosecdef).map(f => f.signature), ["pyramid_private.lock_reference(text,uuid)"]);
   for (const fn of funcs) {
     check(fn.proconfig?.[0], fn.prosecdef ? "search_path=pg_catalog" : "search_path=pg_catalog, public");
@@ -96,7 +98,10 @@ try {
       fn.signature.includes("lock_reference(") || fn.signature.includes("check_application_submission_evidence(") || fn.signature.includes("completed_retention_evidence("));
   }
   const updateColumns = {
-    Project: ["title", "summary", "version", "updatedAt"], Job: ["lifecycleState", "version", "closedAt", "archivedAt", "updatedAt"],
+    Project: ["title", "summary", "version", "updatedAt", "clientDescriptor", "year", "brief", "challenge", "approach", "outcome", "featured", "publicationState", "publishAt", "publishedAt", "archivedAt"],
+    Job: ["lifecycleState", "version", "closedAt", "archivedAt", "updatedAt", "title", "departmentId", "jobLocationId", "workArrangement", "employmentType", "experienceLevel", "shiftSchedule", "compensationMode", "compensationMinMinor", "compensationMaxMinor", "compensationCurrency", "compensationPeriod", "compensationText", "summary", "responsibilities", "requiredQualifications", "preferredQualifications", "hiringProcessCopy", "applicationDeadline", "publishAt", "publishedAt"],
+    JobQuestion: ["questionType", "prompt", "required", "sortOrder", "active"],
+    ProjectMedia: ["altText", "caption", "accessibilityDescription", "sortOrder", "updatedAt"],
     Application: ["technicalStatus", "hiringStatus", "submittedAt", "withdrawnAt", "updatedAt", "deletionRequestedAt", "deletionCompletedAt",
       "fullName", "email", "city", "phoneOrWhatsApp", "specialism", "portfolioUrl", "professionalUrl", "availabilityText", "remoteAvailable",
       "shortIntroduction", "preferredEngagement", "freelancerRateMinMinor", "freelancerRateMaxMinor", "rateCurrency", "accommodationContactRequested",
@@ -126,19 +131,16 @@ try {
     'SET ROLE pyramid_reference_locker', `SET ROLE ${ownerUrl.username}`,
     `SET SESSION AUTHORIZATION ${ownerUrl.username}`,
     'SELECT * FROM public._prisma_migrations', 'SELECT * FROM public."CompatibilityProbe"',
-    'SELECT * FROM public."Discipline"', 'SELECT * FROM public."Sector"',
-    'SELECT * FROM public."ProjectMedia"', 'SELECT * FROM public."ProjectCredit"',
-    'SELECT * FROM public."ProjectDiscipline"', 'SELECT * FROM public."ProjectSector"',
     'SELECT public.prevent_immutable_change()',
     'LOCK TABLE public."AuditEvent" IN ACCESS EXCLUSIVE MODE', 'SET LOCAL session_replication_role=replica',
     'ALTER FUNCTION pyramid_private.lock_reference(text,uuid) SECURITY INVOKER',
     'DROP FUNCTION pyramid_private.lock_reference(text,uuid)',
   ]) await denied(runtime, sql);
-  for (const table of ["AuditEvent", "CandidateConsent", "ApplicationStatusEvent", "FileSecurityReview", "StaffUser", "UserRole", "Department", "ConsentDefinition", "RetentionPolicy", "JobQuestion", "JobQuestionOption"]) {
+  for (const table of ["AuditEvent", "CandidateConsent", "ApplicationStatusEvent", "FileSecurityReview", "StaffUser", "UserRole", "Department", "ConsentDefinition", "RetentionPolicy", "InternalNote", "JobQuestion"]) {
     await denied(runtime, `UPDATE public."${table}" SET "id"="id"`);
     await denied(runtime, `DELETE FROM public."${table}"`);
   }
-  for (const table of ["Project", "Job", "Application", "CandidateFile", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket"])
+  for (const table of ["Project", "Job", "Application", "CandidateFile", "BackgroundJob", "IdempotencyRecord", "RateLimitBucket", "JobQuestionOption", "ProjectCredit", "ProjectMedia"])
     await denied(runtime, `UPDATE public."${table}" SET "id"="id"`);
   await denied(runtime, 'SELECT "id" FROM public."FileSecurityReview" FOR UPDATE');
   await runtime.query("SET LOCAL row_security=off");
@@ -173,11 +175,11 @@ try {
   await owner.query("ROLLBACK");
   // Even the locking owner cannot mutate references or create objects.
   await owner.query("BEGIN"); await owner.query("SET LOCAL ROLE pyramid_reference_locker");
-  for (const table of ["StaffUser", "UserRole", "Department", "ConsentDefinition", "RetentionPolicy", "JobQuestion", "JobQuestionOption"])
+  for (const table of ["StaffUser", "UserRole", "Department", "ConsentDefinition", "RetentionPolicy", "JobQuestion", "JobQuestionOption", "JobLocation", "Discipline", "Sector"])
     await denied(owner, `UPDATE public."${table}" SET "id"="id"`, ["ConsentDefinition", "RetentionPolicy"].includes(table) ? "55000" : "42501");
   await denied(owner, 'CREATE TABLE pyramid_private.b1_lock_owner_escalation(id int)');
   await owner.query("ROLLBACK");
-  console.log(`B1_NEGATIVE_ISOLATION_OK checks=${checks} browser_roles=3 functions=18`);
+  console.log(`B1_NEGATIVE_ISOLATION_OK checks=${checks} browser_roles=3 functions=22`);
 
   const claims = async () => ({ subjectId: staff.subjects.manager, assuranceLevel: "aal2" });
   const manager = await session.resolveAuthenticatedStaff(claims);

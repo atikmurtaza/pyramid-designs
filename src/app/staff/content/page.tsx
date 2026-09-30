@@ -25,7 +25,7 @@ export default async function StaffContentPage({
 
   return (
     <>
-      <StaffPageHeading eyebrow="Content" title="Draft content" summary="Only draft and scheduled project metadata is included." />
+      <StaffPageHeading eyebrow="Content" title="Project content" summary="Draft, scheduled and published projects available to your role." />
       <StaffMutationNotice status={mutation} />
       {canCreate ? (
         <form className="staff-form staff-panel staff-mutation-panel" action={createContentDraft}>
@@ -50,7 +50,7 @@ export default async function StaffContentPage({
             </li>
           ))}
         </ul>
-      ) : <StaffEmptyState>No draft or scheduled content is available.</StaffEmptyState>}
+      ) : <StaffEmptyState>No current project content is available.</StaffEmptyState>}
     </>
   );
 }

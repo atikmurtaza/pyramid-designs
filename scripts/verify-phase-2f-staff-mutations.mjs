@@ -22,7 +22,13 @@ const failureProjectId = "00000000-0000-4000-8000-000000000030";
 
 function principal(staffUserId, roles, assuranceLevel = "aal2") {
   return {
-    authSubjectId: `synthetic-${staffUserId}`,
+    authSubjectId: ({
+      [phase2CFixtures.contentEditorStaffId]: phase2CFixtures.subjects.contentEditor,
+      [phase2CFixtures.reviewerStaffId]: phase2CFixtures.subjects.reviewer,
+      [phase2CFixtures.managerStaffId]: phase2CFixtures.subjects.manager,
+      [phase2CFixtures.auditorStaffId]: phase2CFixtures.subjects.auditor,
+      [phase2BFixtures.adminStaffId]: "synthetic-supabase-subject-admin",
+    })[staffUserId] ?? `synthetic-${staffUserId}`,
     staffUserId,
     assuranceLevel,
     roles,
@@ -275,13 +281,22 @@ try {
       expectedHiringStatus: "NEW",
       requestedHiringStatus: "WITHDRAWN",
     }, principals.HIRING_REVIEWER, executor));
-    await mutate({
+    await expectUnavailable(() => mutate({
       type: "application.hiring_status.change",
       idempotencyKey: randomUUID(),
       applicationId: phase2BFixtures.applicationId,
       expectedHiringStatus: "NEW",
       requestedHiringStatus: "WITHDRAWN",
+    }, principals.HIRING_MANAGER, executor));
+    await mutate({
+      type: "application.withdraw.record", idempotencyKey: randomUUID(),
+      applicationId: phase2BFixtures.applicationId,
+      expectedTechnicalStatus: "SUBMITTED", confirmed: true,
     }, principals.HIRING_MANAGER, executor);
+    assert.deepEqual((await executor.query(
+      `SELECT "technicalStatus", "hiringStatus" FROM public."Application" WHERE "id"=$1`,
+      [phase2BFixtures.applicationId],
+    )).rows[0], { technicalStatus: "WITHDRAWN", hiringStatus: "WITHDRAWN" });
   });
 
   await verifyRolledBack(async (executor) => {
@@ -534,7 +549,7 @@ try {
   assert.match(source, /ApplicationStatusEvent/);
   assert.match(source, /hasSameOriginMutationHeaders/);
   assert.match(source, /resolveAuthenticatedStaff/);
-  assert.match(source, /submitted\.length !== expected\.length/);
+  assert.match(source, /values\.length !== 1/);
 
   console.log("PHASE_2F_STAFF_MUTATIONS_OK");
 } finally {

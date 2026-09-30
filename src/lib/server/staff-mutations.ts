@@ -17,6 +17,8 @@ import {
   type DatabaseExecutor,
 } from "./database.ts";
 import { appendAuditEvent } from "./repositories/audit.ts";
+import { requireCurrentStaffPrincipal } from "./repositories/staff.ts";
+import { applyStaffWorkflow, validateWorkflowMutation, workflowBoundary, type StaffWorkflowMutation } from "./staff-workflows.ts";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -36,6 +38,7 @@ export type HiringStatus = (typeof HIRING_STATUSES)[number];
 export type JobTransition = (typeof JOB_TRANSITIONS)[number];
 
 export type StaffMutation =
+  | StaffWorkflowMutation
   | Readonly<{
       type: "content.create";
       idempotencyKey: string;
@@ -181,7 +184,7 @@ function validateMutation(input: StaffMutation): StaffMutation {
         requestedLifecycleState: requireEnum(input.requestedLifecycleState, JOB_TRANSITIONS),
       };
     default:
-      invalid();
+      return validateWorkflowMutation(input);
   }
 }
 
@@ -202,7 +205,7 @@ function mutationBoundary(input: StaffMutation) {
         target: { type: "JOB", id: input.jobId },
       } as const;
     default:
-      unavailable();
+      return workflowBoundary(input);
   }
 }
 
@@ -355,22 +358,25 @@ async function changeHiringStatus(
   input: Extract<StaffMutation, { type: "application.hiring_status.change" }>,
   executor: DatabaseExecutor,
 ) {
+  // Withdrawal requires its separate verified-request attestation.
+  if (input.requestedHiringStatus === "WITHDRAWN") unavailable();
   const stateResult = await executor.query<{
     technicalStatus: string;
     hiringStatus: HiringStatus | null;
     retentionPermitsAccess: boolean;
     deletionCompleted: boolean;
+    deletionRequested: boolean;
   }>(
     `SELECT "technicalStatus", "hiringStatus",
             "expiresAt" > CURRENT_TIMESTAMP AS "retentionPermitsAccess",
-            "deletionCompletedAt" IS NOT NULL AS "deletionCompleted"
+            "deletionCompletedAt" IS NOT NULL AS "deletionCompleted", "deletionRequestedAt" IS NOT NULL AS "deletionRequested"
      FROM public."Application"
      WHERE "id" = $1
      FOR UPDATE`,
     [input.applicationId],
   );
   const state = stateResult.rows[0];
-  if (!state || state.hiringStatus !== input.expectedHiringStatus) unavailable();
+  if (!state || state.hiringStatus !== input.expectedHiringStatus || state.deletionRequested) unavailable();
   requireStateAuthorization(principal, "application.hiring_status.change", {
     type: "APPLICATION",
     id: input.applicationId,
@@ -479,6 +485,8 @@ async function applyMutation(
       return changeHiringStatus(principal, input, executor);
     case "job.transition":
       return transitionJob(principal, input, executor);
+    default:
+      return applyStaffWorkflow(principal, input, executor);
   }
 }
 
@@ -495,6 +503,7 @@ export async function performStaffMutation(
   const runTransaction = dependencies.transaction ?? databaseTransaction;
 
   return runTransaction(async (executor) => {
+    try { await requireCurrentStaffPrincipal(principal, executor); } catch { unavailable(); }
     const idempotency = await claimIdempotency(principal, input, executor);
     if (idempotency.duplicateTargetId) {
       return { outcome: "ALREADY_APPLIED", targetId: idempotency.duplicateTargetId };
@@ -513,7 +522,7 @@ export function allowedHiringStatusTransitions(
 ) {
   if (!currentStatus || !UUID_PATTERN.test(applicationId)) return [];
   return HIRING_STATUSES.filter((requestedHiringStatus) =>
-    authorize(principal, {
+    requestedHiringStatus !== "WITHDRAWN" && authorize(principal, {
       operation: "application.hiring_status.change",
       target: {
         type: "APPLICATION",

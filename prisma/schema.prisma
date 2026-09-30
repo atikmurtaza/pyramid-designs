@@ -176,6 +176,7 @@ model StaffUser {
   applicationStatusEvents ApplicationStatusEvent[]
   fileSecurityReviews     FileSecurityReview[]
   auditEvents             AuditEvent[]
+  internalNotes           InternalNote[]
 }
 
 model UserRole {
@@ -445,10 +446,23 @@ model Application {
   consents                      CandidateConsent[]
   statusEvents                  ApplicationStatusEvent[]
   backgroundJobs                BackgroundJob[]
+  internalNotes                 InternalNote[]
 
   @@index([jobId, hiringStatus, createdAt])
   @@index([applicationType, hiringStatus, createdAt])
   @@index([expiresAt])
+}
+
+model InternalNote {
+  id                String      @id @default(uuid()) @db.Uuid
+  applicationId     String      @db.Uuid
+  authorStaffUserId  String      @db.Uuid
+  body              String      @db.VarChar(2000)
+  createdAt         DateTime    @default(now()) @db.Timestamptz(6)
+  application       Application @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  authorStaffUser   StaffUser   @relation(fields: [authorStaffUserId], references: [id], onDelete: Restrict)
+
+  @@index([applicationId, createdAt, id])
 }
 
 model ApplicationAnswer {
@@ -563,6 +577,7 @@ model AuditEvent {
 
   @@index([targetType, targetId, occurredAt])
   @@index([actorStaffUserId, occurredAt])
+  @@index([occurredAt, id])
 }
 
 model BackgroundJob {

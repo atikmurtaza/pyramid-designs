@@ -1,6 +1,7 @@
 import "server-only";
 
 import { database, type DatabaseExecutor } from "../database.ts";
+import type { StaffPrincipal } from "../auth/session.ts";
 
 export type StaffRole =
   | "CONTENT_EDITOR"
@@ -68,6 +69,21 @@ export async function getEffectiveStaffRoles(
 ): Promise<StaffRole[]> {
   const profile = await findStaffAuthorizationProfile(supabaseUserId, executor);
   return profile?.status === "ACTIVE" ? profile.roles : [];
+}
+
+export class StaffPrincipalUnavailableError extends Error {}
+
+export async function requireCurrentStaffPrincipal(
+  principal: StaffPrincipal,
+  executor: DatabaseExecutor,
+  lock = true,
+) {
+  if (lock) await executor.query("SELECT pyramid_private.lock_reference('STAFF', $1)", [principal.staffUserId]);
+  const current = await findStaffAuthorizationProfile(principal.authSubjectId, executor);
+  if (!current || current.status !== "ACTIVE" || current.staffUserId !== principal.staffUserId
+    || JSON.stringify([...current.roles].sort()) !== JSON.stringify([...principal.roles].sort())) {
+    throw new StaffPrincipalUnavailableError("Not available.");
+  }
 }
 
 export async function setStaffStatus(

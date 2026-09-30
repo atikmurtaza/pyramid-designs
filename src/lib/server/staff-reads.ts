@@ -147,7 +147,7 @@ export async function listStaffContent(
   const result = await executor.query<StaffContentListItem>(
     `SELECT "id", "title", "publicationState", "updatedAt"
      FROM public."Project"
-     WHERE "publicationState" IN ('DRAFT', 'SCHEDULED')
+     WHERE "publicationState" IN ('DRAFT', 'SCHEDULED', 'PUBLISHED')
      ORDER BY "updatedAt" DESC, "id"
      LIMIT 50`,
   );

@@ -274,12 +274,12 @@ function stateAllows(
   state: AuthorizationState | undefined,
 ) {
   if (
-    operation === "content.list_metadata" ||
     operation === "content.draft.read" ||
     operation === "content.edit"
   ) {
     return ["DRAFT", "SCHEDULED"].includes(state?.publicationState ?? "");
   }
+  if (operation === "content.list_metadata") return ["DRAFT", "SCHEDULED", "PUBLISHED"].includes(state?.publicationState ?? "");
   if (operation === "content.publish") {
     return (
       ["DRAFT", "SCHEDULED"].includes(state?.publicationState ?? "") &&

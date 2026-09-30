@@ -10,6 +10,8 @@ import { requireStaffPortalPrincipal } from "@/lib/server/staff-portal";
 import { formatStaffDate, StaffBackLink, StaffMutationNotice, StaffPageHeading } from "../../_components";
 import { PendingSubmitButton } from "../../_pending-submit-button";
 import { transitionJob } from "../../actions";
+import { readJobWorkflow, readJobReferences } from "@/lib/server/staff-workflow-reads";
+import { JobEditor, LifecycleForm, QuestionEditor, QuestionOrder } from "../../_workflow-forms";
 
 export default async function StaffJobPage({ params, searchParams }: {
   params: Promise<{ id: string }>;
@@ -26,6 +28,8 @@ export default async function StaffJobPage({ params, searchParams }: {
     throw error;
   }
   const transitions = job.version === undefined ? [] : allowedJobTransitions(principal, job.id, job.lifecycleState);
+  const workflow = job.detailLevel === "MANAGEMENT" ? await readJobWorkflow(principal, id) : null;
+  const references = workflow ? await readJobReferences(principal) : null;
 
   return (
     <>
@@ -41,6 +45,15 @@ export default async function StaffJobPage({ params, searchParams }: {
         {job.applicationDeadline !== undefined ? <div><dt>Application deadline</dt><dd>{formatStaffDate(job.applicationDeadline)}</dd></div> : null}
         {job.summary ? <div className="staff-details__wide"><dt>Summary</dt><dd>{job.summary}</dd></div> : null}
       </dl>
+      {workflow?.fields && references && job.lifecycleState === "DRAFT" && job.version !== undefined && <>
+        <JobEditor id={id} version={job.version} fields={workflow.fields} references={references} />
+        <section className="staff-panel"><h2>Questions and options</h2><p>Used questions are frozen to preserve historical answers. Save one change, then refresh for the current job version.</p>
+          {workflow.questions.map((q) => q.used ? <p key={q.id}>{q.prompt} — historical use; immutable.</p> : <QuestionEditor key={q.id} jobId={id} version={job.version!} question={q} />)}
+          <QuestionEditor jobId={id} version={job.version} />
+          {workflow.questions.length > 1 && !workflow.questions.some((q) => q.used) && <QuestionOrder jobId={id} version={job.version} questions={workflow.questions} />}
+        </section>
+        <LifecycleForm type="job.publish" id={id} version={job.version} label="Publish job" description="Verify the approved role content and all questions/options. Publishing does not enable candidate intake." />
+      </>}
       {transitions.length > 0 && job.version !== undefined ? (
         <div className="staff-actions">
           {transitions.map((state) => (
