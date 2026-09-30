@@ -1,8 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { refreshStaffAuthSession } from "@/lib/supabase/proxy";
+import { productionCapabilityEnabled } from "@/lib/server/production-gates";
 
 export function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (process.env.NODE_ENV === "production" && (
+    path.startsWith("/api/internal/compatibility/") || path === "/api/internal/cron-probe"
+    || path.startsWith("/api/internal/staff-auth/") || path === "/internal/staff-auth"
+    || (!productionCapabilityEnabled("STAFF") && (path === "/staff" || path.startsWith("/staff/") || path.startsWith("/api/staff/")))
+  )) return new NextResponse(null, { status: 404, headers: { "Cache-Control": "private, no-store, max-age=0" } });
   if (request.nextUrl.pathname === "/join") {
     const nonce = btoa(crypto.randomUUID());
     const csp = ["default-src 'self'", `script-src 'self' 'nonce-${nonce}' https://challenges.cloudflare.com`,
@@ -25,5 +32,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/join", "/staff/:path*", "/api/internal/staff-auth/:path*", "/internal/staff-auth/:path*"],
+  matcher: ["/join", "/staff/:path*", "/api/staff/:path*", "/api/internal/compatibility/:path*", "/api/internal/cron-probe", "/api/internal/staff-auth/:path*", "/internal/staff-auth/:path*"],
 };

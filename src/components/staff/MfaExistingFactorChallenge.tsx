@@ -12,7 +12,9 @@ function browserClient() {
   const url = publicEnvironment.supabaseUrl;
   const publishableKey = publicEnvironment.supabasePublishableKey;
   if (!url || !publishableKey) throw new Error("Authentication unavailable.");
-  return createBrowserClient(url, publishableKey);
+  return createBrowserClient(url, publishableKey, {
+    cookieOptions: { secure: process.env.NODE_ENV === "production", sameSite: "lax" },
+  });
 }
 
 export function MfaExistingFactorChallenge() {

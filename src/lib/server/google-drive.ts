@@ -1,4 +1,5 @@
 import "server-only";
+import { productionCapabilityEnabled } from "./production-gates.ts";
 
 import { fileUnavailable, MAX_CV_BYTES, readBoundedStream, sha256 } from "./candidate-file-policy.ts";
 
@@ -29,17 +30,19 @@ function required(name: string) { const value = process.env[name]?.trim(); if (!
 type DriveFile = { id: string; name: string; mimeType: string; size?: string; sha256Checksum?: string; parents?: string[]; trashed: boolean; revisionTag?: string | null };
 
 export function googleStorageConfigured() {
-  return ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_DRIVE_ROOT_ID"].every((name) => !!process.env[name]?.trim());
+  return productionCapabilityEnabled("DRIVE") && ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_DRIVE_ROOT_ID"].every((name) => !!process.env[name]?.trim());
 }
 
 // No browser credential, Drive URL, fetch injection or fake provider selection.
 export function googleDriveStorage(signal?: AbortSignal): WorkerStorage {
+  if (!productionCapabilityEnabled("DRIVE")) fileUnavailable();
   const root = id(required("GOOGLE_DRIVE_ROOT_ID"));
   const clientId = required("GOOGLE_CLIENT_ID");
   const clientSecret = required("GOOGLE_CLIENT_SECRET");
   const refreshToken = required("GOOGLE_REFRESH_TOKEN");
   let token: string | undefined;
   async function request(url: string, init: RequestInit = {}) {
+    if (!productionCapabilityEnabled("DRIVE")) fileUnavailable();
     if (!token) {
       const response = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST", redirect: "error", signal: AbortSignal.any([AbortSignal.timeout(10_000), ...(signal ? [signal] : [])]),

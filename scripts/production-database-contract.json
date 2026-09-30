@@ -1,0 +1,38 @@
+{
+  "relations": {
+    "rows": 28,
+    "sha256": "647e9ec689da8e06cfbf7a6ea801bce16405aeda4a507403d8b60f02984f30c2"
+  },
+  "columns": {
+    "rows": 280,
+    "sha256": "dcdc9c90bc6d185f85b875f78ea3d5d7fbabc0716f890507b4a1ac9290132d4f"
+  },
+  "constraints": {
+    "rows": 105,
+    "sha256": "f04a4b577cc53c442d13035fc1e92adb82ef331c93280c3e3788f905b41d1da2"
+  },
+  "indexes": {
+    "rows": 74,
+    "sha256": "1195eea95b09bd4d1e101269bf52bf998896b98d56c296df3aec8fd9ec667b63"
+  },
+  "policies": {
+    "rows": 80,
+    "sha256": "e4689fd843e6c12c17e9fe725d6ff2c57953b3025f8b5befdf7865c9344eecba"
+  },
+  "functions": {
+    "rows": 22,
+    "sha256": "80a2ec720c0c4e778ea5c0b9f479354f4dfc48a204a61da1b41e5d3cf975a5e4"
+  },
+  "triggers": {
+    "rows": 29,
+    "sha256": "011710ab794060240c876f2c6401e72b56f68b83382a24777457422002e1268f"
+  },
+  "enums": {
+    "rows": 84,
+    "sha256": "cafa41125819faf48ffc1220a82b866adade119767131b947bd7885281464b9e"
+  },
+  "privileges": {
+    "rows": 4,
+    "sha256": "548021854be942542ea857b7f6011b9ad74b0ddb059250c60192a98ab364c72f"
+  }
+}

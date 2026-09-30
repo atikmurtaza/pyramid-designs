@@ -1,4 +1,5 @@
 import "server-only";
+import { productionCapabilityEnabled } from "./production-gates.ts";
 
 import { createHash, randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
@@ -237,6 +238,7 @@ function classify(error: unknown): JobFailure {
 
 export async function runBackgroundWorker(dependencies: { run?: RunTransaction; storage?: (signal: AbortSignal) => WorkerStorage;
   email?: EmailAdapter } = {}) {
+  if (!productionCapabilityEnabled("WORKER")) throw new Error("Background worker unavailable.");
   const rawRun = dependencies.run ?? workerTransaction;
   const started = performance.now();
   const invocationId = randomUUID();

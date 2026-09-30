@@ -1,4 +1,5 @@
 import "server-only";
+import { productionCapabilityEnabled } from "./production-gates.ts";
 
 import { createHmac } from "node:crypto";
 import { renderNotification, validNotificationRecipient, unavailableEmailAdapter,
@@ -14,6 +15,7 @@ const receiptPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]
 function configuration() {
   const e = process.env;
   if (!["production", "development", "test"].includes(e.NODE_ENV ?? "")
+    || !productionCapabilityEnabled("EMAIL")
     || e.EMAIL_PROVIDER !== "resend" || e.EMAIL_FROM_ADDRESS !== sender
     || e.EMAIL_FROM_NAME !== "Pyramid Designs" || e.EMAIL_REPLY_TO_MODE !== "fixed"
     || e.EMAIL_REPLY_TO_ADDRESS !== replyTo || !e.RESEND_API_KEY

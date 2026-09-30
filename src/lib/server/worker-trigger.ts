@@ -2,11 +2,13 @@ import "server-only";
 import { hasBearerSecret } from "./compatibility.ts";
 import { serverEnvironment } from "./environment.ts";
 import { runBackgroundWorker } from "./background-worker.ts";
+import { productionCapabilityEnabled } from "./production-gates.ts";
 
 export async function handleWorkerTrigger(request: Request, run = runBackgroundWorker) {
   const response = (body: object, status = 200) => Response.json(body, { status,
     headers: { "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
   if (request.method !== "POST") return response({ ok: false, code: "METHOD_NOT_ALLOWED" }, 405);
+  if (!productionCapabilityEnabled("WORKER")) return response({ ok: false, code: "WORKER_UNAVAILABLE" }, 404);
   let secret: string;
   try { secret = serverEnvironment.cronSecret(); }
   catch { return response({ ok: false, code: "WORKER_UNAVAILABLE" }, 503); }

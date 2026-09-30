@@ -31,7 +31,9 @@ function databaseUrl() {
   const value = process.env.DATABASE_URL?.trim();
   if (!value) throw new Error("DATABASE_URL is required.");
 
-  const protocol = new URL(value).protocol;
+  let protocol: string;
+  try { protocol = new URL(value).protocol; }
+  catch { throw new Error("DATABASE_URL must be a PostgreSQL URL."); }
   if (protocol !== "postgres:" && protocol !== "postgresql:") {
     throw new Error("DATABASE_URL must be a PostgreSQL URL.");
   }

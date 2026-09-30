@@ -2,6 +2,8 @@
 
 **Current provider decision, 2026-09-30:** [ADR 0017](decisions/0017-neon-application-database-supabase-auth.md) and [Phase A](../implementation/phase-a-release-decisions.md) select Neon for application PostgreSQL and retain Supabase Auth. Hostinger → server-only `pg` → Neon; Prisma remains schema/migration tooling only. Historical provider sections below describe their original baseline. [B1-R1](../implementation/phase-b1-neon-production-database.md#b1-r1-closure) establishes the authorized restricted-runtime permission migration, verified on disposable PostgreSQL. Live Neon/Hostinger acceptance, production migration and deployment remain unperformed and owner-gated.
 
+**B4A repository foundation, 2026-09-30:** [ADR 0018](decisions/0018-closed-deployment-and-capability-activation.md) separates deployment from capability activation. Staff/worker/email/Drive default closed in production; intake and retention remain code-closed. Minimal liveness/authenticated DB connectivity, read-only catalog/history checks, the [environment contract](../operations/production-environment.md) and [release/rollback runbook](../operations/production-release.md) are current. Temporary compatibility diagnostics return 404 in production; table cleanup requires a later reviewed forward migration. Live provider/host/backup/Auth/scheduler acceptance and B3 disclosure remain gates.
+
 **Phase 0F status:** Accepted architecture baseline through Phase 0F, 2026-08-27. Provider-neutral sections are retained; the provider-specific revision and ADRs 0009-0013 are authoritative where they differ.
 
 **Historical Phase 0C status:** Proposed on 2026-08-27; superseded by the Phase 0F accepted status above.

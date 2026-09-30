@@ -27,6 +27,7 @@ function authorize(request: Request) {
 }
 
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === "production") return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
   const authorized = authorize(request);
   if (authorized === null) {
     return compatibilityJson({ ok: false, code: "PROBE_NOT_CONFIGURED" }, 503);
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === "production") return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
   const authorized = authorize(request);
   if (authorized === null) {
     return compatibilityJson({ ok: false, code: "PROBE_NOT_CONFIGURED" }, 503);

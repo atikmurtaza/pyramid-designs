@@ -31,7 +31,9 @@ try {
     ["RESEND_API_KEY", "re_invalid\r\nvalue"], ["NODE_ENV", "unknown"]]) {
     const old = process.env[name]; process.env[name] = value; check(emailReadiness(), "EMAIL_CONFIGURATION_UNAVAILABLE"); process.env[name] = old;
   }
-  process.env.NODE_ENV = "production"; check(emailReadiness(), "EMAIL_PROVIDER_CONFIGURED"); process.env.NODE_ENV = "test";
+  process.env.NODE_ENV = "production"; check(emailReadiness(), "EMAIL_CONFIGURATION_UNAVAILABLE");
+  process.env.PRODUCTION_EMAIL_ENABLED = "true"; check(emailReadiness(), "EMAIL_PROVIDER_CONFIGURED");
+  delete process.env.PRODUCTION_EMAIL_ENABLED; process.env.NODE_ENV = "test";
   const adapter = configuredEmailAdapter();
   inspect = (url, init) => {
     check(url, "https://api.resend.com/emails"); check(init.method, "POST"); check(init.redirect, "error");

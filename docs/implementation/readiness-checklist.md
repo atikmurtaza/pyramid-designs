@@ -3,6 +3,8 @@
 **Status:** Phase 0F approved checklist. Future work remains unchecked.
 **Rule:** Completing a section does not authorize the next phase, production deployment, DNS change or real candidate intake without the relevant owner/reviewer gate.
 
+**Current B4A infrastructure foundation:** [B4A status and owner actions](phase-b4a-production-infrastructure-readiness.md) and [current release runbook](../operations/production-release.md) supersede historical provider/operation assumptions. Repository preparation/local synthetic recovery does not establish live Neon, Auth, Hostinger/proxy/scheduler, backup/provider or activation readiness. B3 remains upstream-disclosure blocked; production intake/retention stay code-closed.
+
 ## Before Phase 1
 
 - [x] Phase 0A repository/asset audit completed.

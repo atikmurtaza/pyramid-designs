@@ -7,9 +7,11 @@ export async function refreshStaffAuthSession(request: NextRequest) {
   const url = publicEnvironment.supabaseUrl;
   const publishableKey = publicEnvironment.supabasePublishableKey;
   if (!url || !publishableKey) return protectStaffResponse(request, NextResponse.next({ request }));
+  if (process.env.NODE_ENV === "production" && new URL(url).protocol !== "https:") return protectStaffResponse(request, NextResponse.next({ request }));
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, publishableKey, {
+    cookieOptions: { secure: process.env.NODE_ENV === "production", sameSite: "lax" },
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet) => {
