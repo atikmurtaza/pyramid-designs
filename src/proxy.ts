@@ -1,8 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { refreshStaffAuthSession } from "@/lib/supabase/proxy";
+import { maintenanceBlocksRequest } from "@/lib/server/database-maintenance";
 
 export function proxy(request: NextRequest) {
+  if (maintenanceBlocksRequest(request.method, request.nextUrl.pathname)) {
+    return NextResponse.json({ ok: false, code: "DATABASE_MAINTENANCE" }, {
+      status: 503,
+      headers: { "Cache-Control": "private, no-store, max-age=0", "Retry-After": "60" },
+    });
+  }
   if (request.nextUrl.pathname === "/join") {
     const nonce = btoa(crypto.randomUUID());
     const csp = ["default-src 'self'", `script-src 'self' 'nonce-${nonce}' https://challenges.cloudflare.com`,
@@ -21,9 +28,12 @@ export function proxy(request: NextRequest) {
     response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     return response;
   }
-  return refreshStaffAuthSession(request);
+  if (/^\/(?:staff|api\/internal\/staff-auth|internal\/staff-auth)(?:\/|$)/.test(request.nextUrl.pathname)) {
+    return refreshStaffAuthSession(request);
+  }
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/join", "/staff/:path*", "/api/internal/staff-auth/:path*", "/internal/staff-auth/:path*"],
+  matcher: ["/:path*"],
 };

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
+import { databaseMaintenanceEnabled, DatabaseMaintenanceError, requireDatabaseWritesEnabled } from "./database-maintenance.ts";
 
 const POOL_OPTIONS = Object.freeze({
   max: 3,
@@ -41,8 +42,10 @@ function databaseUrl() {
 
 function createExecutor(queryable: Pool | PoolClient): DatabaseExecutor {
   return {
-    query: <Row extends QueryResultRow>(text: string, values: unknown[] = []) =>
-      queryable.query<Row>(text, values),
+    query: <Row extends QueryResultRow>(text: string, values: unknown[] = []) => {
+      requireDatabaseWritesEnabled();
+      return queryable.query<Row>(text, values);
+    },
   };
 }
 
@@ -58,16 +61,30 @@ function getPool() {
   return pool;
 }
 
-export function query<Row extends QueryResultRow = QueryResultRow>(
+export async function query<Row extends QueryResultRow = QueryResultRow>(
   text: string,
   values: unknown[] = [],
 ) {
-  return getPool().query<Row>(text, values);
+  if (!databaseMaintenanceEnabled()) return getPool().query<Row>(text, values);
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN READ ONLY");
+    // Fix the read-only snapshot before caller SQL; extended protocol accepts one statement.
+    await client.query("SELECT oid FROM pg_catalog.pg_class LIMIT 1");
+    const statement = { text, values, queryMode: "extended" };
+    return await client.query<Row>(statement);
+  } catch {
+    throw new DatabaseMaintenanceError();
+  } finally {
+    try { await client.query("ROLLBACK"); }
+    finally { client.release(true); }
+  }
 }
 
 export async function transaction<T>(
   work: (database: DatabaseExecutor) => Promise<T>,
 ) {
+  requireDatabaseWritesEnabled();
   let client: PoolClient | undefined;
 
   try {
