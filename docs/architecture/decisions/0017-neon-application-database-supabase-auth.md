@@ -1,5 +1,7 @@
 # ADR 0017: Neon application PostgreSQL with retained Supabase Auth
 
+**SUPERSEDED: ABANDONED BY OWNER ARCHITECTURE DECISION — 2026-10-01.** [ADR 0019](0019-supabase-production-database-rebaseline.md) restores Supabase PostgreSQL. This ADR is historical evidence and introduces no active Neon requirement.
+
 **Status:** Accepted provider and restricted-runtime architecture; B1-R1 permission migration authorized and verified offline. Live provisioning/acceptance remains owner-gated.
 
 **Date:** 2026-09-30.

@@ -3,7 +3,7 @@
 **Status:** Phase 0F approved checklist. Future work remains unchecked.
 **Rule:** Completing a section does not authorize the next phase, production deployment, DNS change or real candidate intake without the relevant owner/reviewer gate.
 
-**Current B4A infrastructure foundation:** [B4A status and owner actions](phase-b4a-production-infrastructure-readiness.md) and [current release runbook](../operations/production-release.md) supersede historical provider/operation assumptions. Repository preparation/local synthetic recovery does not establish live Neon, Auth, Hostinger/proxy/scheduler, backup/provider or activation readiness. B3 remains upstream-disclosure blocked; production intake/retention stay code-closed.
+**Current S1 provider re-baseline, 2026-10-01:** [ADR 0019](../architecture/decisions/0019-supabase-production-database-rebaseline.md), [S1 status/roadmap](phase-b4b1-s1-supabase-rebaseline.md) and the [current release runbook](../operations/production-release.md) supersede historical provider assumptions. Supabase PostgreSQL and Auth are authoritative. No Neon project, branch, API key, support response, rehearsal, migration, recovery or P3/P4 gate is required. B3 remains UPSTREAM DISCLOSURE BLOCKED; production intake/retention stay closed. Historical checklist entries below are not automatic authorization or current live acceptance.
 
 ## Before Phase 1
 

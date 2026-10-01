@@ -1,5 +1,7 @@
 # Pyramid Designs Website Plan
 
+**Current production architecture, 2026-10-01:** [ADR 0019](docs/architecture/decisions/0019-supabase-production-database-rebaseline.md) is authoritative: existing Supabase PostgreSQL + Auth, Hostinger managed Next.js/server-only pg, private Google Drive, Resend and Turnstile. Preserve controlled schema migrations. Supabase-to-Neon migration is abandoned; original planning/status statements below remain historical.
+
 **Phase 0F architecture note (2026-08-27):** This remains a planning document and implementation has not started. Provider recommendations in the original plan are historical where superseded by ADRs 0009-0013 and `docs/discovery/phase-0-final-gate.md`. The current baseline is existing qualifying Hostinger managed Next.js/Node.js hosting; Supabase Free PostgreSQL and Supabase Auth in Mumbai; private candidate PDFs in a dedicated company-controlled Google Drive account; PostgreSQL-backed jobs; business-mail SMTP; and free external uptime checking, targeting £0 incremental recurring infrastructure cost.
 
 Status: Planning only. No implementation, deployment, production configuration, or publishing is included in this phase.

@@ -1,6 +1,6 @@
 # Production environment contract
 
-Phase B4A, 2026-09-30. Authoritative inventory based on current source. Historical phase examples remain historical. No private environment file or secret value was inspected/copied. [.env.example](../../.env.example) has blank placeholders, public sender identities and false gates only.
+Phase B4B1-S1, 2026-10-01; [ADR 0019](../architecture/decisions/0019-supabase-production-database-rebaseline.md). Authoritative inventory based on current source. Historical phase examples remain historical. S1 inspected only configuration names/provider/project/mode projections; no secret values were printed or copied into evidence. [.env.example](../../.env.example) has blank placeholders, public sender identities and false gates only.
 
 Classes: **A** public build time; **B** private runtime; **C** operator/migration only; **D** worker/scheduler only (the web handler also consumes its bearer); **E** optional development/test; **F** obsolete/remove.
 
@@ -10,8 +10,8 @@ Classes: **A** public build time; **B** private runtime; **C** operator/migratio
 | --- | --- | --- | --- | --- | --- |
 | NEXT_PUBLIC_SUPABASE_URL | A; public | env/public + Supabase server/browser Auth URL | Build/runtime; required before staff | Rebuild; reverify issuer/sessions | Supabase production Auth project |
 | NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | A; public | env/public + Supabase publishable Auth key | Build/runtime; required before staff | Rebuild and verify browser/server together | Same Supabase project |
-| DATABASE_URL | B; secret | database pool, public content/staff/worker/readiness | Runtime; required for DB-backed rehearsal; Neon pooled restricted login | Verify new login, restart pools, drain/revoke old | Neon owner target + secret manager |
-| DIRECT_URL | C; secret | Prisma directUrl, operator readiness | Operator only; direct endpoint; absent from web/build/scheduler | Verify new operator/target separately | Neon operator + secret manager |
+| DATABASE_URL | B; secret | database pool, public content/staff/worker/readiness | Runtime; required for DB-backed rehearsal; Supabase restricted login, session 5432 or verified direct | Verify new login, restart pools, drain/revoke old | Existing Supabase project + secret manager |
+| DIRECT_URL | C; secret | Prisma directUrl, operator readiness | Operator only; direct or session 5432; absent from web/build/scheduler | Verify new operator/target separately | Supabase operator + secret manager |
 | CRON_SECRET | D; secret | worker bearer and authenticated readiness | Runtime + protected scheduler header; >=32 random chars; required for worker/ready | Coordinate web, monitor and scheduler; reject old bearer | Company secret manager |
 | PRODUCTION_STAFF_ENABLED | B; internal gate | proxy + server Auth config | Runtime; closed by default; only exact true after acceptance | Owner activation/closure, restart, route/action smoke | Approved release manifest; false in B4 |
 | PRODUCTION_WORKER_ENABLED | D; internal gate | worker trigger + direct worker entry | Runtime; closed by default; exact true only after operational acceptance | Quiesce, drain bounded invocation/lease, inspect backlog | Approved release manifest; false in B4 |
@@ -33,6 +33,7 @@ Classes: **A** public build time; **B** private runtime; **C** operator/migratio
 | TURNSTILE_SITE_KEY | B; public identifier, server-selected | challenge to approved widget client | Runtime; later challenge acceptance only; no NEXT_PUBLIC alias | Coordinate widget/secret/CSP | Same Cloudflare widget |
 | PUBLIC_INTAKE_MODE | E; test config | synthetic intake/publication predicates | Optional synthetic, loopback development/test; omit production | No production activation semantics | Disposable harness |
 | COMPATIBILITY_PROBE_SECRET | E; test secret | temporary compatibility endpoints | Optional development; remove from production | Production returns 404 even with a value | Local synthetic environment |
+| NODE_EXTRA_CA_CERTS | B/C; CA file path, not a credential | Node TLS trust for provider-authenticated Supabase CA | Set before Node starts when platform trust needs it; available after redeploy; never disable verification | Verify certificate source/fingerprint/expiry; restart | Supabase dashboard certificate and controlled host file |
 | NODE_ENV | B; platform config | Next, adapters, gates, retention | Must be production on managed start; tests use test/development | Never override mode to enable synthetic intake | Hostinger/Next process environment |
 | PORT | B; platform config | installed Next start CLI | Platform-supplied listener; not a custom application secret | Verify private listener/proxy mapping | Hostinger managed Web App |
 
@@ -46,7 +47,7 @@ All following E values belong only to explicitly selected local/operator tooling
 | --- | --- | --- |
 | B1_DISPOSABLE_ADMIN_URL | E; local secret | B1 disposable admin harness; loopback only |
 | B1_EVIDENCE_DIRECTORY | E; local path | B1 external evidence |
-| B1_TEST_OWNER_URL | E; rehearsal secret | restricted B1/B2 setup/fault injection; remote only through B4B1-P3 authenticated disposable guard |
+| B1_TEST_OWNER_URL | E; rehearsal secret | restricted B1/B2 setup/fault injection on synthetic local fixtures; no production use |
 | B1_TEST_PUBLIC_ROLE | E; local role name | browser-role negative checks |
 | B2_DISPOSABLE_ADMIN_URL | E; local secret | B2 harness; loopback PostgreSQL 17:55442 |
 | B2_EVIDENCE_DIRECTORY | E; local path | B2/browser external evidence |
@@ -59,30 +60,28 @@ All following E values belong only to explicitly selected local/operator tooling
 | PHASE2IE_PLAYWRIGHT_MODULE | E; local path | historical browser installed tool |
 | PHASE2IC2B_LIVE_RECIPIENT | E; private contact if real | isolated live CLI only; forbidden in B4, not a production override |
 | COMPATIBILITY_BASE_URL | E; test origin | historical probe CLI target; never invoked in B4 |
-| P3_PROJECT_ID | E; operator target identifier | B4B1-P3 only; exactly withered-feather-01662312 |
-| P3_BRANCH_ID | E; disposable identifier | real schema-only branch creation receipt; production/historical IDs hard denied |
-| P3_RUN_ID | E; execution UUID | bind same-run creation/cleanup receipts; generate only after P3B approval |
-| P3_REHEARSAL_AUTHORIZATION | E; explicit operator gate | exact AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY; owner approval of reviewed manifest required first |
-| P3_NEON_API_KEY | E; secret | canonical project-bound P3 provider boundary; metadata and separately approved manifest branch lifecycle; never forwarded to Prisma or persisted |
-| P3_LEDGER_PATH | E; external path | secret-free same-run resource creation receipt projections; no credential material |
-| P3_EVIDENCE_DIRECTORY | E; external path | fixed JSON status/count projections; raw child/provider/SQL output discarded |
-| P3_B1_OPERATOR_URL | E; secret | exact B1 direct restricted rehearsal owner; ephemeral environment only |
-| P3_B2_OPERATOR_URL | E; secret | exact B2 direct restricted rehearsal owner; ephemeral environment only |
-| P3_B1_RUNTIME_URL | E; secret | exact B1 pooled restricted rehearsal runtime; verify-full |
-| P3_B2_RUNTIME_URL | E; secret | exact B2 pooled restricted rehearsal runtime; verify-full |
-| P3_B1_PUBLIC_ROLE | E; generated role name | exact same-run b1_public_ plus 12 hex digits; B1 negative principal |
-| P3_B2_PUBLIC_ROLE | E; generated role name | distinct exact same-run generated B2 negative principal |
-| P3_LOCAL_ADMIN_URL | E; local synthetic secret | offline harness catalog checks only; loopback 127.0.0.1:55442/postgres; dedicated disposable PostgreSQL 17 |
-| NODE_TLS_REJECT_UNAUTHORIZED | E; unsafe platform override | P3 provider/lifecycle refuses value 0; never disable certificate verification |
+| P3_PROJECT_ID | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_BRANCH_ID | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_RUN_ID | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_REHEARSAL_AUTHORIZATION | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_NEON_API_KEY | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_LEDGER_PATH | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_EVIDENCE_DIRECTORY | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B1_OPERATOR_URL | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B2_OPERATOR_URL | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B1_RUNTIME_URL | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B2_RUNTIME_URL | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B1_PUBLIC_ROLE | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_B2_PUBLIC_ROLE | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| P3_LOCAL_ADMIN_URL | F; retired historical tooling only | No production, deployment, readiness or recovery requirement; see historical B4B1 record |
+| NODE_TLS_REJECT_UNAUTHORIZED | F; unsafe platform override | Never disable certificate verification; Supabase readiness rejects value 0 |
 | SUPABASE_SERVICE_ROLE_KEY | F; secret | No current app consumer; remove/do not provision; owner revokes if historically exposed |
 | SUPABASE_SECRET_KEY | F; secret | No current app consumer; remove/do not provision; same revocation treatment |
 
 Private values enter protected provider environment storage or operator secret management, never Git, shell arguments/history, browser configuration, public aliases, chat, screenshots or logs. Build runs do not load production database/provider credentials. DIRECT_URL is absent from deploy builds and runtime. Changes to A keys require rebuild; private adapters read B values at runtime.
 
-P3 variables are never Hostinger/application/build/scheduler configuration. The P3 harness refuses private environment files and ambient PG*/NODE_OPTIONS overrides. It derives DATABASE_URL/B1_TEST_OWNER_URL for the explicitly gated verifier subprocess only; DIRECT_URL stays blank there. Native Prisma deploy receives only the corresponding direct rehearsal operator URL through its environment, without API/runtime/bootstrap credentials. No bootstrap credential variable is added. P3A does not execute provisioning or remote migration; the canonical [B4B1-P3A record](../implementation/phase-b4b1-neon-live-acceptance.md#b4b1-p3a-disposable-neon-harness-and-mutation-preflight) defines owner-gated P3B use.
+**Neon retirement:** ABANDONED BY OWNER ARCHITECTURE DECISION — 2026-10-01. All P3 variables above are listed only so retained historical tools remain inventoried; do not provision or execute them for production. P3_NEON_API_KEY is not an application requirement. Historical provider/lifecycle instructions remain in the [B4B1 evidence record](../implementation/phase-b4b1-neon-live-acceptance.md), not this production procedure.
 
-H2 adds `scripts/run-phase-b4b1-neon-lifecycle.mjs`. Its `--dry-run` is offline. Future `--execute-rehearsal` requires separate R2 programme approval plus the existing manifest authorization, exact P3_PROJECT_ID, ephemeral P3_NEON_API_KEY and external P3_EVIDENCE_DIRECTORY. Run under Node 22 with `--conditions=react-server --experimental-strip-types`, from the reviewed clean B4 worktree. The lifecycle generates its own execution UUID, exclusive evidence subdirectory, branch receipt, SQL credentials and public-role identities; these are not caller-selected resume inputs. It invokes the existing runner stages and the single canonical provider boundary. No ad-hoc provider helper is required. H2 does not execute this command or authorize R2.
-
-Creation and deletion are attempted at most once per session. Ambiguous outcomes are observed through read-only metadata; no search result grants cleanup authority and no observation re-enables mutation. Only the authentic in-memory receipt from the same successful creation can authorize exact-ID deletion after fresh identity checks and connection/evidence closure. A saved ledger is evidence, not a transferable delete capability. Process loss or an unreceipted creation requires owner reconciliation; do not reconstruct authority from names or a previous UUID. Optional expiration is skipped because Early Access availability is unproven. The copied schema-only `pyramid_design` database is used solely for already-approved disposable bootstrap catalog/provisioning work; production and copied application relations are never rehearsal targets.
+Supabase uses PostgreSQL roles for server access and its public URL/key for Auth. Do not copy the primary checkout's currently Neon-based DATABASE_URL/DIRECT_URL into Hostinger. Do not overwrite the existing live deployment or private environment files in S1. The rollback configuration is identification evidence, not an accepted least-privilege runtime credential. Retain the current Auth project; no service-role credential is required. The existing Prisma configuration requires DIRECT_URL for migrate commands, even when the operator uses session mode.
 
 CRON_SECRET requires a protected scheduler Authorization header mechanism with output redaction. If the platform exposes it in commands/URLs/job output, scheduling is NOT READY. Rotation affects worker and readiness monitors together. Gates select operations; they are not proof of release approval or B3 closure.

@@ -1,5 +1,7 @@
 # Phase B1 — Neon production database architecture and permission review
 
+**ABANDONED BY OWNER ARCHITECTURE DECISION — 2026-10-01:** The Supabase-to-Neon programme and its provider/support/rehearsal/P3/P4 gates are retired. Supabase PostgreSQL is the production application database; Supabase Auth remains. This record is historical evidence. Portable security controls remain applicable subject to the current [S1 re-baseline](phase-b4b1-s1-supabase-rebaseline.md) and ADR 0019.
+
 **Date:** 2026-09-30. **Current result: B1-R1 LOCAL ARCHITECTURE CLOSURE PASS.** The owner explicitly authorized migration 10 and conditional commit/push. See [B1-R1 closure](#b1-r1-closure) below for the final permission model, verification and production gates. Live Neon compatibility remains OWNER CONFIG REQUIRED; production migration/deployment and B2 have not started.
 
 **Original assessment result: B1 MIGRATION REVIEW REQUIRED.** The following original assessment is retained as history. At that gate B1 was incomplete and could not be committed/pushed; no tenth migration had been created. Its blocked-state statements and nine-migration tests describe that earlier assessment, superseded only by the authorized R1 evidence below.

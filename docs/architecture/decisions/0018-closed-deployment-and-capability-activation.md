@@ -2,7 +2,7 @@
 
 **Status:** Accepted for the B4A repository foundation, 2026-09-30. Actual deployment/activation still requires separate owner approval.
 
-Hostinger/Neon/Supabase Auth/private Drive/Resend/Turnstile architecture remains ADR 0009/0017 and earlier approved boundaries. A deployment does not activate staff access, worker admission, email or Drive traffic. Server-only exact-true production switches default closed; staff proxy and authoritative server Auth, direct/HTTP worker, email configuration/send and every Drive transport enforce them. Real candidate intake and production retention remain code-closed with no environment activation flag.
+Hostinger/Supabase PostgreSQL/Supabase Auth/private Drive/Resend/Turnstile architecture follows ADR 0019 (2026-10-01) and earlier approved boundaries. A deployment does not activate staff access, worker admission, email or Drive traffic. Server-only exact-true production switches default closed; staff proxy and authoritative server Auth, direct/HTTP worker, email configuration/send and every Drive transport enforce them. Real candidate intake and production retention remain code-closed with no environment activation flag.
 
 Public liveness is a minimal uncached boolean; authenticated bounded readiness checks only DB connectivity. Detailed catalog/history/permission checks stay operator CLI read-only. Temporary compatibility diagnostics are production-denied; later table cleanup uses a separately reviewed forward migration.
 

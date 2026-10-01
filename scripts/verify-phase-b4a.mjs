@@ -70,14 +70,20 @@ try {
   assert.throws(()=>query("SELECT 1"),error=>error.message==="DATABASE_URL must be a PostgreSQL URL.");checks++;
   process.env.DATABASE_URL=saved;
   for(const mode of ["runtime","operator"]){
-    const endpoint="ep-synthetic-example",base=mode==="runtime" ? endpoint+"-pooler":endpoint;
-    check(!!validateTarget("postgresql://synthetic@"+base+".eu-west-2.aws.neon.tech/app?sslmode=verify-full",mode,false,endpoint));
-    for(const value of [
-      "postgresql://synthetic@db.supabase.co/app?sslmode=verify-full",
-      "postgresql://synthetic@"+base+".neon.tech/app?sslmode=require",
-      "postgresql://synthetic@"+base+".neon.tech/app?sslmode=verify-full&options=anything",
-      "postgresql://synthetic@ep-other.neon.tech/app?sslmode=verify-full"]){
-      assert.throws(()=>validateTarget(value,mode,false,endpoint));checks++;
+    const project="abcdefghijklmnopqrst";
+    for (const host of [`db.${project}.supabase.co`,"aws-0-eu-west-2.pooler.supabase.com"]) {
+      const user=host.startsWith("db.") ? "synthetic" : `synthetic.${project}`;
+      const base=`postgresql://${user}@${host}:5432/postgres?sslmode=verify-full`;
+      check(!!validateTarget(base,mode,false,project,host));
+      for(const value of [
+        base.replace(host,"ep-synthetic.neon.tech"),
+        base.replace("verify-full","require"),
+        base+"&options=anything",base+"&sslmode=require",base+"#ignored",
+        base.replace(":5432/",":6543/"),base.replace("/postgres?","/other?"),
+        base.replace(user,`${user}.wrong`),base.replace(host,host+".evil.invalid")]) {
+        assert.throws(()=>validateTarget(value,mode,false,project,host));checks++;
+      }
+      assert.throws(()=>validateTarget(base,mode,false,"zyxwvutsrqponmlkjihg",host));checks++;
     }
   }
   for(const file of readdirSync("src/app/api/internal/compatibility")){

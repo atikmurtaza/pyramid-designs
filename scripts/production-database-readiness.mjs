@@ -78,7 +78,11 @@ export async function inspectDatabase(connectionString, mode, expected) {
     const version = Number((await client.query("SHOW server_version_num")).rows[0].server_version_num);
     assert(version >= 170000 && version < 180000, "PostgreSQL 17 acceptance required");
     const identity = (await client.query("SELECT current_user,session_user,current_database() AS database")).rows[0];
-    assert.equal(identity.current_user, decodeURIComponent(new URL(connectionString).username));
+    const connection = new URL(connectionString);
+    // Supavisor authenticates role.project-ref but PostgreSQL reports only role.
+    const loginName = decodeURIComponent(connection.username);
+    assert.equal(identity.current_user, connection.hostname.endsWith(".pooler.supabase.com")
+      ? loginName.slice(0, loginName.lastIndexOf(".")) : loginName);
     assert.equal(identity.session_user, identity.current_user);
     const login = (await client.query("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname=current_user")).rows[0];
     if (mode === "runtime") {
@@ -155,20 +159,30 @@ export async function inspectDatabase(connectionString, mode, expected) {
   } finally { await client.end().catch(()=>{}); }
 }
 
-export function validateTarget(value,mode,local,endpoint) {
+export function validateTarget(value,mode,local,project,host) {
   const url = new URL(value);
+  assert(["runtime","operator"].includes(mode));
   assert(["postgres:","postgresql:"].includes(url.protocol));
+  assert(!url.hash);
   if (local) {
     assert(["127.0.0.1","localhost"].includes(url.hostname));
     assert.equal(url.port,"55442");
     assert(/^\/phase2ib_b1r1_b[24]_[a-z0-9_]+$/.test(url.pathname));
   } else {
-    assert(/^ep-[a-z0-9-]+$/.test(endpoint ?? ""));
-    assert(url.hostname.endsWith(".neon.tech"));
-    assert.equal(url.hostname.split(".")[0],endpoint+(mode==="runtime" ? "-pooler" : ""));
+    assert(/^[a-z]{20}$/.test(project ?? ""));
+    assert.equal(url.hostname,host,"Independently approved Supabase host required");
+    if (host === `db.${project}.supabase.co`) {
+      assert(/^[a-z][a-z0-9_]*$/.test(decodeURIComponent(url.username)));
+    } else {
+      assert(/^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$/.test(host ?? ""));
+      assert(new RegExp(`^[a-z][a-z0-9_]*\\.${project}$`).test(decodeURIComponent(url.username)));
+    }
+    assert.equal(url.pathname,"/postgres");
     assert.equal(url.searchParams.get("sslmode"),"verify-full");
-    assert([...url.searchParams.keys()].every(k=>["sslmode","channel_binding"].includes(k)));
+    assert.equal(url.searchParams.getAll("sslmode").length,1);
+    assert([...url.searchParams.keys()].every(k=>k==="sslmode"));
     assert(["","5432"].includes(url.port));
+    assert.notEqual(process.env.NODE_TLS_REJECT_UNAUTHORIZED,"0");
   }
   assert(url.username && url.pathname.length>1);
   return url.href;
@@ -178,10 +192,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   try {
     const args=process.argv.slice(2),mode=args.includes("--operator") ? "operator" : "runtime";
     assert(args.includes("--runtime") !== args.includes("--operator"));
-    assert(args.includes("--local") !== args.includes("--neon-read-only"));
-    const endpoint=args.find(a=>a.startsWith("--expected-endpoint="))?.split("=")[1];
-    assert(args.every(a=>["--operator","--runtime","--local","--neon-read-only"].includes(a) || a.startsWith("--expected-endpoint=")));
-    const target=validateTarget(process.env[mode==="runtime" ? "DATABASE_URL" : "DIRECT_URL"],mode,args.includes("--local"),endpoint);
+    assert(args.includes("--local") !== args.includes("--supabase-read-only"));
+    const project=args.find(a=>a.startsWith("--expected-project="))?.split("=")[1];
+    const host=args.find(a=>a.startsWith("--expected-host="))?.split("=")[1];
+    assert(args.every(a=>["--operator","--runtime","--local","--supabase-read-only"].includes(a) || a.startsWith("--expected-project=") || a.startsWith("--expected-host=")));
+    const target=validateTarget(process.env[mode==="runtime" ? "DATABASE_URL" : "DIRECT_URL"],mode,args.includes("--local"),project,host);
     const expected=JSON.parse(await readFile("scripts/production-database-contract.json","utf8"));
     console.log(JSON.stringify(await inspectDatabase(target,mode,expected)));
   } catch {

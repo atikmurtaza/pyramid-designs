@@ -1,5 +1,7 @@
 # Phase A — authoritative owner release decisions
 
+**Database decision superseded on 2026-10-01 by [ADR 0019](../architecture/decisions/0019-supabase-production-database-rebaseline.md):** Supabase PostgreSQL is production; Supabase-to-Neon migration is ABANDONED BY OWNER ARCHITECTURE DECISION — 2026-10-01. Other owner decisions remain in force. The original decisions below are retained as history.
+
 **Date:** 2026-09-30. **Context:** Owner instructions following closed Phase 2J at `9de6ba306916136e7d55c34b14932938fa99b7a5`. These decisions supersede provider and release-policy recommendations in historical records; they do not rewrite those records or authorize production activation.
 
 ## Seven approved decisions

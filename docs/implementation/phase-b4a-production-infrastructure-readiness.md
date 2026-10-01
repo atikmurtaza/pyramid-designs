@@ -1,5 +1,7 @@
 # Phase B4A — production infrastructure readiness
 
+**ABANDONED BY OWNER ARCHITECTURE DECISION — 2026-10-01:** The Supabase-to-Neon programme and its provider/support/rehearsal/P3/P4 gates are retired. Supabase PostgreSQL is the production application database; Supabase Auth remains. This record is historical evidence. Portable security controls remain applicable subject to the current [S1 re-baseline](phase-b4b1-s1-supabase-rebaseline.md) and ADR 0019.
+
 **Date:** 2026-09-30. **Repository foundation: PASS; owner/provider acceptance remains required.** This phase is independent of frozen B3. No deployment, activation, production database operation, production migration, DNS change, live email, Drive mutation, Turnstile request or real candidate record is authorised or performed.
 
 ## Baseline and isolation
