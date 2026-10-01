@@ -1,0 +1,2407 @@
+{
+  "phase": "B4B1-P3B",
+  "authorization": "REQUEST_ONLY_NOT_EXECUTED",
+  "project": "withered-feather-01662312",
+  "disposableBranchId": null,
+  "branchIdSource": "Real authenticated P3B creation receipt; no invented ID",
+  "forbiddenBranches": [
+    "br-still-lab-b3q03yuz",
+    "br-square-resonance-b3ew5c59"
+  ],
+  "forbiddenDatabase": "pyramid_design",
+  "migrationApplications": 22,
+  "orderedDeployments": 2,
+  "probeInventory": [
+    {
+      "file": "scripts/seed-phase-2b-synthetic.mjs",
+      "sha256LF": "5179bc9e91171cf1238796e2c1f6b3b08f64b3004f4e55c32164d3e580587545",
+      "coverage": [
+        {
+          "start": 1,
+          "end": 275,
+          "classification": "durable synthetic fixture"
+        }
+      ],
+      "operations": [
+        {
+          "line": 40,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 47,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 53,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 59,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 71,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 81,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 87,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 92,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 97,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 103,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 121,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 128,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 134,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 144,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 151,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 158,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 165,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 172,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 179,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 198,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 206,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 213,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 220,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 232,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 244,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 254,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        }
+      ]
+    },
+    {
+      "file": "scripts/seed-phase-2c-synthetic.mjs",
+      "sha256LF": "ba9ac4283022d7f7e9e4a7ac85d4279684e1a75b84a956b1f3d55ef9dfedd5d7",
+      "coverage": [
+        {
+          "start": 1,
+          "end": 87,
+          "classification": "durable synthetic fixture"
+        }
+      ],
+      "operations": [
+        {
+          "line": 56,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 58,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 68,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 71,
+          "classification": "durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        }
+      ]
+    },
+    {
+      "file": "scripts/verify-phase-b1-permissions.mjs",
+      "sha256LF": "ebafcb98741ecfcc97feed7400192d68d77c0e3497437b0c6479bffb2059511e",
+      "coverage": [
+        {
+          "start": 1,
+          "end": 126,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions"
+        },
+        {
+          "start": 127,
+          "end": 189,
+          "classification": "transaction rolled back"
+        },
+        {
+          "start": 190,
+          "end": 383,
+          "classification": "durable synthetic fixture / concurrency test"
+        },
+        {
+          "start": 384,
+          "end": 416,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture"
+        }
+      ],
+      "operations": [
+        {
+          "line": 48,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 62,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 64,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 65,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 91,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 93,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 94,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 122,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 125,
+          "classification": "durable synthetic fixture (helper definitions); catalog assertions",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 129,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 130,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 131,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 132,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 133,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 134,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 135,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 136,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 137,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 142,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 143,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 146,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 147,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 150,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 151,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 157,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 158,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 160,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 164,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 165,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 166,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 175,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 176,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 183,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 185,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 186,
+          "classification": "transaction rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 196,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 198,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 200,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 206,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 207,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 208,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 209,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 213,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 215,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 218,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 221,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 222,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 227,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 228,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 233,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 235,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 237,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 238,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 239,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 241,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 242,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 243,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 245,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 247,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 248,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 249,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 251,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 252,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 254,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 256,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 258,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 260,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 261,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 262,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 264,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 266,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 267,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 268,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 273,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 275,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 278,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 283,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 284,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 286,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 288,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 297,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 304,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 308,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 311,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 315,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 317,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 318,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 320,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 321,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 330,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 348,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 356,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 357,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 360,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 364,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 365,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 368,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 369,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 371,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 374,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 375,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 376,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 377,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 378,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 380,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 381,
+          "classification": "durable synthetic fixture / concurrency test",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 384,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 391,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 392,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 395,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 398,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 404,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 406,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 410,
+          "classification": "concurrency test / transaction rolled back / durable synthetic fixture",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        }
+      ]
+    },
+    {
+      "file": "scripts/verify-phase-b2-workflows.mjs",
+      "sha256LF": "d74cebb264b098e1ecc43bf3425f804d659c203e7962b3637c8180b41f4c6c09",
+      "coverage": [
+        {
+          "start": 1,
+          "end": 49,
+          "classification": "transaction rolled back (denial helper)"
+        },
+        {
+          "start": 50,
+          "end": 183,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back"
+        },
+        {
+          "start": 184,
+          "end": 200,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back"
+        },
+        {
+          "start": 201,
+          "end": 237,
+          "classification": "durable synthetic fixture; denial helper rolls back"
+        }
+      ],
+      "operations": [
+        {
+          "line": 39,
+          "classification": "transaction rolled back (denial helper)",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 47,
+          "classification": "transaction rolled back (denial helper)",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 53,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 55,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 56,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 57,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 58,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 66,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 69,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 70,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 71,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 72,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 73,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 74,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 75,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 76,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 77,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 79,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 80,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 81,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 82,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 83,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 84,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 85,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 86,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 88,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 89,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 90,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 93,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 94,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 95,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 96,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 101,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 102,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 103,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 105,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 106,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 107,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 109,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 112,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 113,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 114,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 115,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 119,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 120,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 122,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 123,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 124,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 125,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 126,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 128,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 130,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 134,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 135,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 136,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 138,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 139,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 140,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 141,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 142,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 143,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 144,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 146,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 149,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 150,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 151,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 153,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 154,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 155,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 156,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 159,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 160,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 161,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 162,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 163,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 164,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 165,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 166,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 167,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 171,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 177,
+          "classification": "durable synthetic fixture / concurrency test; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 185,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 188,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 189,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 194,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 198,
+          "classification": "concurrency test; temporary inactive fixture restored; lock transactions rolled back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 202,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 203,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 204,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 205,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 206,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 207,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 208,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 209,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 210,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 213,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 214,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 215,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 216,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 217,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 219,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        },
+        {
+          "line": 233,
+          "classification": "durable synthetic fixture; denial helper rolls back",
+          "cleanup": "Rollback where transactional; otherwise exact recorded disposable branch deletion; unexpected denial success aborts"
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "branch-create",
+      "targetType": "branch-and-primary-compute",
+      "expectedTarget": {
+        "project": "withered-feather-01662312",
+        "name": "b4b1-p3-schema-only-20261001",
+        "init_source": "schema-only",
+        "sourceBranch": "br-still-lab-b3q03yuz",
+        "parent_id": null,
+        "default": false,
+        "protected": false
+      },
+      "purpose": "Exclude all source rows; one schema-only root and primary compute, current Free defaults",
+      "prerequisite": "Owner authorizes this complete manifest; collision/quota checks; accept copied credential residual authority",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "expiration",
+      "targetType": "branch",
+      "expectedTarget": {
+        "hoursFromCreation": 24
+      },
+      "purpose": "Optional cleanup backstop",
+      "prerequisite": "Supported authenticated creation workflow",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Explicit branch disposal remains mandatory",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": true
+    },
+    {
+      "id": "b1-owner",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "b4b1_p3_b1_owner",
+        "login": true,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": []
+      },
+      "purpose": "Independent restricted migration owner; random in-memory credential",
+      "prerequisite": "Recorded branch; SQL bootstrap only; name absent",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-bootstrap-grant",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "b4b1_p3_b1_owner",
+        "member": "pyramid_owner",
+        "admin": true,
+        "inherit": false,
+        "set": true
+      },
+      "purpose": "Permit database owner assignment; inspect creator-generated membership",
+      "prerequisite": "b1-owner",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact new-role REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-database",
+      "targetType": "database",
+      "expectedTarget": {
+        "name": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "owner": "b4b1_p3_b1_owner",
+        "template": "template0"
+      },
+      "purpose": "Genuinely fresh migration-empty target",
+      "prerequisite": "b1-bootstrap-grant; name absent; never reuse copied pyramid_design",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-bootstrap-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "b4b1_p3_b1_owner",
+        "member": "pyramid_owner"
+      },
+      "purpose": "Remove temporary bootstrap operator SET/INHERIT/ADMIN authority",
+      "prerequisite": "b1-database",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-owner",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "b4b1_p3_b2_owner",
+        "login": true,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": []
+      },
+      "purpose": "Independent restricted migration owner; random in-memory credential",
+      "prerequisite": "Recorded branch; SQL bootstrap only; name absent",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-bootstrap-grant",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "b4b1_p3_b2_owner",
+        "member": "pyramid_owner",
+        "admin": true,
+        "inherit": false,
+        "set": true
+      },
+      "purpose": "Permit database owner assignment; inspect creator-generated membership",
+      "prerequisite": "b2-owner",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact new-role REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-database",
+      "targetType": "database",
+      "expectedTarget": {
+        "name": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "owner": "b4b1_p3_b2_owner",
+        "template": "template0"
+      },
+      "purpose": "Genuinely fresh migration-empty target",
+      "prerequisite": "b2-bootstrap-grant; name absent; never reuse copied pyramid_design",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-bootstrap-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "b4b1_p3_b2_owner",
+        "member": "pyramid_owner"
+      },
+      "purpose": "Remove temporary bootstrap operator SET/INHERIT/ADMIN authority",
+      "prerequisite": "b2-database",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "capability-pyramid_runtime",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "pyramid_runtime",
+        "login": false,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": [],
+        "initialOwnership": false
+      },
+      "purpose": "Required missing capability; SQL only; stop on collision",
+      "prerequisite": "Recorded branch; copied sentinels must be compatible; no copied role alterations",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "capability-pyramid_reference_locker",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "pyramid_reference_locker",
+        "login": false,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": [],
+        "initialOwnership": false
+      },
+      "purpose": "Required missing capability; SQL only; stop on collision",
+      "prerequisite": "Recorded branch; copied sentinels must be compatible; no copied role alterations",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-locker",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "pyramid_reference_locker",
+        "member": "b4b1_p3_b1_owner",
+        "admin": false,
+        "inherit": true,
+        "set": true
+      },
+      "purpose": "Migration-derived default privileges/function ownership",
+      "prerequisite": "capability-pyramid_reference_locker; b1-owner",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; retain through final checks",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-public-role",
+      "targetType": "role",
+      "expectedTarget": {
+        "nameFrom": "b1 same-run generated name",
+        "pattern": "^b1_public_[a-f0-9]{12}$",
+        "login": false,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": []
+      },
+      "purpose": "Otherwise ungranted PUBLIC negative principal",
+      "prerequisite": "Generate and record distinct exact name before SQL; stop on collision",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-test-memberships",
+      "targetType": "membership",
+      "expectedTarget": {
+        "roles": [
+          "anon",
+          "authenticated",
+          "b1 recorded public-test role"
+        ],
+        "member": "b4b1_p3_b1_owner",
+        "admin": false,
+        "inherit": false,
+        "set": true
+      },
+      "purpose": "Synthetic sentinel/PUBLIC denials",
+      "prerequisite": "b1-public-role; read-only sentinel validation",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE after tests",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-locker",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "pyramid_reference_locker",
+        "member": "b4b1_p3_b2_owner",
+        "admin": false,
+        "inherit": true,
+        "set": true
+      },
+      "purpose": "Migration-derived default privileges/function ownership",
+      "prerequisite": "capability-pyramid_reference_locker; b2-owner",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; retain through final checks",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-public-role",
+      "targetType": "role",
+      "expectedTarget": {
+        "nameFrom": "b2 same-run generated name",
+        "pattern": "^b1_public_[a-f0-9]{12}$",
+        "login": false,
+        "inherit": true,
+        "privilegedFlags": false,
+        "parents": []
+      },
+      "purpose": "Otherwise ungranted PUBLIC negative principal",
+      "prerequisite": "Generate and record distinct exact name before SQL; stop on collision",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-test-memberships",
+      "targetType": "membership",
+      "expectedTarget": {
+        "roles": [
+          "anon",
+          "authenticated",
+          "b2 recorded public-test role"
+        ],
+        "member": "b4b1_p3_b2_owner",
+        "admin": false,
+        "inherit": false,
+        "set": true
+      },
+      "purpose": "Synthetic sentinel/PUBLIC denials",
+      "prerequisite": "b2-public-role; read-only sentinel validation",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE after tests",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-1",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260902000000_phase_2a_compatibility_probe",
+        "sha256": "11f33cebd8b31f1bae86fc28915eb750dca3eb88a788e6a211611fdca2fbbc89",
+        "transportChecksums": [
+          "11f33cebd8b31f1bae86fc28915eb750dca3eb88a788e6a211611fdca2fbbc89",
+          "0a236fec627ecba9d9806c3684cfc407f3b5294542f74aa49dc3eaec44f1b376"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "Live provider + SQL identity; migration-empty; exact role prerequisites",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-2",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260903000000_phase_2a_compatibility_probe_security",
+        "sha256": "4a485e4c3295f86e4a51dfd4eaa3f97c9a4885b52e4806b4848edb5c332d93aa",
+        "transportChecksums": [
+          "4a485e4c3295f86e4a51dfd4eaa3f97c9a4885b52e4806b4848edb5c332d93aa",
+          "c71642dfaf7170e66892962932848ee641a0f839b603c4a3f3a78b7271d577fd"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-1",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-3",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260903220000_phase_2b_production_domain_foundation",
+        "sha256": "7e7277707588a7491d23feb1a2c279cf03f0604672728d01fb3427d8eb1fbda0",
+        "transportChecksums": [
+          "7e7277707588a7491d23feb1a2c279cf03f0604672728d01fb3427d8eb1fbda0",
+          "87e96047a8ef5815a9c4fc6cc0b20e1c5b1d3ebd2fb22409ad3301ac51be56c7"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-2",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-4",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260903221000_phase_2b_candidate_file_constraint_correction",
+        "sha256": "f13555eea9735b94b974a52ee3bb620e3d2a03ab85d863e09d13383105c3f364",
+        "transportChecksums": [
+          "f13555eea9735b94b974a52ee3bb620e3d2a03ab85d863e09d13383105c3f364",
+          "0326608555b13567fb214671f9712782e6f89ab82112c62fb15a0267df5a1a58"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-3",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-5",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260903222000_phase_2b_evidence_constraints",
+        "sha256": "62abbc7973f6ba026eda4834e46220e1d76f1f44936d8719ebe8f27059b47cd4",
+        "transportChecksums": [
+          "62abbc7973f6ba026eda4834e46220e1d76f1f44936d8719ebe8f27059b47cd4",
+          "40a8dcdf93295684dab5812f1525ba969881856133f54aca65098229acf39c30"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-4",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-6",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260903223000_phase_2b_application_constraint_completion",
+        "sha256": "5ced2555e62b5c6ab178cd1237f8507994806a851405dfcfdacdf6e2df140d3c",
+        "transportChecksums": [
+          "5ced2555e62b5c6ab178cd1237f8507994806a851405dfcfdacdf6e2df140d3c",
+          "7f3c92e5e7446a534c4a8f4cf1645d494234e53e045051e7729e8fc74593a78a"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-5",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-7",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260905000000_phase_2g_file_free_submission",
+        "sha256": "a8f97d2f0dd9c514a4a82574979acfbd49a7776f9f9dfd1722d0dacc385043e5",
+        "transportChecksums": [
+          "a8f97d2f0dd9c514a4a82574979acfbd49a7776f9f9dfd1722d0dacc385043e5",
+          "2b13ba67c9a5b7b4c93e3b103a11953cacf90a5c247552003b75055cc4251eac"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-6",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-8",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260905010000_phase_2g_immediate_file_evidence",
+        "sha256": "fa9371f2d2276cd0d51e05df25a83343fe5ac422404ce0c0342cf57722787b3f",
+        "transportChecksums": [
+          "fa9371f2d2276cd0d51e05df25a83343fe5ac422404ce0c0342cf57722787b3f",
+          "590591661cf65491a80ea7845831ac5f653cd48ee425e1dda88ab5b9548b2160"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-7",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-9",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260907000000_phase_2ib_completed_retention_tombstones",
+        "sha256": "998d6ae7829e7fabcee1759fa8e9e69821d6204987311c73c39a463339c914d9",
+        "transportChecksums": [
+          "998d6ae7829e7fabcee1759fa8e9e69821d6204987311c73c39a463339c914d9",
+          "d74f7a4ad93180bbfc033d7c5326ad96a21223b8c360e41f2b7bafe2bbdc8f3e"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-8",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-10",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260930000000_phase_b1_runtime_permissions",
+        "sha256": "31b746476c16625b5a7c5d5a775698365d19d6c16c0367cd0b869da6c3444db5",
+        "transportChecksums": [
+          "31b746476c16625b5a7c5d5a775698365d19d6c16c0367cd0b869da6c3444db5",
+          "485cc1dbfea5a0af298a9aa9a508838869dd21aeb310f2f74ec9c51b4a5dd4a8"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-9",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-migration-11",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "operator": "b4b1_p3_b1_owner",
+        "name": "20260930010000_phase_b2_admin_workflows",
+        "sha256": "f79d552c5e94689a128e191e17951792d1c7eee4e0a6ec10f674737b285a4fec",
+        "transportChecksums": [
+          "f79d552c5e94689a128e191e17951792d1c7eee4e0a6ec10f674737b285a4fec",
+          "300fe4de59ef7117fe6b01fee40d4354fea8ef88b1211383cdf554e0521337af"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b1-migration-10",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-1",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260902000000_phase_2a_compatibility_probe",
+        "sha256": "11f33cebd8b31f1bae86fc28915eb750dca3eb88a788e6a211611fdca2fbbc89",
+        "transportChecksums": [
+          "11f33cebd8b31f1bae86fc28915eb750dca3eb88a788e6a211611fdca2fbbc89",
+          "0a236fec627ecba9d9806c3684cfc407f3b5294542f74aa49dc3eaec44f1b376"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "Live provider + SQL identity; migration-empty; exact role prerequisites",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-2",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260903000000_phase_2a_compatibility_probe_security",
+        "sha256": "4a485e4c3295f86e4a51dfd4eaa3f97c9a4885b52e4806b4848edb5c332d93aa",
+        "transportChecksums": [
+          "4a485e4c3295f86e4a51dfd4eaa3f97c9a4885b52e4806b4848edb5c332d93aa",
+          "c71642dfaf7170e66892962932848ee641a0f839b603c4a3f3a78b7271d577fd"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-1",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-3",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260903220000_phase_2b_production_domain_foundation",
+        "sha256": "7e7277707588a7491d23feb1a2c279cf03f0604672728d01fb3427d8eb1fbda0",
+        "transportChecksums": [
+          "7e7277707588a7491d23feb1a2c279cf03f0604672728d01fb3427d8eb1fbda0",
+          "87e96047a8ef5815a9c4fc6cc0b20e1c5b1d3ebd2fb22409ad3301ac51be56c7"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-2",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-4",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260903221000_phase_2b_candidate_file_constraint_correction",
+        "sha256": "f13555eea9735b94b974a52ee3bb620e3d2a03ab85d863e09d13383105c3f364",
+        "transportChecksums": [
+          "f13555eea9735b94b974a52ee3bb620e3d2a03ab85d863e09d13383105c3f364",
+          "0326608555b13567fb214671f9712782e6f89ab82112c62fb15a0267df5a1a58"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-3",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-5",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260903222000_phase_2b_evidence_constraints",
+        "sha256": "62abbc7973f6ba026eda4834e46220e1d76f1f44936d8719ebe8f27059b47cd4",
+        "transportChecksums": [
+          "62abbc7973f6ba026eda4834e46220e1d76f1f44936d8719ebe8f27059b47cd4",
+          "40a8dcdf93295684dab5812f1525ba969881856133f54aca65098229acf39c30"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-4",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-6",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260903223000_phase_2b_application_constraint_completion",
+        "sha256": "5ced2555e62b5c6ab178cd1237f8507994806a851405dfcfdacdf6e2df140d3c",
+        "transportChecksums": [
+          "5ced2555e62b5c6ab178cd1237f8507994806a851405dfcfdacdf6e2df140d3c",
+          "7f3c92e5e7446a534c4a8f4cf1645d494234e53e045051e7729e8fc74593a78a"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-5",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-7",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260905000000_phase_2g_file_free_submission",
+        "sha256": "a8f97d2f0dd9c514a4a82574979acfbd49a7776f9f9dfd1722d0dacc385043e5",
+        "transportChecksums": [
+          "a8f97d2f0dd9c514a4a82574979acfbd49a7776f9f9dfd1722d0dacc385043e5",
+          "2b13ba67c9a5b7b4c93e3b103a11953cacf90a5c247552003b75055cc4251eac"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-6",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-8",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260905010000_phase_2g_immediate_file_evidence",
+        "sha256": "fa9371f2d2276cd0d51e05df25a83343fe5ac422404ce0c0342cf57722787b3f",
+        "transportChecksums": [
+          "fa9371f2d2276cd0d51e05df25a83343fe5ac422404ce0c0342cf57722787b3f",
+          "590591661cf65491a80ea7845831ac5f653cd48ee425e1dda88ab5b9548b2160"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-7",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-9",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260907000000_phase_2ib_completed_retention_tombstones",
+        "sha256": "998d6ae7829e7fabcee1759fa8e9e69821d6204987311c73c39a463339c914d9",
+        "transportChecksums": [
+          "998d6ae7829e7fabcee1759fa8e9e69821d6204987311c73c39a463339c914d9",
+          "d74f7a4ad93180bbfc033d7c5326ad96a21223b8c360e41f2b7bafe2bbdc8f3e"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-8",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-10",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260930000000_phase_b1_runtime_permissions",
+        "sha256": "31b746476c16625b5a7c5d5a775698365d19d6c16c0367cd0b869da6c3444db5",
+        "transportChecksums": [
+          "31b746476c16625b5a7c5d5a775698365d19d6c16c0367cd0b869da6c3444db5",
+          "485cc1dbfea5a0af298a9aa9a508838869dd21aeb310f2f74ec9c51b4a5dd4a8"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-9",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-migration-11",
+      "targetType": "migration",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "operator": "b4b1_p3_b2_owner",
+        "name": "20260930010000_phase_b2_admin_workflows",
+        "sha256": "f79d552c5e94689a128e191e17951792d1c7eee4e0a6ec10f674737b285a4fec",
+        "transportChecksums": [
+          "f79d552c5e94689a128e191e17951792d1c7eee4e0a6ec10f674737b285a4fec",
+          "300fe4de59ef7117fe6b01fee40d4354fea8ef88b1211383cdf554e0521337af"
+        ],
+        "endpoint": "direct",
+        "tls": "verify-full",
+        "node": "22.x",
+        "prisma": "6.12.0"
+      },
+      "purpose": "Unchanged repository migration and native Prisma ledger application",
+      "prerequisite": "b2-migration-10",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "No down-migration/reset/db push/resolve; dispose branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-runtime",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "b4b1_p3_b1_runtime",
+        "login": true,
+        "inherit": true,
+        "privilegedFlags": false,
+        "ownership": false
+      },
+      "purpose": "Independent restricted pooled runtime",
+      "prerequisite": "b1-migration-11; 11 checksummed finished ledger entries; zero drift; operator contract",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-runtime-membership",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "pyramid_runtime",
+        "member": "b4b1_p3_b1_runtime",
+        "admin": false,
+        "inherit": true,
+        "set": true
+      },
+      "purpose": "Only approved runtime parent",
+      "prerequisite": "b1-runtime",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-connect",
+      "targetType": "database-grant",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "role": "b4b1_p3_b1_runtime",
+        "privilege": "CONNECT"
+      },
+      "purpose": "Restricted authentication; no CREATE/TEMP/ownership",
+      "prerequisite": "b1-runtime",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-creator-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "member": "pyramid_owner",
+        "role": "b4b1_p3_b1_runtime",
+        "observedNewRoleRelationshipsOnly": true
+      },
+      "purpose": "Remove unintended new-runtime creator authority before acceptance",
+      "prerequisite": "Read-only inspect exact memberships; no copied/provider role repair",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": true
+    },
+    {
+      "id": "b2-runtime",
+      "targetType": "role",
+      "expectedTarget": {
+        "name": "b4b1_p3_b2_runtime",
+        "login": true,
+        "inherit": true,
+        "privilegedFlags": false,
+        "ownership": false
+      },
+      "purpose": "Independent restricted pooled runtime",
+      "prerequisite": "b2-migration-11; 11 checksummed finished ledger entries; zero drift; operator contract",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-runtime-membership",
+      "targetType": "membership",
+      "expectedTarget": {
+        "role": "pyramid_runtime",
+        "member": "b4b1_p3_b2_runtime",
+        "admin": false,
+        "inherit": true,
+        "set": true
+      },
+      "purpose": "Only approved runtime parent",
+      "prerequisite": "b2-runtime",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-connect",
+      "targetType": "database-grant",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "role": "b4b1_p3_b2_runtime",
+        "privilege": "CONNECT"
+      },
+      "purpose": "Restricted authentication; no CREATE/TEMP/ownership",
+      "prerequisite": "b2-runtime",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-creator-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "member": "pyramid_owner",
+        "role": "b4b1_p3_b2_runtime",
+        "observedNewRoleRelationshipsOnly": true
+      },
+      "purpose": "Remove unintended new-runtime creator authority before acceptance",
+      "prerequisite": "Read-only inspect exact memberships; no copied/provider role repair",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": true
+    },
+    {
+      "id": "b1-seed",
+      "targetType": "synthetic-fixture",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "fixture": "seed-phase-2c-synthetic.mjs",
+        "operator": "b4b1_p3_b1_owner"
+      },
+      "purpose": "Committed synthetic fixtures; example.invalid recipients; no real provider calls",
+      "prerequisite": "Full operator/runtime acceptance; empty application rows; separate database binding",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-probes",
+      "targetType": "synthetic-probes",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_neon_b4b1_p3_b1_20261001",
+        "runtime": "b4b1_p3_b1_runtime",
+        "verifier": "verify-phase-b1-permissions.mjs",
+        "pooledChecks": true
+      },
+      "purpose": "Existing security/workflow assertions, rollback DDL/denials, durable synthetic/concurrency workflows, isolated pool/context/reconnect",
+      "prerequisite": "b1-seed; reviewed source-bound probe inventory; failure aborts",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-seed",
+      "targetType": "synthetic-fixture",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "fixture": "seed-phase-2c-synthetic.mjs",
+        "operator": "b4b1_p3_b2_owner"
+      },
+      "purpose": "Committed synthetic fixtures; example.invalid recipients; no real provider calls",
+      "prerequisite": "Full operator/runtime acceptance; empty application rows; separate database binding",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-probes",
+      "targetType": "synthetic-probes",
+      "expectedTarget": {
+        "database": "phase2ib_b1r1_b2_neon_b4b1_p3_20261001",
+        "runtime": "b4b1_p3_b2_runtime",
+        "verifier": "verify-phase-b2-workflows.mjs",
+        "pooledChecks": true
+      },
+      "purpose": "Existing security/workflow assertions, rollback DDL/denials, durable synthetic/concurrency workflows, isolated pool/context/reconnect",
+      "prerequisite": "b2-seed; reviewed source-bound probe inventory; failure aborts",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Dispose recorded branch",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b1-test-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "member": "b4b1_p3_b1_owner",
+        "roles": [
+          "anon",
+          "authenticated",
+          "b1 recorded public-test role"
+        ],
+        "remainingBootstrapNewRoleMemberships": true
+      },
+      "purpose": "Close test authority; retain contractual locker; final runtime contract",
+      "prerequisite": "b1-probes; connections closed",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "b2-test-revoke",
+      "targetType": "membership",
+      "expectedTarget": {
+        "member": "b4b1_p3_b2_owner",
+        "roles": [
+          "anon",
+          "authenticated",
+          "b2 recorded public-test role"
+        ],
+        "remainingBootstrapNewRoleMemberships": true
+      },
+      "purpose": "Close test authority; retain contractual locker; final runtime contract",
+      "prerequisite": "b2-probes; connections closed",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "Exact REVOKE; branch disposal",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    },
+    {
+      "id": "branch-delete",
+      "targetType": "branch",
+      "expectedTarget": {
+        "idFrom": "same P3B creation receipt",
+        "name": "b4b1-p3-schema-only-20261001",
+        "includes": "only its compute/databases/roles"
+      },
+      "purpose": "Explicit final cleanup; remove copied credential exposure",
+      "prerequisite": "Evidence captured; pools/processes closed; same-run ledger; live ID/project/root/name/default/protection recheck",
+      "productionImpact": "ZERO database/schema/role/data mutations; disposable quota consumption only",
+      "reversibility": "IRREVERSIBLE",
+      "cleanupIdentifierRequirement": "Same-run creation receipt and exact branch ID; never prefix discovery",
+      "optional": false
+    }
+  ]
+}

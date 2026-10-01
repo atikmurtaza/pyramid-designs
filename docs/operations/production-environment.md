@@ -46,7 +46,7 @@ All following E values belong only to explicitly selected local/operator tooling
 | --- | --- | --- |
 | B1_DISPOSABLE_ADMIN_URL | E; local secret | B1 disposable admin harness; loopback only |
 | B1_EVIDENCE_DIRECTORY | E; local path | B1 external evidence |
-| B1_TEST_OWNER_URL | E; local secret | restricted B1/B2 setup/fault injection |
+| B1_TEST_OWNER_URL | E; rehearsal secret | restricted B1/B2 setup/fault injection; remote only through B4B1-P3 authenticated disposable guard |
 | B1_TEST_PUBLIC_ROLE | E; local role name | browser-role negative checks |
 | B2_DISPOSABLE_ADMIN_URL | E; local secret | B2 harness; loopback PostgreSQL 17:55442 |
 | B2_EVIDENCE_DIRECTORY | E; local path | B2/browser external evidence |
@@ -59,9 +59,25 @@ All following E values belong only to explicitly selected local/operator tooling
 | PHASE2IE_PLAYWRIGHT_MODULE | E; local path | historical browser installed tool |
 | PHASE2IC2B_LIVE_RECIPIENT | E; private contact if real | isolated live CLI only; forbidden in B4, not a production override |
 | COMPATIBILITY_BASE_URL | E; test origin | historical probe CLI target; never invoked in B4 |
+| P3_PROJECT_ID | E; operator target identifier | B4B1-P3 only; exactly withered-feather-01662312 |
+| P3_BRANCH_ID | E; disposable identifier | real schema-only branch creation receipt; production/historical IDs hard denied |
+| P3_RUN_ID | E; execution UUID | bind same-run creation/cleanup receipts; generate only after P3B approval |
+| P3_REHEARSAL_AUTHORIZATION | E; explicit operator gate | exact AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY; owner approval of reviewed manifest required first |
+| P3_NEON_API_KEY | E; secret | ephemeral authenticated GET-only branch/endpoint/database metadata; never forwarded to Prisma or persisted |
+| P3_LEDGER_PATH | E; external path | secret-free same-run resource creation receipt projections; no credential material |
+| P3_EVIDENCE_DIRECTORY | E; external path | fixed JSON status/count projections; raw child/provider/SQL output discarded |
+| P3_B1_OPERATOR_URL | E; secret | exact B1 direct restricted rehearsal owner; ephemeral environment only |
+| P3_B2_OPERATOR_URL | E; secret | exact B2 direct restricted rehearsal owner; ephemeral environment only |
+| P3_B1_RUNTIME_URL | E; secret | exact B1 pooled restricted rehearsal runtime; verify-full |
+| P3_B2_RUNTIME_URL | E; secret | exact B2 pooled restricted rehearsal runtime; verify-full |
+| P3_B1_PUBLIC_ROLE | E; generated role name | exact same-run b1_public_ plus 12 hex digits; B1 negative principal |
+| P3_B2_PUBLIC_ROLE | E; generated role name | distinct exact same-run generated B2 negative principal |
+| P3_LOCAL_ADMIN_URL | E; local synthetic secret | offline harness catalog checks only; loopback 127.0.0.1:55442/postgres; dedicated disposable PostgreSQL 17 |
 | SUPABASE_SERVICE_ROLE_KEY | F; secret | No current app consumer; remove/do not provision; owner revokes if historically exposed |
 | SUPABASE_SECRET_KEY | F; secret | No current app consumer; remove/do not provision; same revocation treatment |
 
 Private values enter protected provider environment storage or operator secret management, never Git, shell arguments/history, browser configuration, public aliases, chat, screenshots or logs. Build runs do not load production database/provider credentials. DIRECT_URL is absent from deploy builds and runtime. Changes to A keys require rebuild; private adapters read B values at runtime.
+
+P3 variables are never Hostinger/application/build/scheduler configuration. The P3 harness refuses private environment files and ambient PG*/NODE_OPTIONS overrides. It derives DATABASE_URL/B1_TEST_OWNER_URL for the explicitly gated verifier subprocess only; DIRECT_URL stays blank there. Native Prisma deploy receives only the corresponding direct rehearsal operator URL through its environment, without API/runtime/bootstrap credentials. No bootstrap credential variable is added. P3A does not execute provisioning or remote migration; the canonical [B4B1-P3A record](../implementation/phase-b4b1-neon-live-acceptance.md#b4b1-p3a-disposable-neon-harness-and-mutation-preflight) defines owner-gated P3B use.
 
 CRON_SECRET requires a protected scheduler Authorization header mechanism with output redaction. If the platform exposes it in commands/URLs/job output, scheduling is NOT READY. Rotation affects worker and readiness monitors together. Gates select operations; they are not proof of release approval or B3 closure.

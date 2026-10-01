@@ -2,16 +2,20 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import pg from "pg";
-import { phase2BFixtures as f } from "./seed-phase-2b-synthetic.mjs";
-import { phase2CFixtures as staff } from "./seed-phase-2c-synthetic.mjs";
 import { syntheticPdf } from "./phase-2h-synthetic-pdf.mjs";
 import { syntheticEmailAdapter } from "./synthetic-email-adapter.mjs";
+import { authorizeRemoteVerifier } from "./neon-rehearsal-target.mjs";
 
 assert(!existsSync(".env.local"));
 assert.equal(Number(process.versions.node.split(".")[0]), 22);
+const remoteMode = process.argv.includes("--neon-disposable");
+if (remoteMode) process.on("uncaughtException", () => {
+  console.error("NEON_DISPOSABLE_VERIFIER_FAILED details_suppressed=true"); process.exit(1);
+});
+const administratorRoles = remoteMode ? await authorizeRemoteVerifier("b1") : ["postgres"];
 const runtimeUrl = new URL(process.env.DATABASE_URL ?? "invalid:");
 const ownerUrl = new URL(process.env.B1_TEST_OWNER_URL ?? "invalid:");
-for (const url of [runtimeUrl, ownerUrl]) {
+if (!remoteMode) for (const url of [runtimeUrl, ownerUrl]) {
   assert(["localhost", "127.0.0.1"].includes(url.hostname));
   assert(/^\/phase2ib_b1r1_[a-z0-9_]+$/.test(url.pathname));
 }
@@ -20,6 +24,8 @@ assert.notEqual(runtimeUrl.username, ownerUrl.username);
 assert.equal(process.env.DIRECT_URL, "");
 assert(/^b1_public_[a-f0-9]+$/.test(process.env.B1_TEST_PUBLIC_ROLE));
 process.env.NODE_ENV = "test"; process.env.PUBLIC_INTAKE_MODE = "synthetic";
+const { phase2BFixtures: f } = await import("./seed-phase-2b-synthetic.mjs");
+const { phase2CFixtures: staff } = await import("./seed-phase-2c-synthetic.mjs");
 const owner = new pg.Client({ connectionString: ownerUrl.href });
 const runtime = new pg.Client({ connectionString: runtimeUrl.href });
 await Promise.all([owner.connect(), runtime.connect()]);
@@ -71,7 +77,7 @@ try {
   const flags = (await runtime.query("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname=current_user")).rows[0];
   for (const flag of Object.values(flags)) check(flag, false);
   check((await runtime.query("SELECT current_user")).rows[0].current_user, runtimeUrl.username);
-  for (const role of ["pyramid_reference_locker", ownerUrl.username, "postgres", "anon", "authenticated"])
+  for (const role of ["pyramid_reference_locker", ownerUrl.username, ...administratorRoles, "anon", "authenticated"])
     check((await runtime.query("SELECT pg_has_role(current_user,$1,'SET') AS allowed", [role])).rows[0].allowed, false);
   check((await owner.query("SELECT count(*)::int AS n FROM pg_class WHERE relnamespace='public'::regnamespace AND relowner='pyramid_runtime'::regrole")).rows[0].n, 0);
   check((await owner.query("SELECT count(*)::int AS n FROM pg_class WHERE relnamespace='public'::regnamespace AND relkind='r' AND NOT relrowsecurity")).rows[0].n, 0);

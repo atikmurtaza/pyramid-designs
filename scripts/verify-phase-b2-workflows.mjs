@@ -2,14 +2,18 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import pg from 'pg';
-import { phase2BFixtures as f } from './seed-phase-2b-synthetic.mjs';
-import { phase2CFixtures as s } from './seed-phase-2c-synthetic.mjs';
+import { authorizeRemoteVerifier } from './neon-rehearsal-target.mjs';
 
 assert(!existsSync('.env.local') && !existsSync('.env'));
 assert.equal(Number(process.versions.node.split('.')[0]),22);
+const remoteMode=process.argv.includes('--neon-disposable');
+if(remoteMode) process.on('uncaughtException',()=>{console.error('NEON_DISPOSABLE_VERIFIER_FAILED details_suppressed=true');process.exit(1);});
+if(remoteMode) await authorizeRemoteVerifier('b2');
 const runtimeUrl=new URL(process.env.DATABASE_URL),ownerUrl=new URL(process.env.B1_TEST_OWNER_URL);
-for(const url of [runtimeUrl,ownerUrl]) {assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,'55442');assert(url.pathname.startsWith('/phase2ib_b1r1_b2_'));}
+if(!remoteMode) for(const url of [runtimeUrl,ownerUrl]) {assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,'55442');assert(url.pathname.startsWith('/phase2ib_b1r1_b2_'));}
 assert.equal(runtimeUrl.pathname,ownerUrl.pathname);assert.notEqual(runtimeUrl.username,ownerUrl.username);
+const { phase2BFixtures:f }=await import('./seed-phase-2b-synthetic.mjs');
+const { phase2CFixtures:s }=await import('./seed-phase-2c-synthetic.mjs');
 const owner=new pg.Client({connectionString:ownerUrl.href}), runtime=new pg.Client({connectionString:runtimeUrl.href});
 await Promise.all([owner.connect(),runtime.connect()]);
 const db=await import('../src/lib/server/database.ts');
