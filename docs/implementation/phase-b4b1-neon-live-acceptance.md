@@ -1,6 +1,6 @@
 # Phase B4B1 — Neon live compatibility and recovery acceptance
 
-**Latest P3B update, 2026-10-01:** Owner authorization and the exact 55-operation manifest are verified. Live execution stopped before operation 1 because the unchanged harness's authenticated metadata API credential is unavailable. See [B4B1-P3B authorized attempt and credential blocker](#b4b1-p3b-authorized-attempt-and-credential-blocker). Result: OWNER ACTION REQUIRED; disposable branch NOT_CREATED; all provider/database mutations 0. P2's production classification remains HISTORICAL / data UNKNOWN. Earlier P1/P2/P3A sections remain historical evidence; offline/local checks do not establish live Neon acceptance.
+**Latest P3B-R1 update, 2026-10-01:** Credential presence and authenticated access to the exact project now pass; owner authorization and the unchanged 55-operation manifest are verified. R1 stopped before operation 1 when the local lifecycle invocation rejected its project-root request path with `API_PATH_DENIED`. See [B4B1-P3B-R1 stopped lifecycle invocation](#b4b1-p3b-r1-stopped-lifecycle-invocation). Result: FAIL; disposable branch NOT_CREATED; all provider/database mutations 0. No repair or retry occurred. P2's production classification remains HISTORICAL / data UNKNOWN. Earlier sections remain historical evidence; offline/local checks do not establish live Neon acceptance.
 
 **P1 inspection update, 2026-10-01:** The authenticated Neon dashboard has now been inspected read-only. See [B4B1-P1 inspection and provisioning plan](#b4b1-p1-inspection-and-provisioning-plan) below. The original credential-unavailable acceptance attempt remains historical evidence. Final runtime identity/credentials must not be assumed to exist; dashboard identification does not authorize provisioning or establish schema/SQL acceptance.
 
@@ -676,3 +676,71 @@ NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON D
 No production migration/provisioning decision was made. The historical production schema/data remain outside this attempt. No deployment, DNS, plan, provider activation, B3 waiver or B4B1-P4 is authorized by this result. Resume P3B only after its private authentication prerequisite is satisfied and repository/manifest/provider identity are freshly revalidated; a new execution must use its own UUID and receipts.
 
 PHASE B4B1-P3B: OWNER ACTION REQUIRED; MANIFEST AUTHORIZATION: VERIFIED; DISPOSABLE BRANCH: NOT_CREATED; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance not established; no live test executed); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED; DISPOSABLE RESOURCES REMAINING: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; REAL CANDIDATE DATA ACCESSED: NO; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
+
+## B4B1-P3B-R1 stopped lifecycle invocation
+
+**Date:** 2026-10-01 (Europe/London). **Result: FAIL — local lifecycle invocation stopped before manifest operation 1.** The previously unavailable credential is now present and accepted for authenticated metadata access to the exact project. No disposable branch creation was attempted. No SQL connection, role/database provisioning, migration, seed, live suite, pool probe or deletion ran. Live Neon architecture acceptance remains incomplete; this attempt establishes no SQL/provider compatibility defect.
+
+### Repository, authorization and preflight
+
+The exact requested B4 worktree began clean on `phase/b4-production-readiness`, at `4ee4e751224dca616f21e80b79bf4d4e5fd86a22`, `docs: record live Neon rehearsal`. HEAD, tracking branch and the actual remote feature branch matched. Repository authority was re-read: AGENTS, Phase A, ADRs 0017/0018, B1/B2 closure contracts, B4A, this canonical P3A/P3B record, the runner/target/manifest modules, relevant verifier adaptations and readiness checker, and production environment/release procedures. The primary checkout and B3 were not entered or changed.
+
+The unchanged manifest's byte SHA-256 is `28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8`. Its generated source inventory exactly matches the checked-in JSON: 55 operations, `REQUEST_ONLY_NOT_EXECUTED`, null disposable branch ID, 22 proposed migration applications and two ordered deployments. Owner authorization remains exactly `AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY`; no additional operation or production authority was inferred.
+
+Execution UUID: `091aab01-1c02-4f96-ae64-cca7c99be986`, distinct from the blocked attempt. Installed cached Node **22.22.0** ran the unchanged offline verifier: **159 PASS**. The dry run remained **BLOCKED_DISPOSABLE_BRANCH_REQUIRED**, with zero provider calls, database connections and mutations for that command. These are offline checks, not live READY evidence.
+
+### API credential and exact project access
+
+Presence-only inspection found `P3_NEON_API_KEY` present. Its value was used privately in authenticated request headers and was never displayed, hashed, persisted, included in command arguments or placed in evidence/documentation. Other environment variables were not inventoried for credential discovery.
+
+Native authenticated read-only project access verified **withered-feather-01662312**, provider PostgreSQL major **17**, region **aws-ap-southeast-1**. The project-scoped branch inventory matched the protected identities: `migration-baseline` / `br-still-lab-b3q03yuz` was ready/default/unprotected; `migration-synthetic-verification` / `br-square-resonance-b3ew5c59` was archived/nondefault/unprotected. The proposed disposable branch name was absent. These metadata observations opened no SQL connection and did not inspect business rows.
+
+Broader credential permissions were not established or enumerated. Every authenticated request was constrained to the fixed approved project; no unrelated project was enumerated or modified. The credential was not rotated or replaced. Credential result: **PRESENT_AND_ACCEPTED** for the metadata access performed, not a claim that mutation permissions were tested.
+
+### Failure and mandatory stop
+
+The existing repository runner deliberately delegates provider creation/provisioning/deletion to the authorised lifecycle workflow. The local ephemeral invocation used the unchanged repository modules and supplied no fabricated provider receipt. During its initial project revalidation, its request-path guard required a slash-prefixed suffix; the invocation passed an empty suffix for the project-root metadata request. The guard raised **API_PATH_DENIED before fetch**. Manifest operation 1 was never reached and no provider mutation request was submitted.
+
+This was an error in the local invocation, not a credential rejection or an observed defect in the committed P3A harness. Forward execution stopped. The invocation was not patched or retried, and no SQL, manifest, migration, privilege, security expectation or repository harness was changed. Any corrected execution requires a separately reviewed continuation; it was not started in R1.
+
+### Acceptance gates and copied roles
+
+| Gate | R1 result |
+| --- | --- |
+| Exact project / manifest / credential access | PASS / VERIFIED / PRESENT_AND_ACCEPTED |
+| Disposable branch / real provider-generated ID | NOT_CREATED / no ID or creation receipt |
+| Live P3A provider and SQL preflight READY | NOT_RUN; remains BLOCKED_DISPOSABLE_BRANCH_REQUIRED |
+| Copied role attributes / memberships / residual authority | NOT_OBSERVED in R1; prior findings remain historical |
+| B1 / B2 genuinely empty databases | NOT_RUN / NOT_RUN |
+| Capability roles and exact memberships | NOT_RUN |
+| B1 / B2 migrations and checksum/order acceptance | NOT_RUN / NOT_RUN |
+| B1 / B2 restricted runtime identity | NOT_RUN / NOT_RUN |
+| B1 / B2 live suites | NOT_RUN / NOT_RUN; zero live assertions |
+| Direct SQL TLS / pooled runtime / context and reconnect | NOT_RUN / NOT_RUN / NOT_RUN |
+| Final RLS / policies / functions / ownership / defaults contract | NOT_RUN |
+| Cleanup | NOT_REQUIRED; no created resources |
+| Production metadata post-check | PASS; protected branch projections unchanged; disposable name absent |
+
+HTTPS API authentication does not establish direct PostgreSQL TLS, Prisma transport, restricted runtime, pooling or SQL contract acceptance. No copied role/password was inspected or modified during R1. The 58 unknown-provenance production rows were not revisited; there was no production SQL connection or real candidate-data access.
+
+### Evidence and post-check clarification
+
+Secret-free external evidence directory: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-r1-091aab01-1c02-4f96-ae64-cca7c99be986`.
+
+- `preflight.json`: verified run/manifest/project, projected protected branch metadata, credential classification, 159 offline assertions and zero mutations.
+- `result.json`: original fixed-code invocation failure and all-zero live counters. No creation ledger exists because no resource was created.
+- `post-check-and-clarification.json`: independent final authenticated read-only comparison with the saved preflight baseline, no disposable branch and unchanged protected metadata.
+
+The original invocation also emitted `PRODUCTION_METADATA_CHANGED` after comparing post-check metadata with an uninitialised in-invocation baseline. That generated diagnostic is preserved and explicitly corrected by the separate evidence: it does **not** establish a production change. The final check used the saved authenticated preflight baseline, passed, and performed no repair or forward mutation. Production schema/data equivalence was not re-queried or inferred from metadata.
+
+Evidence contains fixed classifications, approved identifiers, counts and projected metadata only; no raw provider response, DSN, password, token, cookie, candidate record or secret-bearing output is persisted. No secret was sought in another checkout. Documentation/evidence boundary, sensitive-pattern, staged scope and whitespace checks are required before the authorised documentation commit. Application/build suites are not rerun for this documentation-only result; their historical passes are not represented as live acceptance.
+
+### Repository scope and live effects
+
+Only this canonical acceptance record is updated. Application code, dependencies, schema, migrations, manifest, harness, verifier adaptations and security expectations remain unchanged. The conditional commit message is exactly `docs: record completed Neon rehearsal`; it records a completed **failed attempt**, not successful live acceptance. Push is limited to `phase/b4-production-readiness`; main and B3 remain untouched.
+
+NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON DISPOSABLE DATABASES CREATED: 0; NEON DISPOSABLE ROLES CREATED: 0; REMOTE MIGRATION APPLICATIONS: 0; B1 ASSERTIONS: 0; B2 ASSERTIONS: 0; POOL ASSERTIONS: 0; PRODUCTION DATABASE CONNECTIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; DISPOSABLE RESOURCES REMAINING: 0.
+
+No production provisioning/migration/deployment, B3 work, B4B1-P4, further unknown-row investigation or Hostinger/Supabase/Drive/Resend/Turnstile phase was started. No live compatibility PASS is claimed.
+
+PHASE B4B1-P3B-R1: FAIL; MANIFEST AUTHORIZATION: VERIFIED; API CREDENTIAL: PRESENT_AND_ACCEPTED; DISPOSABLE BRANCH: NOT_CREATED; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance incomplete; no live SQL test executed); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED; DISPOSABLE RESOURCES REMAINING: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; REAL CANDIDATE DATA ACCESSED: NO; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
