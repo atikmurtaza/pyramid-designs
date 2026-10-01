@@ -1,6 +1,6 @@
 # Phase B4B1 — Neon live compatibility and recovery acceptance
 
-**Latest P3A update, 2026-10-01:** Repository-only disposable Neon harness preparation completed. See [B4B1-P3A implementation, verification and exact P3B boundary](#b4b1-p3a-disposable-neon-harness-and-mutation-preflight). Offline/local evidence does not establish live Neon acceptance. P3B is not started; dry run is BLOCKED_DISPOSABLE_BRANCH_REQUIRED. P2's production classification remains HISTORICAL / data UNKNOWN; no production connection or provider mutation was made in P3A. Earlier blocked/P1/P2 sections remain historical evidence.
+**Latest P3B update, 2026-10-01:** Owner authorization and the exact 55-operation manifest are verified. Live execution stopped before operation 1 because the unchanged harness's authenticated metadata API credential is unavailable. See [B4B1-P3B authorized attempt and credential blocker](#b4b1-p3b-authorized-attempt-and-credential-blocker). Result: OWNER ACTION REQUIRED; disposable branch NOT_CREATED; all provider/database mutations 0. P2's production classification remains HISTORICAL / data UNKNOWN. Earlier P1/P2/P3A sections remain historical evidence; offline/local checks do not establish live Neon acceptance.
 
 **P1 inspection update, 2026-10-01:** The authenticated Neon dashboard has now been inspected read-only. See [B4B1-P1 inspection and provisioning plan](#b4b1-p1-inspection-and-provisioning-plan) below. The original credential-unavailable acceptance attempt remains historical evidence. Final runtime identity/credentials must not be assumed to exist; dashboard identification does not authorize provisioning or establish schema/SQL acceptance.
 
@@ -627,3 +627,52 @@ Changed scope: two documentation files, five new harness/test/manifest files, tw
 P3A live counters: PRODUCTION DATABASE CONNECTIONS 0; PRODUCTION DATABASE MUTATIONS 0; PRODUCTION ROLE MUTATIONS 0; PRODUCTION MIGRATIONS 0; PRODUCTION DATA WRITES 0; NEON DISPOSABLE BRANCHES CREATED 0; NEON DATABASES CREATED 0; NEON ROLES CREATED 0; REMOTE MIGRATIONS EXECUTED 0; REAL CANDIDATE DATA ACCESSED NO. B3 WORKTREE TOUCHED NO. PRODUCTION DEPLOYMENT NO. NEXT PHASE NOT STARTED.
 
 **Owner decision:** authorize precisely the generated 55-operation disposable P3B boundary, including scoped provisioning, synthetic probes, copied administrator residual exposure and irreversible exact-ID cleanup, or leave P3B closed. Authorization never extends to production provisioning/migration/repair or deployment.
+
+## B4B1-P3B authorized attempt and credential blocker
+
+**Date:** 2026-10-01 (Europe/London). **Result: OWNER ACTION REQUIRED.** The owner supplied `AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY` for only the verified P3A manifest. Execution stopped before operation 1. No disposable branch, compute, database or role was created; no SQL connection, provisioning, migration, seed, suite, pool probe or deletion was executed. No live compatibility acceptance is established.
+
+### Repository, authorization and manifest validation
+
+The requested B4 worktree was clean on `phase/b4-production-readiness` at `bcc4ba8a8118aa12e1918fb73354f1f30e3537fa`, `feat: prepare isolated Neon rehearsal harness`. Local HEAD, tracking branch and actual remote feature branch matched before provider inspection. Main was not merged or changed. B3 was not entered or modified; **UPSTREAM DISCLOSURE BLOCKED** remains unchanged.
+
+The manifest's LF-normalized SHA-256 is exactly `28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8`; its status remains `REQUEST_ONLY_NOT_EXECUTED`, with 55 operations, 22 proposed migration applications and two ordered deployments. Regeneration from current migration/probe sources matched the reviewed JSON exactly. Authorization has been received; prerequisites for its execution have not been satisfied. No manifest or harness change was made.
+
+Execution UUID: `d744470a-583a-4ad8-b126-02055e2686c4`. No created-resource receipts or fictional branch ID exist. The external blocked-attempt evidence is separate from a creation/cleanup ledger and contains no credentials.
+
+### Authenticated provider inspection and pre-operation stop
+
+The existing authenticated Edge Neon Console session was confirmed in the exact project. Two read-only Neon connector branch inventories independently confirmed only these existing branches:
+
+| Branch | Exact ID | Observed state |
+| --- | --- | --- |
+| migration-baseline | br-still-lab-b3q03yuz | ready; default |
+| migration-synthetic-verification | br-square-resonance-b3ew5c59 | archived |
+
+The exact disposable branch name `b4b1-p3-schema-only-20261001` was absent. No SQL query or database connection was used for either existing branch. Archived historical state was preserved.
+
+**Blocker:** `providerPreflight` and `cleanupMetadata` in the unchanged `scripts/neon-rehearsal-target.mjs` require an ephemeral `P3_NEON_API_KEY` for native authenticated metadata GETs. Presence-only checks found neither `P3_NEON_API_KEY` nor `NEON_API_KEY` in process, user or machine environments. No installed Neon CLI command was found. The browser and connector sessions authenticate their own operations but their inspected interfaces expose no supported bearer-token handoff to this local runner. Browser cookies/session material were not extracted. Connector snapshots were not substituted for the harness's native authenticated gate.
+
+Creating a new API credential is not one of the authorized 55 operations. It was not attempted. The inspected connector branch-creation signature also has no schema-only parameter, so it was not used to create a normal data-copy branch. The browser creation workflow was not submitted while the required subsequent authentication path remained unavailable. Existing operator/runtime variables were absent, as expected before identity provisioning; they are not treated as a separate failure of already-created resources.
+
+The safe continuation prerequisite is to make an appropriate existing Neon API credential available through private ephemeral process injection, without sharing its value in chat, repository, arguments or evidence. If acquiring a new credential or adopting another authentication mechanism is necessary, that needs a separately authorized preparation step. P3B does not patch the harness, manufacture metadata, weaken TLS/target checks or expand the mutation manifest to work around this blocker.
+
+### Rehearsal, verification, evidence and cleanup
+
+B1/B2 empty-target checks, copied-role catalog inspection, capability provisioning, migrations, runtime creation, live suites, direct transport, pooled transport and final contract checks are all **NOT_RUN**. B1, B2 and live pool assertion counts are each 0. Copied role/password isolation and live PostgreSQL/Neon architecture compatibility remain unverified; the stop is an authentication prerequisite failure, not an observed database incompatibility.
+
+Node 22 offline regression passed **159 assertions**, including production hard-deny, manifest/source identity, redaction and cleanup-receipt rejection. Two additional direct refusal checks confirmed that both native metadata preflight and cleanup metadata reject absent credentials with `PROVIDER_METADATA_CREDENTIAL_REQUIRED` before any provider call or database connection; no branch ID was supplied to those refusal checks. Dry run remained **BLOCKED_DISPOSABLE_BRANCH_REQUIRED; provider calls 0; database connections 0; mutations 0**. Those counters describe the dry-run command; the separate two connector metadata reads are disclosed above. They do not establish a live READY preflight. No real disposable ID or receipt was invented to invoke the live runner.
+
+Secret-free external evidence is stored under `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-d744470a-583a-4ad8-b126-02055e2686c4\attempt.json`: exact run/manifest identifiers, projected branch metadata, credential-presence classifications, verification counts, all-zero mutation effects and blocked status only. No raw provider response, password, DSN, token, cookie or candidate record is persisted. No secret-bearing artifact was created.
+
+Cleanup is **NOT_REQUIRED**: no same-run disposable resources exist. Final read-only provider inventory confirmed both exact existing branch IDs remain present and no disposable branch was created. No delete, expiry, reset, restore or production database post-check connection occurred. Disposable resources remaining: **0**.
+
+The canonical acceptance record is the only repository change. Documentation scope, sensitive-content/boundary scan including external attempt evidence, and `git diff --check` passed before the conditional documentation commit. No application, dependency, package, schema, migration, verifier, runtime or B3 change is made. Unrelated frontend/browser/build suites are not rerun. A documentation commit records this blocked attempt and never implies PASS.
+
+### Live effects and programme boundary
+
+NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON DISPOSABLE DATABASES CREATED: 0; NEON DISPOSABLE ROLES CREATED: 0; REMOTE MIGRATION APPLICATIONS: 0; B1 ASSERTIONS: 0; B2 ASSERTIONS: 0; POOL ASSERTIONS: 0. PRODUCTION DATABASE CONNECTIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; DISPOSABLE RESOURCES REMAINING: 0.
+
+No production migration/provisioning decision was made. The historical production schema/data remain outside this attempt. No deployment, DNS, plan, provider activation, B3 waiver or B4B1-P4 is authorized by this result. Resume P3B only after its private authentication prerequisite is satisfied and repository/manifest/provider identity are freshly revalidated; a new execution must use its own UUID and receipts.
+
+PHASE B4B1-P3B: OWNER ACTION REQUIRED; MANIFEST AUTHORIZATION: VERIFIED; DISPOSABLE BRANCH: NOT_CREATED; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance not established; no live test executed); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED; DISPOSABLE RESOURCES REMAINING: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; REAL CANDIDATE DATA ACCESSED: NO; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
