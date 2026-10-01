@@ -63,7 +63,7 @@ All following E values belong only to explicitly selected local/operator tooling
 | P3_BRANCH_ID | E; disposable identifier | real schema-only branch creation receipt; production/historical IDs hard denied |
 | P3_RUN_ID | E; execution UUID | bind same-run creation/cleanup receipts; generate only after P3B approval |
 | P3_REHEARSAL_AUTHORIZATION | E; explicit operator gate | exact AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY; owner approval of reviewed manifest required first |
-| P3_NEON_API_KEY | E; secret | ephemeral authenticated GET-only branch/endpoint/database metadata; never forwarded to Prisma or persisted |
+| P3_NEON_API_KEY | E; secret | canonical project-bound P3 provider boundary; metadata and separately approved manifest branch lifecycle; never forwarded to Prisma or persisted |
 | P3_LEDGER_PATH | E; external path | secret-free same-run resource creation receipt projections; no credential material |
 | P3_EVIDENCE_DIRECTORY | E; external path | fixed JSON status/count projections; raw child/provider/SQL output discarded |
 | P3_B1_OPERATOR_URL | E; secret | exact B1 direct restricted rehearsal owner; ephemeral environment only |
@@ -73,11 +73,16 @@ All following E values belong only to explicitly selected local/operator tooling
 | P3_B1_PUBLIC_ROLE | E; generated role name | exact same-run b1_public_ plus 12 hex digits; B1 negative principal |
 | P3_B2_PUBLIC_ROLE | E; generated role name | distinct exact same-run generated B2 negative principal |
 | P3_LOCAL_ADMIN_URL | E; local synthetic secret | offline harness catalog checks only; loopback 127.0.0.1:55442/postgres; dedicated disposable PostgreSQL 17 |
+| NODE_TLS_REJECT_UNAUTHORIZED | E; unsafe platform override | P3 provider/lifecycle refuses value 0; never disable certificate verification |
 | SUPABASE_SERVICE_ROLE_KEY | F; secret | No current app consumer; remove/do not provision; owner revokes if historically exposed |
 | SUPABASE_SECRET_KEY | F; secret | No current app consumer; remove/do not provision; same revocation treatment |
 
 Private values enter protected provider environment storage or operator secret management, never Git, shell arguments/history, browser configuration, public aliases, chat, screenshots or logs. Build runs do not load production database/provider credentials. DIRECT_URL is absent from deploy builds and runtime. Changes to A keys require rebuild; private adapters read B values at runtime.
 
 P3 variables are never Hostinger/application/build/scheduler configuration. The P3 harness refuses private environment files and ambient PG*/NODE_OPTIONS overrides. It derives DATABASE_URL/B1_TEST_OWNER_URL for the explicitly gated verifier subprocess only; DIRECT_URL stays blank there. Native Prisma deploy receives only the corresponding direct rehearsal operator URL through its environment, without API/runtime/bootstrap credentials. No bootstrap credential variable is added. P3A does not execute provisioning or remote migration; the canonical [B4B1-P3A record](../implementation/phase-b4b1-neon-live-acceptance.md#b4b1-p3a-disposable-neon-harness-and-mutation-preflight) defines owner-gated P3B use.
+
+H2 adds `scripts/run-phase-b4b1-neon-lifecycle.mjs`. Its `--dry-run` is offline. Future `--execute-rehearsal` requires separate R2 programme approval plus the existing manifest authorization, exact P3_PROJECT_ID, ephemeral P3_NEON_API_KEY and external P3_EVIDENCE_DIRECTORY. Run under Node 22 with `--conditions=react-server --experimental-strip-types`, from the reviewed clean B4 worktree. The lifecycle generates its own execution UUID, exclusive evidence subdirectory, branch receipt, SQL credentials and public-role identities; these are not caller-selected resume inputs. It invokes the existing runner stages and the single canonical provider boundary. No ad-hoc provider helper is required. H2 does not execute this command or authorize R2.
+
+Creation and deletion are attempted at most once per session. Ambiguous outcomes are observed through read-only metadata; no search result grants cleanup authority and no observation re-enables mutation. Only the authentic in-memory receipt from the same successful creation can authorize exact-ID deletion after fresh identity checks and connection/evidence closure. A saved ledger is evidence, not a transferable delete capability. Process loss or an unreceipted creation requires owner reconciliation; do not reconstruct authority from names or a previous UUID. Optional expiration is skipped because Early Access availability is unproven. The copied schema-only `pyramid_design` database is used solely for already-approved disposable bootstrap catalog/provisioning work; production and copied application relations are never rehearsal targets.
 
 CRON_SECRET requires a protected scheduler Authorization header mechanism with output redaction. If the platform exposes it in commands/URLs/job output, scheduling is NOT READY. Rotation affects worker and readiness monitors together. Gates select operations; they are not proof of release approval or B3 closure.

@@ -142,7 +142,7 @@ try{globalThis.fetch=async()=>{calls++;throw new Error("Unexpected request");};a
 // authorize SQL, and redirect/auth/network failures are fixed-code failures.
 const apiEnv={...env,P3_NEON_API_KEY:"synthetic-token-canary"};let requests=[];
 try {
-  globalThis.fetch=async (input,options)=>{requests.push({input,method:options.method,redirect:options.redirect});return {ok:true,json:async()=>
+  globalThis.fetch=async (input,options)=>{requests.push({input,method:options.method,redirect:options.redirect});return {ok:true,status:200,json:async()=>
     input.endsWith("/endpoints")?{endpoints:provider.endpoints}:input.endsWith("/databases")?{databases:provider.databases}:{branch:provider.branch}};};
   check((await providerPreflight(apiEnv,auth,ledger)).endpoint.id,"ep-offline-fixture");
   check(requests.length,3);check(requests.every(r=>r.method==="GET"&&r.redirect==="error"&&r.input.startsWith("https://console.neon.tech/api/v2/")));

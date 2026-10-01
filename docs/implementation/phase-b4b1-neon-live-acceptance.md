@@ -1,5 +1,7 @@
 # Phase B4B1 — Neon live compatibility and recovery acceptance
 
+**Latest H1 update, 2026-10-01:** Root cause is proven in the retained ephemeral R1 lifecycle invocation, not the committed P3A harness. Its empty project-root GET suffix failed a slash-only guard before fetch. The same helper has no method/resource allowlist or canonicalization; permitting the empty suffix alone cannot meet H1's required security boundary. H1 section 19's material-incompleteness stop applies. See [B4B1-P3B-H1 path-policy investigation and stop](#b4b1-p3b-h1-path-policy-investigation-and-stop). Result: OWNER ACTION REQUIRED; no harness correction, commit/push, Management API call, SQL connection or mutation; R2 NOT READY and NOT STARTED.
+
 **Latest P3B-R1 update, 2026-10-01:** Credential presence and authenticated access to the exact project now pass; owner authorization and the unchanged 55-operation manifest are verified. R1 stopped before operation 1 when the local lifecycle invocation rejected its project-root request path with `API_PATH_DENIED`. See [B4B1-P3B-R1 stopped lifecycle invocation](#b4b1-p3b-r1-stopped-lifecycle-invocation). Result: FAIL; disposable branch NOT_CREATED; all provider/database mutations 0. No repair or retry occurred. P2's production classification remains HISTORICAL / data UNKNOWN. Earlier sections remain historical evidence; offline/local checks do not establish live Neon acceptance.
 
 **P1 inspection update, 2026-10-01:** The authenticated Neon dashboard has now been inspected read-only. See [B4B1-P1 inspection and provisioning plan](#b4b1-p1-inspection-and-provisioning-plan) below. The original credential-unavailable acceptance attempt remains historical evidence. Final runtime identity/credentials must not be assumed to exist; dashboard identification does not authorize provisioning or establish schema/SQL acceptance.
@@ -744,3 +746,183 @@ NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON D
 No production provisioning/migration/deployment, B3 work, B4B1-P4, further unknown-row investigation or Hostinger/Supabase/Drive/Resend/Turnstile phase was started. No live compatibility PASS is claimed.
 
 PHASE B4B1-P3B-R1: FAIL; MANIFEST AUTHORIZATION: VERIFIED; API CREDENTIAL: PRESENT_AND_ACCEPTED; DISPOSABLE BRANCH: NOT_CREATED; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance incomplete; no live SQL test executed); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED; DISPOSABLE RESOURCES REMAINING: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; REAL CANDIDATE DATA ACCESSED: NO; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
+
+## B4B1-P3B-H1 path-policy investigation and stop
+
+**Date:** 2026-10-01 (Europe/London). **Result: OWNER ACTION REQUIRED.** The H1 instruction permits inspection, official contract verification, offline checks and documentation, but explicitly requires a stop if the provider model is materially incomplete. That stop was reached before editing any harness source. No P3B mutation authorization was exercised. No R2 attempt, credential access, provider metadata call or SQL connection occurred.
+
+### Repository identity and evidence
+
+The exact B4 worktree began clean on `phase/b4-production-readiness`, at `192435d9befbdab5eb12289be2226b7e76f4343c`, `docs: record completed Neon rehearsal`. Local HEAD, tracking `origin/phase/b4-production-readiness` and actual remote feature branch matched. Main was not merged. B3 was not entered, read or changed; its supplied **UPSTREAM DISCLOSURE BLOCKED** gate remains.
+
+Repository authority and trace review covered AGENTS, Phase A, ADRs 0017/0018, B1/B2 closure and remote verifier guards, B4A/P3A/P3B/R1 records, the complete P3 runner/target/manifest/offline verifier, cleanup ledger validation, environment contract and release procedures. The retained R1 `result.json` and `post-check-and-clarification.json` were read as evidence; their old results are not a new live verification. The clarification distinguishes the original uninitialized metadata comparison from the subsequent successful read-only post-check.
+
+H1's external, secret-free evidence directory is `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-h1-20261001-h1-muoz67gb`. It contains `reproduce-r1-guard.mjs`, `verification.json` and a public `neon-openapi-v2.json` snapshot. Its identifier is an investigation record, not a P3B execution or creation receipt. No raw credential-bearing provider response is retained.
+
+### Proven root cause and request trace
+
+The retained R1 custom tool-call source in session `01a0f569-a283-7111-8f44-24c74fe7902c` constructs a fixed base of `https://console.neon.tech/api/v2/projects/` plus `REHEARSAL.project`. The actual call is `const projectData=await api('')`; `api(path,method='GET',body)` defaults to GET. Its exact guard is:
+
+```js
+requireSafe(path.startsWith('/')&&!path.includes('..')&&!path.includes('://'),'API_PATH_DENIED');
+```
+
+Thus the intended request was **GET /api/v2/projects/withered-feather-01662312**. Empty suffix construction reached no normalization, method allowlist or resource classification: the first conjunct failed before `fetch(base+path, ...)`. No network request for that project-root call and no manifest operation followed. The fixed project base was present, but method/resource authorization was absent. The provider would execute only after this guard passed.
+
+Searching committed scripts confirms no `API_PATH_DENIED` implementation, lifecycle `api()` helper, POST/DELETE executor or shared API path/method classifier. `providerPreflight` and `cleanupMetadata` in `scripts/neon-rehearsal-target.mjs` perform fixed-origin native GETs only. The P3A canonical design deliberately delegates provider mutation to a separate authorized lifecycle workflow. The R1 helper was ephemeral and never committed. Altering those existing GET wrappers would not repair the actual failing invocation.
+
+The original predicate also accepts encoded traversal/slash/backslash, duplicate/trailing slashes, query/fragment suffixes and unsupported resources. It accepts any HTTP method for a permitted suffix, including DELETE of either protected branch or an unrecorded branch. These are offline observations about the helper, not provider executions or a claim that every surrounding workflow guard is bypassed. Host/TLS were not relaxed: the original base is fixed HTTPS, redirects are refused, and committed SQL TLS validation remains unchanged.
+
+### Official provider contract, verified 2026-10-01
+
+Current primary evidence is the [Neon API index](https://neon.com/docs/reference/api.md), its linked [release v2 OpenAPI specification](https://neon.com/api_spec/release/v2.json), and [branching API guide](https://neon.com/docs/guides/branching-neon-api.md), fetched without authentication. The saved public specification SHA-256 is `e4a2b8f77f9dcbc6b4b829790829b3a9d5d5df72f16d4a5182063a787780a004`. Public documentation reads are separate from Management API/account calls, which were zero.
+
+The specification's server is exactly `https://console.neon.tech/api/v2`. Only these classes are actually used by the committed P3A GET wrappers or retained R1 invocation:
+
+| Method | Path below /api/v2 | operationId | Use |
+| --- | --- | --- | --- |
+| GET | /projects/{project_id} | getProject | R1 initial project identity |
+| GET | /projects/{project_id}/branches | listProjectBranches | Collision/protected inventory and cleanup absence |
+| GET | /projects/{project_id}/branches/{branch_id} | getProjectBranch | Branch identity/readiness and cleanup recheck |
+| POST | /projects/{project_id}/branches | createProjectBranch | Manifest branch-create, never executed in H1 |
+| DELETE | /projects/{project_id}/branches/{branch_id} | deleteProjectBranch | Same-run disposal, never executed in H1 |
+| GET | /projects/{project_id}/branches/{branch_id}/endpoints | listProjectBranchEndpoints | Compute binding |
+| GET | /projects/{project_id}/branches/{branch_id}/databases | listProjectBranchDatabases | Database/owner binding |
+| GET | /projects/{project_id}/connection_uri | getConnectionURI | R1 disposable bootstrap URI retrieval |
+
+The last operation uses project/branch/endpoint/database/role/pooled parameters; its credential-bearing response must remain memory-only. Role/database provisioning in the retained invocation is SQL, not API role/database creation. No operations endpoint or role endpoint is invoked; none is proposed for an allowlist. The specification supports schema-only root creation using `parent_id` as schema source, a `read_write` endpoint in the creation body, and branch DELETE responses 200/204. No incompatibility with the 55-operation plan was identified from these public contracts; account availability/permissions are untested. Project creation/deletion/configuration mutation, organization/account mutation and alternate hosts remain outside authority.
+
+### Stop and required correction for review
+
+Changing the slash predicate to accept an empty string would cure the immediate symptom but leave H1's required method-aware, resource-aware, canonical deny-by-default policy absent. There is no committed policy to amend or regression-test for lifecycle POST/DELETE. Building and integrating that policy is a provider-boundary implementation, not the presumed narrow allowlist correction. H1 section 19 therefore prohibits proceeding with it here.
+
+A separately reviewed correction must establish one source-controlled canonical request boundary shared by metadata and lifecycle callers: exact approved HTTPS origin/project; explicit method/resource classes from the table; unambiguous pathname/query handling; rejection of traversal, encoded separators, userinfo, malformed/foreign URLs and Unicode confusion; manifest/body validation before branch creation; and same-run receipt plus fresh branch identity validation before exact-ID deletion. Both protected branch IDs/names and production database remain hard denies for mutating targets. The connection_uri query needs exact same-run branch/compute and bootstrap scope, with memory-only credentials. Integrating the external lifecycle caller and writing H1's full 18-case positive/negative policy suite requires review; no mutation executor, endpoint expansion, manifest change or new approval token was introduced here.
+
+### Offline verification, scope and manifest integrity
+
+Node **22.22.0** complete existing offline suite: **159 PASS**, including native GET mocks, project/production-target denials, same-run/partial cleanup, manifest regeneration/source containment inventory, redaction/environment projection and B1/B2 default/gated subprocess refusal. The external pure-predicate reproduction passed **25 assertions**, proving rejection before mocked transport and reproducing missing defenses. It has no fetch or database client; accepted bad cases deliberately document defects and are not security acceptance passes. H1's corrected-policy regression suite is **NOT IMPLEMENTED** under the stop. B1/B2 full SQL/catalog/pool replays and live tests were not run; no changed SQL boundary needs replay.
+
+Non-mutating native `--dry-run`: **BLOCKED_DISPOSABLE_BRANCH_REQUIRED provider_calls=0 database_connections=0 mutations=0**. It never calls project-root metadata and cannot establish that path's acceptance. No credential presence/value inspection was needed. No key was read, printed, hashed, persisted or enumerated; test canaries are synthetic only.
+
+Application lint, targeted lint for all four existing harness modules, typecheck, repository scope/whitespace and existing B4 boundary/sensitive scan passed. The sensitive scan inspected retained B4A build artifacts; no new production build/browser/SQL suite is claimed for this documentation-only stop. All source, dependencies, schema, migration files and the manifest are unchanged. Only this canonical document is modified. No files are staged. The conditional `fix: correct Neon rehearsal API path policy` commit/push is **NOT ELIGIBLE** because no correction/security acceptance exists; HEAD/tracking/remote remain the baseline. This document is left for review.
+
+MANIFEST OPERATIONS: 55
+
+MANIFEST STATUS: REQUEST_ONLY_NOT_EXECUTED
+
+MANIFEST SHA256 BEFORE: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SHA256 AFTER: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SEMANTICS CHANGED: NO
+
+Generated semantic/source inventory matches the reviewed JSON exactly, including 22 migration applications and two deployments. Existing owner authorization remains applicable only to that unchanged manifest; it is not permission to bypass the newly identified provider implementation/review prerequisite.
+
+### Live effects and final gates
+
+PROVIDER READ-ONLY CALLS: 0; PROVIDER MUTATION CALLS: 0; DATABASE CONNECTIONS: 0; NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON DISPOSABLE DATABASES CREATED: 0; NEON DISPOSABLE ROLES CREATED: 0; REMOTE MIGRATION APPLICATIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; DISPOSABLE RESOURCES REMAINING: 0. Resource zero follows prior verified no-creation evidence plus H1's zero creation calls; no fresh account inventory was performed.
+
+PHASE B4B1-P3B-H1: OWNER ACTION REQUIRED; ROOT CAUSE: PROVEN; API PATH POLICY: FAIL; METHOD BINDING: FAIL; PROJECT BINDING: PASS (existing fixed project and authorization checks only; not complete lifecycle policy acceptance); PROTECTED RESOURCE DENIALS: FAIL (existing P3A guards pass, R1 helper path policy does not enforce them); MANIFEST UNCHANGED: YES; MANIFEST AUTHORIZATION STILL APPLICABLE: YES (same 55 operations only; execution blocked); OFFLINE HARNESS: PASS (existing 159 checks; corrected policy acceptance absent); LIVE MUTATIONS: 0; DISPOSABLE RESOURCES REMAINING: 0; P3B-R2 READY: NO; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
+
+## B4B1-P3B-H2 canonical provider boundary
+
+**Date: 2026-10-01 (Europe/London). Result: PASS for security architecture remediation and offline verification.** R2 is ready for programme review, not started or authorized by this engineering result. No Management API/account call, SQL connection, provider/database mutation or resource creation/deletion occurred. Public documentation retrieval is separate from Management API calls. No live Neon compatibility pass is claimed.
+
+### Repository and H1 preservation
+
+The prescribed B4 worktree and `phase/b4-production-readiness` branch started at `192435d9befbdab5eb12289be2226b7e76f4343c`; local, tracking and actual remote feature-branch SHAs matched. The sole pre-existing modification was this document's 79-line H1 addition. It was inspected and copied to external evidence before edits. This H2 section is appended after the complete unchanged H1 record. R1's failure and H1's architectural stop remain historical facts. No reset, main merge, primary-checkout edit or B3 access occurred. B3 remains **UPSTREAM DISCLOSURE BLOCKED**.
+
+H1's external verification/OpenAPI and retained R1 source were inspected. They are historical evidence only, never runtime dependencies. H2 evidence directory: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-h2-20261001`. It contains the H1 preservation copy, current public contract snapshots, verification logs, manifest/source inventory and scope checks, with no real credentials or raw account responses.
+
+### Provider architecture and allowed matrix
+
+`scripts/neon-rehearsal-provider.mjs` is the sole P3 Management API transport. Its frozen explicit operation matrix constructs methods/paths internally. Callers cannot supply URLs, origins, HTTP methods, request bodies, query strings, redirect settings or transport options. Existing metadata preflight/cleanup reads and the new committed lifecycle all invoke it.
+
+All paths below are under exactly `https://console.neon.tech/api/v2/projects/withered-feather-01662312`:
+
+| Operation | Method and suffix | Authority |
+| --- | --- | --- |
+| getProjectMetadata | GET exact project root | fixed project; projected ID/PostgreSQL major/region |
+| listBranches | GET /branches | fixed project; incomplete paginated inventory stops |
+| getBranch | GET /branches/{id} | validated ASCII branch ID; matching returned project/ID |
+| listBranchEndpoints | GET /branches/{id}/endpoints | validated ID; project/branch/region/host/read-write binding |
+| listBranchDatabases | GET /branches/{id}/databases | validated ID; projected name/owner/branch only |
+| createDisposableBranch | POST /branches | unchanged manifest, operator authorization, one session attempt, fresh collision/source checks |
+| getConnectionUri via withBootstrapConnection | GET /connection_uri | authentic same-run receipt; fresh branch/compute/database checks; fixed query; memory-only consumer |
+| deleteSameRunDisposableBranch | DELETE /branches/{id} | authentic same-session receipt, execution UUID, valid ledger, closed cleanup state, fresh provider identity |
+
+No generic `api(path, method, body)` or `deleteBranch(id)` exists. No second provider transport remains in the lifecycle or target module. A saved ledger alone cannot grant delete authority.
+
+### Official Neon contract verification
+
+The current public [API reference](https://neon.com/docs/reference/api.md), linked [release v2 OpenAPI](https://neon.com/api_spec/release/v2.json), [API key concepts](https://neon.com/docs/reference/api/key-concepts.md), and [branch guide](https://neon.com/docs/manage/branches.md) were retrieved on 2026-10-01. OpenAPI SHA-256: `e4a2b8f77f9dcbc6b4b829790829b3a9d5d5df72f16d4a5182063a787780a004`, matching H1's public snapshot. Its server is `https://console.neon.tech/api/v2`.
+
+Verified operationIds: getProject, listProjectBranches, getProjectBranch, createProjectBranch, deleteProjectBranch, listProjectBranchEndpoints, listProjectBranchDatabases, getConnectionURI. All eight are required by the retained lifecycle and existing preflight. No additional endpoint is authorized. Creation accepts 201; delete accepts 200/204. Schema-only uses parent_id as a schema source and creates a root without source rows. One read_write endpoint is part of that creation body.
+
+The generic API description says root branches cannot be deleted; the more specific current branch guide explicitly distinguishes the original project root from deletable backup/schema-only roots. H2 retains only reviewed nondefault/unprotected schema-only root cleanup. Actual account behavior remains untested. Optional expiration remains skipped because OpenAPI describes Early Access availability and account support is unproven. No alternative endpoint or account configuration is introduced.
+
+### Denied matrix, origin/project binding and canonicalization
+
+Everything outside the eight operations is denied: project creation/deletion/PATCH, organization/account/API-key mutations, Auth/Data API, role/database API provisioning, endpoint mutations, billing/plan changes, recovery, branch patch/default/protection changes, arbitrary methods and extra resources. Provisioning remains fixed SQL from the unchanged manifest, confined to the same-run disposable branch.
+
+Exact project and HTTPS origin are constants verified inside the boundary; foreign project/configuration keys fail before transport. A canonical URL is constructed from constants and strict ASCII IDs, then its origin/protocol/credentials/exact pathname and absence of injected query/fragment are checked before fetch. Redirects use `error`; redirected/different final URLs are rejected. TLS remains verified and Node's disable-verification override is refused. The lifecycle additionally refuses private env files and ambient PG/NODE_OPTIONS overrides.
+
+Regressions reject alternate schemes/hosts, absolute/protocol-relative URLs, userinfo/host confusion, traversal/dot segments, encoded traversal/slash/backslash, double encoding, literal backslash, duplicate/trailing slashes, query/fragment injection, malformed percent sequences, controls/NUL, Unicode separators and trailing resources. Authorization cannot inspect one string while fetching a differently interpreted URL.
+
+### Branch creation authorization
+
+Before creation, the boundary verifies exact manifest bytes/SHA-256, full regenerated semantic/source inventory and all 55 operations. It snapshots reviewed data, checks project PostgreSQL 17/region/protected-source identity, and rejects name collisions/incomplete inventories. The only body contains the fixed name, approved source ID, schema-only mode, protected false and one default read_write endpoint. Arbitrary JSON, parent/name/region/expiration/compute/data-copy/protection fields are not accepted. Response metadata must prove a new nondefault/unprotected schema-only root and expected compute.
+
+Only a validated provider creation response creates the immutable in-memory receipt. If the branch is positively receipted but compute validation fails, a partial receipt remains eligible for same-run cleanup. A missing/malformed/ambiguous response cannot be converted into delete authority through a later name search.
+
+### Same-run cleanup authorization
+
+Delete requires the original receipt object from that boundary session, matching execution UUID and exact project/provider branch ID, expected disposable name freshly verified from the provider, matching creation timestamp, existing ledger validation and `EVIDENCE_SAVED_CONNECTIONS_CLOSED`. The lifecycle saves evidence and closes connections first; the boundary independently denies cleanup while its bootstrap consumer is active. Both protected branch IDs are rejected independently even in forged cleanup contexts. Names/prefixes, cloned or stale ledgers, unrecorded IDs, previous UUIDs and mismatched receipts cannot authorize deletion.
+
+### Non-idempotent retry handling
+
+Create/delete each have synchronous one-attempt guards, including concurrent callers. There is no mutation retry loop for timeout, network loss, bad JSON, non-success status or ambiguity. Read-only reconciliation records exact delete-target absence/presence or unreceipted creation-name presence; it never restores mutation authority. Successful DELETE additionally requires exact-ID 404 absence confirmation. A still-present/deleting target, unknown outcome, process loss or missing authentic receipt requires owner reconciliation. No second POST/DELETE, name-based cleanup or resume flag is offered. Generic provider retry guidance does not override this stricter manifest safety policy.
+
+### Secret and connection URI handling
+
+The real API key was not read, printed, hashed, persisted or enumerated in H2. In the implementation it is header-only and excluded from Prisma's environment. Diagnostics contain only fixed classification, approved operation, method and HTTP status. Caught transport errors, response bodies, headers, cookies and causes are discarded. Metadata is projected and identifiers/state/timestamps validated; raw creation/connection responses never enter evidence.
+
+Connection URI parameters are internally fixed to the authenticated same-run branch/compute, copied bootstrap database pyramid_design, bootstrap role pyramid_owner and pooled=false. This is the already-approved schema-only disposable bootstrap context, never production or an application-data test target. Returned endpoint/user/database are validated and verify-full enforced. Use is scoped to a callback, callback errors are suppressed, and the URL password is cleared on exit. Four independent SQL credentials are generated in memory, passed through the existing ephemeral environment path and cleared at closure. JavaScript garbage collection is not secure memory erasure; no stronger guarantee is claimed. All test credentials/canaries are synthetic.
+
+### Lifecycle integration
+
+`scripts/run-phase-b4b1-neon-lifecycle.mjs` commits the previously ephemeral orchestration: manifest/runtime guards; collision-free creation and receipt capture; readiness; isolated bootstrap catalog checks; fixed manifest SQL provisioning; existing runner preflight/migrations/restricted B1/B2/final-contract stages; membership revocation; evidence/connection closure; same-run cleanup. It preserves copied-role/sentinel checks and never repairs production or copied application objects. All provider requests invoke the canonical boundary.
+
+Future approved R2 needs only committed code plus ephemeral authorization/credentials and an external evidence root. The lifecycle generates a fresh UUID and exclusive run directory; previous execution inputs do not resume mutations. **No ad-hoc or ephemeral provider security helper remains required for R2.** Offline --dry-run and future --execute-rehearsal prerequisites are documented in the environment contract. H2 never invokes live execution. No new dependency or package script is introduced.
+
+### Regression and existing harness verification
+
+- Provider regression: **325 PASS**, covering all requested classes plus concurrent calls, active-consumer cleanup refusal, partial creation cleanup, wrong fresh metadata, redirect/TLS failures, 200/204 deletion, incomplete inventory and URI callback errors. Transport is mocked; synthetic IDs are not represented as live resources.
+- Lifecycle integration: **49 PASS across seven mocked scenarios**: success, SQL failure, migration/verification failure, ambiguous creation/deletion, and partial compute receipt. Node 22 test-only module mocks replace all SQL, child/suite effects and provider transport. This verifies orchestration/cleanup/evidence, not Neon or SQL compatibility. Production code exposes no test bypass.
+- Existing full offline P3 harness: **159 PASS**, including unchanged manifest/source regeneration, protected targets, partial/complete cleanup, redaction and B1/B2 default/gated subprocess refusal. Local-default B1/B2 entry paths are exercised before any connection. Full mutating B1/B2 SQL/catalog/pool replays are **NOT RUN** under H2's zero-database-mutation restriction; historical counts are not re-claimed.
+- Application/targeted lint, typecheck, production build and post-build typecheck: **PASS**. Build environment excludes provider credentials. Application/runtime/schema/dependencies are unchanged; B3 acceptance is not implied.
+- Scope/whitespace and B4 sensitive-content scan: **PASS**, zero findings against the fresh build; 96 browser assets and 34 documented environment consumers. Source inventory and staged scope/scan are regenerated at closure. No dependency-audit waiver or B3 re-audit is claimed.
+
+Offline Node 22 commands: `node scripts/verify-phase-b4b1-provider.mjs`; `node --experimental-test-module-mocks scripts/verify-phase-b4b1-lifecycle.mjs`; `node scripts/verify-phase-b4b1-neon.mjs`. Node's experimental module-mocking warning is expected and test-only.
+
+### Manifest integrity and source-bound evidence
+
+MANIFEST OPERATIONS: 55
+
+MANIFEST STATUS: REQUEST_ONLY_NOT_EXECUTED
+
+MANIFEST SHA256 BEFORE: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SHA256 AFTER: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SEMANTICS CHANGED: NO
+
+Regeneration matches the checked-in JSON exactly, including migration checksums, 22 applications/two deployments and complete seed/B1/B2 containment inventory. H2's external inventory also hashes provider, lifecycle, integration, existing runner/target/manifest and regression modules. Evidence is never a runtime dependency. Existing manifest authorization remains applicable only to that unchanged scope; R2 still requires programme review.
+
+### Live verification, effects and release
+
+Optional authenticated provider checks were not needed and were not run. **PROVIDER READ-ONLY CALLS: 0; PROVIDER MUTATION CALLS: 0; DATABASE CONNECTIONS: 0; DATABASE MUTATIONS: 0; NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; NEON DISPOSABLE DATABASES CREATED: 0; NEON DISPOSABLE ROLES CREATED: 0; REMOTE MIGRATION APPLICATIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; DISPOSABLE RESOURCES REMAINING: 0.** Resource zero follows retained R1/H1 no-creation evidence plus H2 zero creation calls, not a fresh inventory.
+
+Release scope: exactly eight files comprising this H1/H2 record, environment documentation, canonical provider, lifecycle, two new regression suites, target integration and one existing mock response's explicit HTTP status. No manifest/package/lock/schema/migration/B1/B2 source/application change. Conditional commit: `fix: secure Neon rehearsal provider boundary`, feature-branch-only normal push after staged gates. Final local/tracking/remote SHA and clean state belong in external release evidence/report, avoiding a self-referential source hash.
+
+PHASE B4B1-P3B-H2: PASS; CANONICAL PROVIDER BOUNDARY: PASS; LIFECYCLE INTEGRATION: PASS; ORIGIN BINDING: PASS; PROJECT BINDING: PASS; METHOD/RESOURCE BINDING: PASS; CANONICALIZATION: PASS; CREATE-BRANCH CONTRACT: PASS; SAME-RUN DELETE CONTRACT: PASS; NON-IDEMPOTENT RETRY SAFETY: PASS; SECRET REDACTION: PASS; PROTECTED RESOURCE DENIALS: PASS; MANIFEST UNCHANGED: YES; MANIFEST AUTHORIZATION STILL APPLICABLE: YES; OFFLINE HARNESS: PASS; PROVIDER MUTATIONS: 0; DATABASE MUTATIONS: 0; DISPOSABLE RESOURCES REMAINING: 0; P3B-R2 READY: YES (for programme review, execution not started); B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.

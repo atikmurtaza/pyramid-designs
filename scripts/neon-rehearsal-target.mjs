@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import pg from "pg";
 import { REHEARSAL, requireSafe, validateLedger, migrationInventory } from "./neon-rehearsal-manifest.mjs";
 import { inspectDatabase } from "./production-database-readiness.mjs";
+import { createNeonProvider } from "./neon-rehearsal-provider.mjs";
 
 export function authorization(e) {
   requireSafe(e.P3_BRANCH_ID, "BLOCKED_DISPOSABLE_BRANCH_REQUIRED");
@@ -70,29 +71,26 @@ export function validateBranch(auth, branch, ledger, ready = true) {
 
 export async function cleanupMetadata(e, auth, ledger) {
   requireSafe(e.P3_NEON_API_KEY?.trim(), "PROVIDER_METADATA_CREDENTIAL_REQUIRED");
+  const provider = createNeonProvider({ project: auth.project, apiKey: e.P3_NEON_API_KEY });
   let branch;
   try {
-    const response = await fetch(`https://console.neon.tech/api/v2/projects/${auth.project}/branches/${auth.branchId}`, {
-      method: "GET", redirect: "error", headers: { Authorization: `Bearer ${e.P3_NEON_API_KEY}` }, signal: AbortSignal.timeout(10_000) });
-    requireSafe(response.ok, "PROVIDER_METADATA_UNAVAILABLE"); branch = (await response.json()).branch;
+    branch = await provider.getBranch(auth.branchId);
   } catch { throw new Error("PROVIDER_METADATA_UNAVAILABLE"); }
+  finally { provider.close(); }
   return validateBranch(auth, branch, ledger, false);
 }
 
 // Native authenticated GETs only. No caller-supplied snapshots can authorize CLI execution.
 export async function providerPreflight(e, auth, ledger) {
   requireSafe(typeof e.P3_NEON_API_KEY === "string" && e.P3_NEON_API_KEY.trim().length > 0, "PROVIDER_METADATA_CREDENTIAL_REQUIRED");
-  const base = `https://console.neon.tech/api/v2/projects/${auth.project}/branches/${auth.branchId}`;
-  async function get(path) {
-    try {
-      const response = await fetch(base + path, { method: "GET", redirect: "error",
-        headers: { Authorization: `Bearer ${e.P3_NEON_API_KEY}` }, signal: AbortSignal.timeout(10_000) });
-      requireSafe(response.ok, "PROVIDER_METADATA_UNAVAILABLE");
-      return await response.json();
-    } catch { throw new Error("PROVIDER_METADATA_UNAVAILABLE"); }
-  }
-  const [branch, endpoints, databases] = await Promise.all([get(""), get("/endpoints"), get("/databases")]);
-  const provider = { branch: branch.branch, endpoints: endpoints.endpoints, databases: databases.databases };
+  const boundary = createNeonProvider({ project: auth.project, apiKey: e.P3_NEON_API_KEY });
+  let provider;
+  try {
+    const [branch, endpoints, databases] = await Promise.all([boundary.getBranch(auth.branchId),
+      boundary.listBranchEndpoints(auth.branchId), boundary.listBranchDatabases(auth.branchId)]);
+    provider = { branch, endpoints, databases };
+  } catch { throw new Error("PROVIDER_METADATA_UNAVAILABLE"); }
+  finally { boundary.close(); }
   return { provider, endpoint: validateProvider(auth, provider, ledger) };
 }
 
