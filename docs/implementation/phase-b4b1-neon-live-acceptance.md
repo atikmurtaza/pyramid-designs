@@ -1,5 +1,7 @@
 # Phase B4B1 — Neon live compatibility and recovery acceptance
 
+**Latest P3B-R3 update, 2026-10-01:** The owner-authorized single diagnostic retry returned HTTP 412 at branch creation. H3 safely persisted `PRECONDITION_FAILED`, but the structured provider message was outside its reviewed vocabulary and was omitted. The provider-specific cause remains unknown. Execution stopped before a creation receipt or SQL connection; no existing-manifest continuation was possible. Read-only reconciliation and the separate post-check found the disposable name absent and both programme-protected branches present. Result: **OWNER ACTION REQUIRED**. This retry authorization is consumed; no further mutation attempt was made. See [B4B1-P3B-R3 single diagnostic retry](#b4b1-p3b-r3-single-diagnostic-retry).
+
 **Latest P3B-R2 update, 2026-10-01:** The unchanged committed H2 lifecycle reached Neon, but its sole branch-creation POST returned HTTP 412. Forward execution stopped before a creation receipt or SQL connection. Committed read-only reconciliation returned `CREATE_NAME_ABSENT_NO_RETRY`; a separate canonical-boundary post-check confirmed the disposable name absent and both protected branches present. Result: **OWNER ACTION REQUIRED**, with no live architecture acceptance. No creation retry, DELETE, harness repair or production action occurred. See [B4B1-P3B-R2 live disposable rehearsal](#b4b1-p3b-r2-live-disposable-rehearsal). The lifecycle's conservative unknown-resource classification is preserved and distinguished from the later observed zero-resource inventory below.
 
 **Latest H1 update, 2026-10-01:** Root cause is proven in the retained ephemeral R1 lifecycle invocation, not the committed P3A harness. Its empty project-root GET suffix failed a slash-only guard before fetch. The same helper has no method/resource allowlist or canonicalization; permitting the empty suffix alone cannot meet H1's required security boundary. H1 section 19's material-incompleteness stop applies. See [B4B1-P3B-H1 path-policy investigation and stop](#b4b1-p3b-h1-path-policy-investigation-and-stop). Result: OWNER ACTION REQUIRED; no harness correction, commit/push, Management API call, SQL connection or mutation; R2 NOT READY and NOT STARTED.
@@ -1131,3 +1133,45 @@ B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED
 PRODUCTION DEPLOYMENT: NO
 
 NEXT PHASE: NOT STARTED
+
+## B4B1-P3B-R3 single diagnostic retry
+
+**Date: 2026-10-01 (Europe/London). Result: OWNER ACTION REQUIRED.** Direct owner authorization: `AUTHORIZE_B4B1_P3B_R3_SINGLE_DIAGNOSTIC_RETRY_AND_EXISTING_MANIFEST_CONTINUATION`. This authorizes one attempt through the committed H3 lifecycle and continuation of the unchanged manifest if its gates pass. It does not authorize request changes, broader error capture, additional retries, provider/account changes or production work.
+
+### Baseline and verification
+
+The designated B4 worktree began clean on `phase/b4-production-readiness`. Local HEAD, tracking branch and actual remote feature branch matched `748e2a78f146c90a8d08636fee58fa509b7cc494`. The primary checkout's unrelated work was preserved; B3 was not entered or modified.
+
+Node 22.22.0 was used. The committed lifecycle dry run passed with 55 operations, zero provider calls and zero database connections. Fresh offline checks passed: provider boundary 356, error projection 535, lifecycle 268 across 25 scenarios, and existing harness 159. These 1,318 checks are offline evidence, not live acceptance. No application implementation, dependency, schema, migration, provider boundary or lifecycle change was made; application lint/typecheck/build were not rerun for this execution and documentation-only record.
+
+Manifest SHA-256 before and after: `28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8`. Its 55 operations and `REQUEST_ONLY_NOT_EXECUTED` review artifact remain unchanged. Actual execution status is recorded separately. All 290 tracked files matched their initial hashes immediately after execution, before this documentation update.
+
+### Single attempt and diagnostic limit
+
+Execution UUID: `5f74148a-7198-425a-97b9-774a6b709220`. The unmodified committed lifecycle was invoked once with the existing disposable-only authorization value under the owner's R3 authorization. An exclusive external attempt marker prevents accidental replay of that invocation. The external observer retained only HTTP methods/statuses and approved projected metadata; it did not inspect or persist request headers, response bodies or connection material.
+
+The exact existing schema-only branch POST returned **412**. Lifecycle stage: `branch-create`; fixed failure: `LIFECYCLE_STOPPED`; forward execution stopped. Persisted diagnostic: operation `createDisposableBranch`, method `POST`, `errorBody: STRUCTURED`, `messagePolicy: OMITTED_UNREVIEWED`, classification `MUTATION_RECONCILIATION_REQUIRED`, HTTP classification `PRECONDITION_FAILED`, provider retry classification `NOT_DOCUMENTED_SAFE`, and `retryPolicy: NO_RETRY_RECONCILE_ONLY`. Neither provider-specific code nor message was retained.
+
+The response satisfied the structured error shape, but its reason was not approved for retention by the closed vocabulary. **SAFE_PROVIDER_REASON_SUPPRESSED.** No raw body was saved or recovered, and no diagnostic vocabulary was widened. R2 and R3 now establish two HTTP 412 responses to the unchanged creation request; the failure is reproducible at the HTTP-status level. **Provider-specific root cause: UNKNOWN_AFTER_SINGLE_SAFE_DIAGNOSTIC_RETRY.** No account/plan, Beta capability, schema-only eligibility, source-branch, project-state or request defect is established by this evidence. No provider/account/request remedy is justified.
+
+### Reconciliation, effects and stop
+
+The provider recorded `creationAttempted: true`, `deletionAttempted: false`, and `CREATE_NAME_ABSENT_NO_RETRY`. No successful event, branch ID, creation receipt or ledger was produced. Existing-manifest provisioning, migrations, runtime acceptance and synthetic suites were not reached.
+
+Calls: **4 authenticated GETs, 1 creation POST returning 412, 0 DELETEs**. Database connections, SQL mutations, migration applications, production mutations and real candidate data access: **0**. The final complete branch inventory contained only the two existing programme-protected identities; the exact disposable name was absent. **Observed disposable resources remaining: 0.** This observation does not rewrite the lifecycle's conservative `disposableResourcesRemaining: UNKNOWN` and `cleanup: OWNER_RECONCILIATION_REQUIRED` result after an attempted creation without a receipt. No cleanup mutation was performed.
+
+Evidence root: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-r3-20261001` (prevalidation, attempt marker, method/status counts, lifecycle summary, post-check and integrity). Canonical lifecycle result: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-5f74148a-7198-425a-97b9-774a6b709220\result.json`.
+
+The single R3 retry is consumed. Further diagnostic engineering or provider investigation must be separately scoped; another POST is not authorized by this run. No continuation was possible, no additional retry was made, and no production or next-phase action was started. The owner's complete R3 instructions authorize the documentation-only commit `docs: record Neon diagnostic retry result` and a normal push solely to `phase/b4-production-readiness`. The later arrival of those detailed instructions does not renew the already-consumed POST allowance. Exact release identity and final clean-worktree verification are retained externally.
+
+Final documentation verification: whitespace check passed; B4 boundary/sensitive scan passed (326 files, one changed document, 96 existing client assets, 34 environment consumers, zero bounded-pattern findings). The scan used retained build artifacts; it is not a fresh application build. Exact API credential exclusion and protected-file hash verification also passed.
+
+### Unreached gates and programme decision
+
+Disposable branch: NOT_CREATED based on the rejected POST, absent receipt and two absence observations. Schema-only verification: NOT_RUN. Both proposed databases, both operators, both runtime identities and both capability roles: NOT_CREATED. B1 migrations: NOT_RUN (0/11); B2 migrations: NOT_RUN (0/11). B1/B2 live suites and pooled-runtime assertions: NOT_RUN (0 executed). Direct transport, pooled runtime and final contract: NOT_RUN. Live Neon architecture compatibility: FAIL to achieve acceptance; this does not establish a PostgreSQL or application incompatibility.
+
+Cleanup action: NOT_REQUIRED on the observed inventory; no authentic same-run resource existed to authorize DELETE. The original conservative lifecycle reconciliation status remains preserved as described above. API credential: PRESENT_AND_ACCEPTED for authenticated GETs; successful GETs do not independently establish POST privilege or feature entitlement.
+
+Provider mutation calls: 1 attempted POST, 0 successful creations, 0 deletions. Disposable databases/roles created: 0. Remote migration applications: 0. B1 assertions: 0; B2 assertions: 0; pool assertions: 0. Production database connections, database mutations, role mutations, migrations and data writes: 0. Real candidate data accessed: NO. Disposable resources remaining: 0 observed. B3 worktree touched: NO; its programme security gate remains UPSTREAM DISCLOSURE BLOCKED. Production deployment: NO. Next phase: NOT_STARTED.
+
+**Narrowest next gate, recommended only:** programme review of the repeated 412 and safe-reason suppression, followed by a separately authorized provider-precondition investigation that requires no creation POST. Determine whether existing account-side records or a provider-supported diagnostic route can identify the precondition without exposing raw response content or changing resources. No projector change, account remedy, provider contact or further execution is authorized or started by this recommendation. B4B1-P4 is not ready.
