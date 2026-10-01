@@ -999,3 +999,135 @@ Disposable live Neon architecture compatibility is **not established**. The stop
 The next appropriate gate is programme review of the HTTP 412 creation failure and its missing provider-specific reason, followed by a separately scoped read-only investigation/remediation decision if required. This R2 attempt is stopped; no retry or engineering phase is started. A future successful disposable rehearsal would still require a separate production migration/provisioning/data-disposition and recovery decision before B4B1-P4 or other provider acceptance. No plan change, restore, Hostinger/Auth/Drive/Resend/Turnstile acceptance, DNS change, deployment or B3 work occurred.
 
 PHASE B4B1-P3B-R2: OWNER ACTION REQUIRED; MANIFEST AUTHORIZATION: VERIFIED; H2 PROVIDER BOUNDARY: VERIFIED (offline security gates; creation returned 412); API CREDENTIAL: PRESENT_AND_ACCEPTED (metadata); DISPOSABLE BRANCH: NOT_CREATED; SCHEMA-ONLY BRANCH: NOT_RUN; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance not established); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED (fresh absence observed; original lifecycle owner-reconciliation flag preserved); DISPOSABLE RESOURCES REMAINING: 0 observed; PRODUCTION DATABASE CONNECTIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; MANIFEST UNCHANGED: YES; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
+
+## B4B1-P3B-H3 HTTP 412 diagnostic and safe error projection
+
+**Date: 2026-10-01 (Europe/London). Result: OWNER ACTION REQUIRED for the unknown provider precondition; safe diagnostic remediation PASS.** H3 made no provider mutation and opened no database connection. The R2 POST was not replayed. R3 is not started, and improved diagnostics do not resolve the historical 412.
+
+### Repository and controls
+
+The designated B4 checkout began clean on `phase/b4-production-readiness` at `be10ca1ef143fd13601e39b97c9a89993bc361b8`, `docs: record Neon live rehearsal result`. Local HEAD, tracking `origin/phase/b4-production-readiness`, and the remote feature branch matched. Review covered AGENTS, Phase A, ADRs 0017/0018, the canonical P3A/P3B/R1/H1/H2/R2 records, provider/lifecycle/runner/target/manifest modules, offline and redaction/cleanup tests, and production environment/release controls. Main was not merged; B3 was not entered, read or changed. B3 remains **UPSTREAM DISCLOSURE BLOCKED**.
+
+External H3 evidence: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-h3-20261001`. Public documentation snapshots and projected account observations are evidence only, never runtime dependencies. Existing R2 evidence and historical acceptance text are preserved.
+
+### R2 failure reconstruction and exact safe request
+
+Retained `r2-observations.json` and `result.json` for UUID `70353db8-e538-4da3-b1db-02ad846f1bea` establish one creation POST with HTTP 412, followed by read-only reconciliation `CREATE_NAME_ABSENT_NO_RETRY`. There was no successful creation response or receipt, no PostgreSQL connection, no SQL mutation and no DELETE. H2 discarded the entire provider error body; the lifecycle also discarded structured diagnostics when persisting the stopped stage. No retained source supplies the provider-specific reason.
+
+The committed H2 body construction and unchanged manifest produce exactly this non-secret projection:
+
+```json
+{
+  "operation": "createDisposableBranch",
+  "method": "POST",
+  "project": "withered-feather-01662312",
+  "path": "/api/v2/projects/withered-feather-01662312/branches",
+  "body": {
+    "branch": {
+      "name": "b4b1-p3-schema-only-20261001",
+      "parent_id": "br-still-lab-b3q03yuz",
+      "init_source": "schema-only",
+      "protected": false
+    },
+    "endpoints": [{ "type": "read_write" }]
+  },
+  "expiration": "OMITTED",
+  "endpointRegion": "OMITTED_PROJECT_DEFAULT"
+}
+```
+
+The manifest's expected resulting root has `parent_id: null`; that is not the wire request. H2 sends the approved `sourceBranch` as `parent_id` to select the schema source. It sends neither `default`, TTL, region, compute size, settings, PostgreSQL version nor a password. The project region is Singapore. No request header, credential or connection URI is included in this projection.
+
+### Current official contract and historical distinction
+
+Official Neon material was fetched afresh on 2026-10-01, without authentication. Primary sources: [release v2 OpenAPI](https://neon.com/api_spec/release/v2.json), [Create branch](https://neon.com/docs/reference/api/branches/create-project-branch), [schema-only guide](https://neon.com/docs/guides/branching-schema-only), [branch management](https://neon.com/docs/manage/branches), [plans](https://neon.com/docs/introduction/plans), [branch expiration](https://neon.com/docs/guides/branch-expiration), [API keys](https://neon.com/docs/manage/api-keys), [roles](https://neon.com/docs/manage/roles), and [regions](https://neon.com/docs/introduction/regions). Current OpenAPI SHA-256: `e4a2b8f77f9dcbc6b4b829790829b3a9d5d5df72f16d4a5182063a787780a004`. Its matching historical H2 hash does not substitute for this fresh retrieval.
+
+**CURRENT OFFICIAL CONTRACT:** `createProjectBranch` uses the stated POST path and a required project path parameter. A body is generally optional. The schema-only guide requires the schema source branch ID; the request supplies it. `init_source: schema-only` creates an independent root while `parent_id` selects the source. `parent-schema` is a different mode and is not silently substituted. Name, source ID, initialization mode and false protection are supported fields. One `read_write` endpoint is supported; endpoint `type` is its required field. No required field is missing, and no sent field is unsupported or marked deprecated in the current schema. No incompatible combination is established by these public contracts. Default compute options inherit provider/project behavior; actual account defaults are not proved by the manifest's Free-plan wording.
+
+The schema-only product guide currently labels the feature/API Beta. It describes root allowances of Free 3, Launch 5, Scale 25 and schema-only storage allowances of 0.5/3/20 GB; Free storage is shared at project level. Current plan documentation lists 10 included branches on Free/Launch and 25 on Scale, with paid hard limits separately documented. Such published limits are not an authenticated plan classification or proof of available account capability.
+
+Paid plans support branch protection. The requested target is unprotected; the observed source also has Neon `protected: false`. The original project root has deletion restrictions, while the branch guide distinguishes disposable schema-only/backup roots. That difference concerns disposal, not proof of the 412 cause. Source role/password isolation remains unproved: general role documentation describes copying roles to child branches and privileged Console/API/CLI roles; it does not establish independent passwords on this schema-only root. No role/password/ACL inspection or repair occurred.
+
+Singapore is a documented region, and live project metadata reports PostgreSQL 17. The reviewed creation/schema-only contract documents no applicable PG17 or Singapore prohibition. Absence of a published restriction is not account acceptance. API keys may be personal, organization-wide or project-scoped; personal rights depend on access, and project-scoped keys have Editor access. Successful GETs do not identify this key's type or prove POST permission. No credential scope/account endpoint was added.
+
+**HISTORICAL DOCUMENTATION:** Earlier H1/H2/R2 evidence remains historical. H2's expiration omission cited the OpenAPI EAP note, which is still present in the freshly retrieved schema/API page. The current product expiration guide gives ordinary Console/CLI/API usage and explicit API TTL rather than a default. This is a current documentation discrepancy, not evidence that this account has or lacks expiration access. Expiration was not sent and cannot be blamed for the 412 from that fact alone. Old EAP claims are not used to establish schema-only capability. No Beta/EAP enrollment or feature toggle occurred.
+
+**INFERENCE:** The observed two branches/one root are below the published ordinary Free branch/root allowances, which weakens a simple count-limit explanation. Current metadata is not a retrospective account/quota snapshot for the failed POST; plan, storage, compute quota, feature gating and transient project/source conditions remain unknown. Beta status alone proves no restriction. Public creation/error documentation gives no specific mapping from HTTP 412 to the relevant precondition.
+
+### Approved read-only provider findings and capability
+
+Presence-only inspection found `P3_NEON_API_KEY` present; the value remained in memory and authenticated headers. Four initial requests used the committed boundary: project, branch inventory, exact source detail and source endpoint inventory. Project/inventory/source projections passed. Source endpoint projection failed closed with `PROVIDER_COMPUTE_MISMATCH`; the H2 validator requires its approved disposable-compute shape and did not return source compute metadata. No raw endpoint object was retained or inspected as a workaround, and no projection/resource/method was broadened. Thus source compute properties remain NOT_CONFIRMED, and this local validation failure does not establish the remote POST's cause.
+
+Observed project: `withered-feather-01662312`, `aws-ap-southeast-1`, PostgreSQL 17. Complete inventory: two branches, one root. `migration-baseline` / `br-still-lab-b3q03yuz` is ready/default/root with no parent and Neon protection false. `migration-synthetic-verification` / `br-square-resonance-b3ew5c59` is archived/nondefault, sourced from the baseline and Neon protection false. Both are programme-protected resources irrespective of the provider protection flag. The disposable name is absent. Plan classification is **NOT_EXPOSED_BY_APPROVED_READ_SURFACES**; historical Free references are not current authenticated plan evidence.
+
+Neither the approved projections nor the reviewed public create/project schema exposes an applicable schema-only capability indicator. **SCHEMA_ONLY_CAPABILITY: NOT_EXPOSED_BY_APPROVED_READ_SURFACES.** No branch was created as a capability test. No account/organization endpoint, Data API, Neon Auth, plan upgrade, manual Console operation or beta enrollment was used.
+
+### HTTP 412 root cause and programme decision
+
+**Root-cause classification: UNKNOWN_REQUIRES_SAFE_DIAGNOSTIC_RETRY.** No authoritative evidence proves a request-contract, project-state, account/plan, source-branch or feature restriction. The R2 error body is irrecoverable from the retained evidence. H3 does not claim the 412 is resolved.
+
+No manifest change is justified by present evidence. No alternative source, branch type/body, endpoint sequence or provider action is selected. The unchanged manifest authorization remains applicable to its original scope; it does not authorize a retry under H3. **R3 SAFE DIAGNOSTIC RETRY REQUIRES EXPLICIT AUTHORIZATION.** Any future proposal that changes semantics or requires provider action must return for manifest/authorization review before execution. R3 and all later phases remain NOT_STARTED.
+
+### Safe diagnostic remediation
+
+The canonical boundary now reads at most 8,192 error-body bytes before strict UTF-8/JSON parsing and cancels oversized streams. The current `GeneralError` contract defines required string `code`/`message` and optional `request_id`; its error-code type has no enum. Merely matching a code regex or stripping credential syntax cannot prove arbitrary caller-controlled text safe. H3 therefore uses a closed reviewed code/message vocabulary, not free-text redaction. Recognized tokens are synthetic-tested, not claimed as a documented Neon code enum or evidence of this account's cause. Unrecognized values are omitted while status/operation/local HTTP classification remain available. This deliberately limits diagnostic coverage for unfamiliar provider reasons.
+
+Allowed messages are at most 160 characters, codes at most 64; printable ASCII only, single-line space normalization, exact vocabulary match and credential/canary/sensitive-syntax rejection. URI credentials, PostgreSQL connection strings, Authorization/Bearer, password/token/key, cookies and DSN content are omitted entirely. Controls/multiline data are rejected rather than flattened into a retained reason. Arbitrary nested fields, raw text/JSON, headers and causes never enter diagnostics. Request IDs are omitted because the contract permits caller-supplied values and provides no secret-free guarantee.
+
+Frozen projections are privately branded with a WeakMap. Only errors minted by this boundary can supply lifecycle evidence; arbitrary caught `diagnostic` properties are not trusted. Approved diagnostics survive request handling, bootstrap callback wrapping and create/delete read-only reconciliation, then persist at `failure.providerDiagnostic` or `cleanupDiagnostic`. Thrown messages remain fixed local codes. No logging was added.
+
+Local policy still allows no automatic retry. Official 423/503 retry advice is recorded separately as `DOCUMENTED_RETRYABLE`; it never reopens POST/DELETE latches or overrides authorization. Ambiguous transport failures retain `NETWORK_OUTCOME_UNKNOWN` with null status and reconciliation-only mutation policy. Receipt/cleanup/connection/target guards and exact creation body remain unchanged.
+
+### Regression, integrity and scope verification
+
+Node 22.22.0 offline suites: provider boundary **356 PASS**; error projection **535 PASS / 33 cases**; lifecycle **268 PASS / 25 scenarios**; original offline harness **159 PASS**. Tests cover safe 400/401/403/409/412, safe code/reason, canaries, Bearer, URI/DSN/password/token/key/cookie material, controls/multiline, invalid JSON/HTML/large/streaming bodies, nested objects, unknown code/message omission, credential-vocabulary collision, ambiguous transport, 423/503, immutable/forged projection handling, evidence preservation, protected resources, cleanup and no mutation retries. No real credential or real PostgreSQL client participates. Assertions verify exclusion from thrown/serialized/inspected errors, evidence, captured stdout/stderr and canonical acceptance text.
+
+Application and targeted script lint, typecheck, manifest regeneration/source inventory, scope/sensitive scans and `git diff --check` passed. The provider and lifecycle are outside Next's source/build imports and TypeScript application scope; a production rebuild is **NOT_REQUIRED / NOT_RUN** under the conditional build requirement. The boundary scan uses retained H2 application build artifacts and does not claim a fresh build. Mutating local SQL/live suites are NOT_RUN under H3's zero-database-connection rule.
+
+MANIFEST OPERATIONS: 55
+
+MANIFEST STATUS: REQUEST_ONLY_NOT_EXECUTED
+
+MANIFEST SHA256 BEFORE: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SHA256 AFTER: 28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8
+
+MANIFEST SEMANTICS CHANGED: NO
+
+Only six files change: this canonical record, provider error projection, lifecycle diagnostic persistence, the existing provider/lifecycle tests and the new error-projection regression. No application, dependency, schema, migration, manifest, production configuration, business/security contract or B3 change. Conditional commit: `fix: preserve safe Neon provider diagnostics`, normal push only to `phase/b4-production-readiness`. Exact final local/tracking/remote identities and release checks are external evidence to avoid self-reference.
+
+### Read-only post-check and live effects
+
+One final approved branch-inventory GET confirmed both exact programme-protected branches remain present with the observed classifications and the disposable branch remains absent. Total H3 account calls: **5 GET**, including the initial source endpoint GET whose local projection failed. Public documentation retrievals are separate unauthenticated reads. No connection URI, row data or SQL catalog was requested.
+
+PROVIDER READ-ONLY CALLS: 5; PROVIDER MUTATION CALLS: 0; DATABASE CONNECTIONS: 0; NEON DISPOSABLE BRANCHES CREATED: 0; NEON DISPOSABLE BRANCHES DELETED: 0; REMOTE MIGRATION APPLICATIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; DISPOSABLE RESOURCES REMAINING: 0 observed. No resource cleanup was necessary or authorized. Git commit/push is the only requested release effect; production deployment remains NO.
+
+PHASE B4B1-P3B-H3: OWNER ACTION REQUIRED
+
+HTTP 412 ROOT CAUSE: UNKNOWN_REQUIRES_SAFE_DIAGNOSTIC_RETRY
+
+SAFE PROVIDER ERROR PROJECTION: PASS
+
+SCHEMA_ONLY_CAPABILITY: NOT_EXPOSED
+
+MANIFEST UNCHANGED: YES
+
+MANIFEST AUTHORIZATION STILL APPLICABLE: YES (original unchanged scope only; H3 authorizes no retry)
+
+PROVIDER MUTATIONS: 0
+
+DATABASE CONNECTIONS: 0
+
+PRODUCTION DATABASE MUTATIONS: 0
+
+DISPOSABLE RESOURCES REMAINING: 0
+
+R3: R3 SAFE DIAGNOSTIC RETRY REQUIRES EXPLICIT AUTHORIZATION
+
+B3 WORKTREE TOUCHED: NO
+
+B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED
+
+PRODUCTION DEPLOYMENT: NO
+
+NEXT PHASE: NOT STARTED

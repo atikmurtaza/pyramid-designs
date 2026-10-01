@@ -80,12 +80,59 @@ export async function validateReviewedManifest(manifest) {
   return reviewed;
 }
 
-// Errors contain only local classifications and an allowlisted operation/method/status.
-// Never retain a transport error, response text, headers, URI or `cause`.
-function failure(operation, status, classification) {
+// GeneralError defines code/message as unrestricted strings. A regex alone cannot
+// prove they are secret-free. Only this closed vocabulary can cross the boundary;
+// unfamiliar reasons remain suppressed. request_id is caller-controlled: omit it.
+const safeCodes = new Set(["BAD_REQUEST", "UNAUTHORIZED", "FORBIDDEN", "CONFLICT", "PRECONDITION_FAILED", "LOCKED", "SERVICE_UNAVAILABLE"]);
+const safeMessages = new Set(["Bad request", "Unauthorized", "Forbidden", "Conflict", "Precondition failed", "Resource is locked", "Service unavailable",
+  "Schema-only branching is not enabled for this project"]);
+const diagnostics = new WeakMap();
+export function safeProviderDiagnostic(error) { return diagnostics.get(error); }
+function reviewedText(value, apiKey, vocabulary, maximum) {
+  if (typeof value !== "string" || value.length > maximum || /[^\x20-\x7e]/.test(value) ||
+    value.toLowerCase().includes(apiKey.toLowerCase()) ||
+    /canary|:\/\/|authorization|bearer|password|token|api[-_ ]?key|cookie|dsn|connection[-_ ]?string/i.test(value)) return undefined;
+  const normalized = value.trim().replace(/ +/g, " ");
+  return vocabulary.has(normalized) ? normalized : undefined;
+}
+async function errorProjection(response, apiKey) {
+  // Bound bytes before parsing; never use text()/json() on an untrusted error.
+  const reader = response.body?.getReader();
+  if (!reader) return { errorBody: "OMITTED_UNAVAILABLE" };
+  try {
+    const chunks = []; let length = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > 8192) return { errorBody: "OMITTED_TOO_LARGE" };
+      chunks.push(Buffer.from(value));
+    }
+    const data = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)));
+    if (!data || Object.getPrototypeOf(data) !== Object.prototype ||
+      typeof data.code !== "string" || typeof data.message !== "string") return { errorBody: "OMITTED_INVALID" };
+    const providerCode = reviewedText(data.code, apiKey, safeCodes, 64);
+    const providerMessage = reviewedText(data.message, apiKey, safeMessages, 160);
+    return { errorBody: "STRUCTURED", ...(providerCode ? { providerCode } : {}),
+      ...(providerMessage ? { providerMessage } : {}),
+      messagePolicy: providerMessage ? "REVIEWED_VOCABULARY" : "OMITTED_UNREVIEWED" };
+  } catch { return { errorBody: "OMITTED_INVALID" }; }
+  finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+}
+
+// Never retain transport errors, raw bodies, nested metadata, headers or causes.
+function failure(operation, status, classification, projection = {}) {
   const error = new Error(`PROVIDER_${classification}`);
-  error.diagnostic = Object.freeze({ operation, method: PROVIDER_OPERATIONS[operation][0],
-    status: Number.isInteger(status) ? status : null, classification });
+  const method = PROVIDER_OPERATIONS[operation][0];
+  const httpClassification = ({ 400: "BAD_REQUEST", 401: "UNAUTHENTICATED", 403: "FORBIDDEN", 409: "CONFLICT",
+    412: "PRECONDITION_FAILED", 423: "LOCKED", 503: "UNAVAILABLE" })[status] ?? (status === null ? "NETWORK_OUTCOME_UNKNOWN" : "UNEXPECTED_RESPONSE");
+  const diagnostic = Object.freeze({ ...projection, operation, method,
+    status: Number.isInteger(status) ? status : null, classification, httpClassification,
+    providerRetryClassification: [423, 503].includes(status) ? "DOCUMENTED_RETRYABLE" :
+      method === "GET" ? "IDEMPOTENT_READ" : "NOT_DOCUMENTED_SAFE",
+    retryPolicy: method === "GET" ? "NO_AUTOMATIC_RETRY" : "NO_RETRY_RECONCILE_ONLY" });
+  Object.defineProperty(error, "diagnostic", { value: diagnostic, enumerable: true });
+  diagnostics.set(error, diagnostic);
   return error;
 }
 
@@ -117,13 +164,15 @@ export function createNeonProvider(config) {
       status = response.status;
       requireSafe(!response.redirected && (!response.url || response.url === url.href), "PROVIDER_REDIRECT_DENIED");
       const accepted = operation === "createDisposableBranch" ? [201] : operation === "deleteSameRunDisposableBranch" ? [200, 204] : [200];
-      if (!accepted.includes(status)) throw failure(operation, status, mutation ? "MUTATION_RECONCILIATION_REQUIRED" : "READ_FAILED");
+      if (!accepted.includes(status)) throw failure(operation, status, mutation ? "MUTATION_RECONCILIATION_REQUIRED" : "READ_FAILED",
+        await errorProjection(response, apiKey));
       // DELETE payloads are unnecessary and may contain sensitive provider fields.
       if (operation === "deleteSameRunDisposableBranch") return undefined;
       const data = await response.json();
       requireSafe(data && typeof data === "object" && !Array.isArray(data), "PROVIDER_RESPONSE_DENIED");
       return data;
-    } catch {
+    } catch (error) {
+      if (safeProviderDiagnostic(error)) throw error;
       throw failure(operation, status, mutation ? "MUTATION_RECONCILIATION_REQUIRED" : "READ_FAILED");
     }
   }
@@ -221,7 +270,8 @@ export function createNeonProvider(config) {
           return receipt;
         } catch (error) {
           await reconcile();
-          throw failure("createDisposableBranch", error.diagnostic?.status, "MUTATION_RECONCILIATION_REQUIRED");
+          throw failure("createDisposableBranch", safeProviderDiagnostic(error)?.status ?? null,
+            "MUTATION_RECONCILIATION_REQUIRED", safeProviderDiagnostic(error));
         }
       },
       getCreationReceipt(...args) { noArgs(args); return receipt; },
@@ -252,7 +302,10 @@ export function createNeonProvider(config) {
           } catch { result = undefined; throw failure("getConnectionUri", 200, "CONNECTION_MATERIAL_DENIED"); }
           result = undefined;
           try { await consume(url); }
-          catch { throw failure("getConnectionUri", 200, "BOOTSTRAP_CONSUMER_FAILED"); }
+          catch (error) {
+            if (safeProviderDiagnostic(error)) throw error;
+            throw failure("getConnectionUri", 200, "BOOTSTRAP_CONSUMER_FAILED");
+          }
           finally { url.password = ""; url = undefined; }
         } finally { bootstrapBusy = false; }
       },
@@ -273,7 +326,8 @@ export function createNeonProvider(config) {
         identity(await reads.getBranch(receipt.branchId), receipt);
         deletionAttempted = true;
         try { await request("deleteSameRunDisposableBranch", receipt.branchId); }
-        catch (error) { await reconcile(); throw failure("deleteSameRunDisposableBranch", error.diagnostic?.status, "MUTATION_RECONCILIATION_REQUIRED"); }
+        catch (error) { await reconcile(); throw failure("deleteSameRunDisposableBranch", safeProviderDiagnostic(error)?.status ?? null,
+          "MUTATION_RECONCILIATION_REQUIRED", safeProviderDiagnostic(error)); }
         await reconcile();
         requireSafe(reconciliation === "DELETE_ABSENCE_CONFIRMED", "CLEANUP_ABSENCE_NOT_PROVEN");
         return Object.freeze({ status: "PASS", branchId: receipt.branchId, absenceConfirmed: true });

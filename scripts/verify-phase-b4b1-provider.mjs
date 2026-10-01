@@ -54,6 +54,9 @@ function fixture(options = {}) {
     if (url === `${base}/branches/${id}` && init.method === "DELETE") {
       state.deleted = !options.keepAfterDelete;
       if (options.deleteAmbiguous) throw new Error(password);
+      if ([412, 423, 503].includes(options.deleteStatus)) return new Response(JSON.stringify({
+        code: "PRECONDITION_FAILED", message: "Precondition failed", nested: { password },
+      }), { status: options.deleteStatus });
       return reply(options.deleteStatus ?? 204, { password });
     }
     if (url === `${base}/branches/${id}`) return reply(state.deleted ? 404 : 200, { branch });
@@ -172,6 +175,13 @@ try {
   }
   f = fixture(); await f.create();
   await denied(() => f.session.withBootstrapConnection(f.receipt, async url => { throw new Error(url.href); }));
+  await assert.rejects(() => f.session.withBootstrapConnection(f.receipt, async () => {
+    f.options.httpError = 412;
+    try { await f.provider.getProjectMetadata(); } finally { delete f.options.httpError; }
+  }), error => {
+    check(error.diagnostic.operation, "getProjectMetadata"); check(error.diagnostic.status, 412);
+    check(error.diagnostic.httpClassification, "PRECONDITION_FAILED"); return true;
+  }); checks++;
   await f.session.withBootstrapConnection(f.receipt, async () => {
     await denied(() => f.session.deleteSameRunDisposableBranch(f.cleanup()), /CLEANUP_CONNECTIONS_NOT_CLOSED/);
     await denied(() => f.session.withBootstrapConnection(f.receipt, async () => {}), /BOOTSTRAP_CONTEXT_DENIED/);
@@ -195,6 +205,17 @@ try {
   f = fixture(); f.provider.close(); await denied(() => f.provider.getProjectMetadata()); check(f.calls.length, 0);
   for (const deleteStatus of [200, 204]) {
     f = fixture({ deleteStatus }); await f.create(); check((await f.session.deleteSameRunDisposableBranch(f.cleanup())).absenceConfirmed);
+  }
+  for (const deleteStatus of [412, 423, 503]) {
+    f = fixture({ deleteStatus, keepAfterDelete: true }); await f.create();
+    await assert.rejects(() => f.session.deleteSameRunDisposableBranch(f.cleanup()), error => {
+      check(error.diagnostic.status, deleteStatus); check(error.diagnostic.providerCode, "PRECONDITION_FAILED");
+      check(error.diagnostic.providerMessage, "Precondition failed"); check(error.diagnostic.retryPolicy, "NO_RETRY_RECONCILE_ONLY");
+      check(!JSON.stringify(error).includes(password) && !JSON.stringify(error).includes(key)); return true;
+    }); checks++;
+    await denied(() => f.session.deleteSameRunDisposableBranch(f.cleanup()), /DELETE_RETRY_DENIED/);
+    check(f.calls.filter(c => c.method === "DELETE").length, 1);
+    check(f.session.status().reconciliation, "DELETE_TARGET_STILL_PRESENT_NO_RETRY");
   }
   f = fixture({ keepAfterDelete: true }); await f.create();
   await denied(() => f.session.deleteSameRunDisposableBranch(f.cleanup()), /CLEANUP_ABSENCE_NOT_PROVEN/);

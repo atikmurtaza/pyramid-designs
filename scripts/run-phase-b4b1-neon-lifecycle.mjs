@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import { isAbsolute, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { REHEARSAL, requireSafe, validateLedger } from "./neon-rehearsal-manifest.mjs";
-import { createNeonProvider, validateReviewedManifest, MANIFEST_SHA256 } from "./neon-rehearsal-provider.mjs";
+import { createNeonProvider, validateReviewedManifest, MANIFEST_SHA256, safeProviderDiagnostic } from "./neon-rehearsal-provider.mjs";
 import { validateBranch, remoteContext, roleFacts, connectionTarget } from "./neon-rehearsal-target.mjs";
 import { main as rehearsal, childEnvironment } from "./run-phase-b4b1-neon.mjs";
 
@@ -150,8 +150,9 @@ export async function lifecycle(args = process.argv.slice(2), input = process.en
       await closeBootstrap();
       stage = "final-contract"; await rehearsal(["--final-check"], e); await event(stage);
     });
-  } catch {
+  } catch (error) {
     failed = true; result.failure = { stage, code: "LIFECYCLE_STOPPED", forwardExecutionStopped: true };
+    if (safeProviderDiagnostic(error)) result.failure.providerDiagnostic = safeProviderDiagnostic(error);
   } finally {
     // Only a receipt minted by this session can reach DELETE, including partial creation.
     receipt ??= session.getCreationReceipt();
@@ -168,7 +169,10 @@ export async function lifecycle(args = process.argv.slice(2), input = process.en
           cleanupState: "EVIDENCE_SAVED_CONNECTIONS_CLOSED" });
         cleanup = "PASS";
       } else if (session.status().creationAttempted) cleanup = "OWNER_RECONCILIATION_REQUIRED";
-    } catch { cleanup = "OWNER_RECONCILIATION_REQUIRED"; failed = true; }
+    } catch (error) {
+      cleanup = "OWNER_RECONCILIATION_REQUIRED"; failed = true;
+      if (safeProviderDiagnostic(error)) result.cleanupDiagnostic = safeProviderDiagnostic(error);
+    }
     result.providerState = session.status();
     result.status = cleanup === "OWNER_RECONCILIATION_REQUIRED" ? "OWNER ACTION REQUIRED" : failed ? "FAIL" : "PASS";
     result.branchId = receipt?.branchId ?? null;

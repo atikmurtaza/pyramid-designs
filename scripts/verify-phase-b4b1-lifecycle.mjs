@@ -58,14 +58,25 @@ mock.module("./run-phase-b4b1-neon.mjs", { namedExports: { childEnvironment,
       for (const suite of ["B1", "B2"]) assert.equal(new URL(env[`P3_${suite}_RUNTIME_URL`]).hostname,
         `${endpointId}-pooler.ap-southeast-1.aws.neon.tech`);
     }
-    if (state.fail === args[0]) throw new Error(password);
+    if (state.fail === args[0]) {
+      const error = new Error(password); error.diagnostic = { providerMessage: apiKey };
+      throw error; // Foreign diagnostics cannot cross the branded projection boundary.
+    }
   },
 } });
 const { lifecycle } = await import("./run-phase-b4b1-neon-lifecycle.mjs");
 const realFetch = globalThis.fetch;
+const errorCases = [
+  ...[400, 401, 403, 409, 412, 423, 503].map(status => ({ status, code: "PRECONDITION_FAILED", message: "Precondition failed" })),
+  ...[apiKey, `Bearer ${password}`, `postgresql://owner:${password}@db.invalid/db`, `password=${password}`,
+    `Cookie: session=${password}`, `Precondition failed\n${password}`, "Precondition failed\u0000"]
+    .map(message => ({ status: 412, code: "PRECONDITION_FAILED", message })),
+  { status: 412, body: "{broken" }, { status: 412, body: `<html>${password}</html>` },
+  { status: 412, body: "x".repeat(8193) }, { status: 412, code: "PRECONDITION_FAILED", message: { nested: password } },
+];
 const directory = await mkdtemp(join(tmpdir(), "pyramid-h2-offline-lifecycle-"));
 try {
-  for (const fail of [undefined, "sql", "--migrate", "--verify", "post", "delete", "compute"]) {
+  for (const fail of [undefined, "sql", "--migrate", "--verify", "post", "delete", "compute", ...errorCases]) {
     state = { fail, calls: [], sql: [], stages: [], connections: 0, open: 0, created: false, deleted: false };
     const stamp = new Date().toISOString();
     const branch = { id: branchId, project_id: project, name: REHEARSAL.branchName, default: false, protected: false,
@@ -83,6 +94,8 @@ try {
       ] });
       if (url === `${origin}/branches` && options.method === "POST") {
         assert.equal(state.calls.filter(c => c.method === "POST").length, 1);
+        if (typeof fail === "object") return new Response(fail.body ?? JSON.stringify({ code: fail.code, message: fail.message,
+          request_id: apiKey, nested: { password } }), { status: fail.status });
         state.created = true;
         if (fail === "post") throw new Error(apiKey);
         return reply(201, { branch, endpoints: fail === "compute" ? [] : [endpoint] });
@@ -106,13 +119,24 @@ try {
     };
     const result = await lifecycle(["--execute-rehearsal"], { P3_REHEARSAL_AUTHORIZATION: REHEARSAL.authorization,
       P3_PROJECT_ID: project, P3_NEON_API_KEY: apiKey, P3_EVIDENCE_DIRECTORY: directory });
-    check(result.status, fail === "post" || fail === "delete" ? "OWNER ACTION REQUIRED" : fail ? "FAIL" : "PASS");
+    check(result.status, fail === "post" || fail === "delete" || typeof fail === "object" ? "OWNER ACTION REQUIRED" : fail ? "FAIL" : "PASS");
     check(state.open, 0); check(state.calls.filter(c => c.method === "POST").length, 1);
-    check(state.calls.filter(c => c.method === "DELETE").length, fail === "post" ? 0 : 1);
+    check(state.calls.filter(c => c.method === "DELETE").length, fail === "post" || typeof fail === "object" ? 0 : 1);
     for (const file of await readdir(result.evidenceDirectory)) {
       const text = await readFile(join(result.evidenceDirectory, file), "utf8");
       check(!text.includes(apiKey) && !text.includes(password) && !text.includes("postgresql://"));
     }
+    const evidence = JSON.parse(await readFile(join(result.evidenceDirectory, "result.json"), "utf8"));
+    if (typeof fail === "object") {
+      check(evidence.failure.providerDiagnostic.status, fail.status);
+      check(evidence.failure.providerDiagnostic.retryPolicy, "NO_RETRY_RECONCILE_ONLY");
+      check(evidence.failure.providerDiagnostic.providerMessage === (fail.message === "Precondition failed" ? "Precondition failed" : undefined));
+      check(state.connections, 0); check(state.sql.length, 0); check(state.stages.length, 0);
+      check(evidence.providerState.reconciliation, "CREATE_NAME_ABSENT_NO_RETRY");
+    }
+    if (fail === "post") check(evidence.failure.providerDiagnostic.httpClassification, "NETWORK_OUTCOME_UNKNOWN");
+    if (fail === "delete") check(evidence.cleanupDiagnostic.httpClassification, "NETWORK_OUTCOME_UNKNOWN");
+    if (fail === "--migrate") check(evidence.failure.providerDiagnostic.providerMessage === undefined);
     if (!fail) {
       check(state.stages, ["--preflight", "--migrate", "b1-runtime-acceptance", "b2-runtime-acceptance", "--verify", "--final-check"]);
       check(state.sql.filter(s => s.startsWith("CREATE DATABASE")).length, 2);
@@ -123,7 +147,7 @@ try {
       check(ledger.resources.filter(r => r.kind === "role").length, 8);
     } else if (fail === "sql" || fail === "--migrate") check(!state.stages.includes("--verify"));
   }
-  console.log(`P3_LIFECYCLE_OFFLINE_OK checks=${checks} scenarios=7 live_provider_calls=0 database_connections=0 sql_executed=0`);
+  console.log(`P3_LIFECYCLE_OFFLINE_OK checks=${checks} scenarios=${7 + errorCases.length} live_provider_calls=0 database_connections=0 sql_executed=0`);
 } finally {
   globalThis.fetch = realFetch; mock.restoreAll();
   // Only the freshly generated test directory under OS temp is removed.
