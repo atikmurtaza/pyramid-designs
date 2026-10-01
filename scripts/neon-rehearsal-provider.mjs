@@ -10,6 +10,8 @@ const ROOT = `/api/v2/projects/${PROJECT}`;
 // No caller can supply a method, URL, path, query, body or transport options.
 export const PROVIDER_OPERATIONS = Object.freeze(Object.fromEntries(Object.entries({
   getProjectMetadata: ["GET", "project"], listBranches: ["GET", "branches"],
+  getProjectPreconditions: ["GET", "project"],
+  getSourceBranchPreconditions: ["GET", "branch"], getSourceEndpointPreconditions: ["GET", "endpoints"],
   getBranch: ["GET", "branch"], listBranchEndpoints: ["GET", "endpoints"],
   listBranchDatabases: ["GET", "databases"], getConnectionUri: ["GET", "connection_uri"],
   createDisposableBranch: ["POST", "branches"], deleteSameRunDisposableBranch: ["DELETE", "branch"],
@@ -59,6 +61,72 @@ function endpointProjection(value, id) {
   "PROVIDER_COMPUTE_MISMATCH");
   requireSafe(["init", "active", "idle"].includes(value.current_state), "PROVIDER_COMPUTE_MISMATCH");
   return { ...pick(value, endpointFields), created_at: createdAt(value.created_at) };
+}
+
+// H4 diagnostics use only the existing project/source GETs. They cannot supply
+// lifecycle identities, connection material or authority for a mutation.
+const subscriptionTypes = ["UNKNOWN", "direct_sales", "direct_sales_v3", "aws_marketplace", "free_v2", "free_v3",
+  "launch", "launch_v3", "scale", "scale_v3", "business", "vercel_pg_legacy"];
+const quotaFields = ["active_time_seconds", "compute_time_seconds", "written_data_bytes", "data_transfer_bytes", "logical_size_bytes"];
+function nonnegativeInteger(value) {
+  requireSafe(Number.isSafeInteger(value) && value >= 0, "PROVIDER_PRECONDITION_METADATA_DENIED");
+  return value;
+}
+function projectPreconditions(value) {
+  const result = { ...projectProjection(value) };
+  if (value.owner?.subscription_type !== undefined) {
+    requireSafe(subscriptionTypes.includes(value.owner.subscription_type), "PROVIDER_PRECONDITION_METADATA_DENIED");
+    result.subscription_type = value.owner.subscription_type;
+  }
+  if (value.owner?.branches_limit !== undefined) result.owner_branches_limit = nonnegativeInteger(value.owner.branches_limit);
+  if (value.effective_project_permission !== undefined && value.effective_project_permission !== null) {
+    requireSafe(["VIEWER", "EDITOR", "ADMIN"].includes(value.effective_project_permission), "PROVIDER_PRECONDITION_METADATA_DENIED");
+    result.effective_project_permission = value.effective_project_permission;
+  }
+  for (const field of ["maintenance_starts_at", "maintenance_scheduled_for"])
+    if (value[field] !== undefined) result[field] = createdAt(value[field]);
+  result.quota = {};
+  for (const field of quotaFields)
+    if (value.settings?.quota?.[field] !== undefined) result.quota[field] = nonnegativeInteger(value.settings.quota[field]);
+  result.consumption = {};
+  for (const field of ["active_time_seconds", "compute_time_seconds", "written_data_bytes", "data_transfer_bytes", "synthetic_storage_size", "branch_logical_size_limit_bytes"])
+    if (value[field] !== undefined) result.consumption[field] = nonnegativeInteger(value[field]);
+  return result;
+}
+function sourceBranchPreconditions(value) {
+  const result = branchProjection(value);
+  requireSafe(result.id === REHEARSAL.deniedBranches[0] && result.name === REHEARSAL.deniedNames[0], "PROVIDER_SOURCE_MISMATCH");
+  if (value.pending_state !== undefined) {
+    requireSafe(["init", "initializing", "creating", "ready", "archived", "deleting"].includes(value.pending_state), "PROVIDER_BRANCH_MISMATCH");
+    result.pending_state = value.pending_state;
+  }
+  if (value.restricted_actions !== undefined) {
+    requireSafe(Array.isArray(value.restricted_actions) && value.restricted_actions.length <= 64 &&
+      value.restricted_actions.every(action => action && typeof action.name === "string" && typeof action.reason === "string"),
+    "PROVIDER_PRECONDITION_METADATA_DENIED");
+    // The contract's reason is unrestricted text. Retain only documented names
+    // and an unknown count; never copy reasons or unfamiliar names.
+    result.restricted_actions = {
+      documented_names: [...new Set(value.restricted_actions.map(action => action.name)
+        .filter(name => ["restore", "delete-rw-endpoint"].includes(name)))],
+      unprojected_count: value.restricted_actions.filter(action => !["restore", "delete-rw-endpoint"].includes(action.name)).length,
+      total: value.restricted_actions.length,
+    };
+  }
+  return result;
+}
+function sourceEndpointPreconditions(value) {
+  requireSafe(value?.branch_id === REHEARSAL.deniedBranches[0] && value.project_id === PROJECT &&
+    /^ep-[a-z0-9-]{1,57}$/.test(value.id) && value.region_id === REHEARSAL.region && typeof value.host === "string" &&
+    ["read_write", "read_only"].includes(value.type) && ["init", "active", "idle"].includes(value.current_state) &&
+    typeof value.disabled === "boolean" && typeof value.passwordless_access === "boolean", "PROVIDER_PRECONDITION_METADATA_DENIED");
+  // Compare the exact H2 host expectation without exposing any host/connection.
+  return { type: value.type, current_state: value.current_state, disabled: value.disabled,
+    passwordless_access: value.passwordless_access,
+    rehearsal_host_binding_matches: value.host === `${value.id}.ap-southeast-1.aws.neon.tech`,
+    // Current official project examples document c-2 host routing. This is a
+    // comparison only, not an additional lifecycle/connection allowlist entry.
+    documented_c2_host_binding_matches: value.host === `${value.id}.c-2.ap-southeast-1.aws.neon.tech` };
 }
 function identity(branch, ledger, ready = false) {
   disposableId(branch?.id);
@@ -177,8 +245,22 @@ export function createNeonProvider(config) {
     }
   }
 
+  function safePreconditions(value) {
+    requireSafe(apiKey && !JSON.stringify(value).includes(apiKey), "PROVIDER_PRECONDITION_METADATA_DENIED");
+    return value;
+  }
   const reads = {
     async getProjectMetadata(...args) { noArgs(args); return projectProjection((await request("getProjectMetadata")).project); },
+    async getProjectPreconditions(...args) { noArgs(args); return safePreconditions(projectPreconditions((await request("getProjectPreconditions")).project)); },
+    async getSourceBranchPreconditions(...args) {
+      noArgs(args); return safePreconditions(sourceBranchPreconditions((await request("getSourceBranchPreconditions", REHEARSAL.deniedBranches[0])).branch));
+    },
+    async getSourceEndpointPreconditions(...args) {
+      noArgs(args);
+      const data = await request("getSourceEndpointPreconditions", REHEARSAL.deniedBranches[0]);
+      requireSafe(Array.isArray(data.endpoints) && data.endpoints.length <= 64, "PROVIDER_PRECONDITION_METADATA_DENIED");
+      return safePreconditions(data.endpoints.map(sourceEndpointPreconditions));
+    },
     async listBranches(...args) {
       noArgs(args);
       const data = await request("listBranches");

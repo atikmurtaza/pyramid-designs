@@ -111,7 +111,7 @@ try {
   }
   check(f.calls.length, 0);
   check(f.provider.request, undefined); check(f.provider.deleteBranch, undefined);
-  check(Object.keys(PROVIDER_OPERATIONS).length, 8);
+  check(Object.keys(PROVIDER_OPERATIONS).length, 11);
   await f.create();
   // 15-20, 42: protected, unrecorded, forged, stale, mismatched receipts.
   for (const target of [...REHEARSAL.deniedBranches, "br-unrecorded"]) {
