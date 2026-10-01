@@ -1,5 +1,7 @@
 # Phase B4B1 — Neon live compatibility and recovery acceptance
 
+**Latest P3B-R2 update, 2026-10-01:** The unchanged committed H2 lifecycle reached Neon, but its sole branch-creation POST returned HTTP 412. Forward execution stopped before a creation receipt or SQL connection. Committed read-only reconciliation returned `CREATE_NAME_ABSENT_NO_RETRY`; a separate canonical-boundary post-check confirmed the disposable name absent and both protected branches present. Result: **OWNER ACTION REQUIRED**, with no live architecture acceptance. No creation retry, DELETE, harness repair or production action occurred. See [B4B1-P3B-R2 live disposable rehearsal](#b4b1-p3b-r2-live-disposable-rehearsal). The lifecycle's conservative unknown-resource classification is preserved and distinguished from the later observed zero-resource inventory below.
+
 **Latest H1 update, 2026-10-01:** Root cause is proven in the retained ephemeral R1 lifecycle invocation, not the committed P3A harness. Its empty project-root GET suffix failed a slash-only guard before fetch. The same helper has no method/resource allowlist or canonicalization; permitting the empty suffix alone cannot meet H1's required security boundary. H1 section 19's material-incompleteness stop applies. See [B4B1-P3B-H1 path-policy investigation and stop](#b4b1-p3b-h1-path-policy-investigation-and-stop). Result: OWNER ACTION REQUIRED; no harness correction, commit/push, Management API call, SQL connection or mutation; R2 NOT READY and NOT STARTED.
 
 **Latest P3B-R1 update, 2026-10-01:** Credential presence and authenticated access to the exact project now pass; owner authorization and the unchanged 55-operation manifest are verified. R1 stopped before operation 1 when the local lifecycle invocation rejected its project-root request path with `API_PATH_DENIED`. See [B4B1-P3B-R1 stopped lifecycle invocation](#b4b1-p3b-r1-stopped-lifecycle-invocation). Result: FAIL; disposable branch NOT_CREATED; all provider/database mutations 0. No repair or retry occurred. P2's production classification remains HISTORICAL / data UNKNOWN. Earlier sections remain historical evidence; offline/local checks do not establish live Neon acceptance.
@@ -926,3 +928,74 @@ Optional authenticated provider checks were not needed and were not run. **PROVI
 Release scope: exactly eight files comprising this H1/H2 record, environment documentation, canonical provider, lifecycle, two new regression suites, target integration and one existing mock response's explicit HTTP status. No manifest/package/lock/schema/migration/B1/B2 source/application change. Conditional commit: `fix: secure Neon rehearsal provider boundary`, feature-branch-only normal push after staged gates. Final local/tracking/remote SHA and clean state belong in external release evidence/report, avoiding a self-referential source hash.
 
 PHASE B4B1-P3B-H2: PASS; CANONICAL PROVIDER BOUNDARY: PASS; LIFECYCLE INTEGRATION: PASS; ORIGIN BINDING: PASS; PROJECT BINDING: PASS; METHOD/RESOURCE BINDING: PASS; CANONICALIZATION: PASS; CREATE-BRANCH CONTRACT: PASS; SAME-RUN DELETE CONTRACT: PASS; NON-IDEMPOTENT RETRY SAFETY: PASS; SECRET REDACTION: PASS; PROTECTED RESOURCE DENIALS: PASS; MANIFEST UNCHANGED: YES; MANIFEST AUTHORIZATION STILL APPLICABLE: YES; OFFLINE HARNESS: PASS; PROVIDER MUTATIONS: 0; DATABASE MUTATIONS: 0; DISPOSABLE RESOURCES REMAINING: 0; P3B-R2 READY: YES (for programme review, execution not started); B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
+
+## B4B1-P3B-R2 live disposable rehearsal
+
+**Date: 2026-10-01 (Europe/London). Result: OWNER ACTION REQUIRED.** One live branch-creation request received HTTP 412. No successful creation response, branch ID or same-run creation receipt was obtained. The committed lifecycle stopped at `branch-create`; all SQL/provisioning/migration/test stages remained NOT_RUN. This is a completed unsuccessful execution attempt, not a live Neon compatibility pass.
+
+### Repository, authorization and H2 validation
+
+The prescribed B4 worktree began clean on `phase/b4-production-readiness` at `e19bd0a448bc82c4706501e639933eeec5331abb`, `fix: secure Neon rehearsal provider boundary`. HEAD, tracking branch and the actual remote feature branch matched before provider execution. The same identity/clean-state gate was repeated immediately before invocation. Main was not merged. Neither the primary checkout nor B3 was entered or modified; B3 remains **UPSTREAM DISCLOSURE BLOCKED**.
+
+Owner authorization remains `AUTHORIZE_B4B1_P3B_DISPOSABLE_ONLY`, limited to the unchanged 55-operation manifest. Renewed authorization was not requested. Both byte and LF-normalized manifest SHA-256 remain `28ae551e32af7f8f009d23b7521b93706d93d03529e15e0d6059b49163ba2eb8`; status remains `REQUEST_ONLY_NOT_EXECUTED`. Full regeneration/source inventory matched, including all 11 migration files, 22 proposed applications and the four source-bound fixture/verifier files. The manifest describes authorization design and was not rewritten as execution state.
+
+The committed canonical provider and lifecycle were inspected and used unchanged. Node **22.22.0** and installed Prisma **6.12.0** satisfied the tooling gate. Pre-execution offline results: provider boundary **325 PASS**, lifecycle integration **49 PASS** across seven mocked scenarios, existing harness **159 PASS**. These cover manifest/source validation, origin/project/method/resource binding, protected-resource denials, same-run cleanup, single-attempt mutation handling and synthetic secret/redaction checks. Offline PASS does not establish live provider creation compatibility.
+
+### Credential, execution UUID and provider preflight
+
+`P3_NEON_API_KEY` was **PRESENT_AND_ACCEPTED for authenticated metadata reads**. Only presence was inspected; the value was used by the committed provider boundary in memory. No value was printed, hashed, persisted, placed in arguments, returned or copied to evidence. Mutation permission was not independently established by successful metadata access; the POST's HTTP 412 is not classified as an authentication rejection.
+
+The committed lifecycle generated fresh execution UUID **`70353db8-e538-4da3-b1db-02ad846f1bea`** and its exclusive evidence directory. No prior UUID, ledger or receipt was reused. Project metadata accepted exact project `withered-feather-01662312`, PostgreSQL major 17 and region `aws-ap-southeast-1`. Its complete project-scoped branch inventory accepted the approved source identity and found no disposable-name collision before the POST. No unrelated project was enumerated.
+
+The source was `migration-baseline` / `br-still-lab-b3q03yuz`, ready/default. The protected historical branch remained `migration-synthetic-verification` / `br-square-resonance-b3ew5c59`, archived/nondefault. The creation contract remained the manifest-derived schema-only request for `b4b1-p3-schema-only-20261001`, with one primary read-write compute. No account/plan/compute setting was changed. No created-resource ledger was available because creation never produced an accepted receipt.
+
+### Branch creation, failure and mandatory stop
+
+The sole creation POST returned **HTTP 412**. Its raw response body was discarded by H2's existing boundary. The provider's specific precondition/reason is therefore **NOT_CAPTURED**, and no quota, plan, source, permission or schema incompatibility is asserted as the cause. The numeric response was observed through read-only Node HTTP diagnostics; observation retained only method/status counts, never request URLs, headers, bodies or connection material, and did not replace or wrap the provider's authorization/transport controls.
+
+The original lifecycle result records `LIFECYCLE_STOPPED`, stage `branch-create`, `creationAttempted: true`, `deletionAttempted: false`, `reconciliation: CREATE_NAME_ABSENT_NO_RETRY`, `branchId: null`, `status: OWNER ACTION REQUIRED`, `cleanup: OWNER_RECONCILIATION_REQUIRED`, and `disposableResourcesRemaining: UNKNOWN`. This original evidence is retained unchanged. There was no second POST, manual create, security-helper substitution, manifest edit, SQL addition or harness correction.
+
+### Schema-only, roles, databases and live checks
+
+Schema-only semantics were present in the authorized request, but no created branch existed for live schema-only verification: **NOT_RUN**. Copied role/password/catalog state was **NOT_OBSERVED**. No copied identity was repaired or used as an application runtime identity.
+
+B1 database `phase2ib_b1r1_neon_b4b1_p3_b1_20261001` and B2 database `phase2ib_b1r1_b2_neon_b4b1_p3_20261001` were **NOT_CREATED**; both empty-target checks were **NOT_RUN**. No owner, capability, public-test or runtime role was created. B1/B2 capability/membership and runtime-identity acceptance were **NOT_RUN**.
+
+B1 migrations, B2 migrations, B1 live security suite, B2 live workflow suite, direct Neon PostgreSQL transport, application pooled runtime and final contract were all **NOT_RUN**. Remote migration applications: **0**; live B1 assertions: **0**; live B2 assertions: **0**; live pool assertions: **0**. HTTPS metadata access is not PostgreSQL TLS, restricted-login, RLS, migration or pooling acceptance. Historical/local test counts are not reused as live results.
+
+### Cleanup and production post-check
+
+Committed read-only reconciliation performed one branch inventory after the failed POST and found the exact disposable name absent. The independent post-check then used the same canonical boundary for project metadata and a fresh complete branch inventory. It confirmed both protected IDs/names present and the disposable name absent. The production branch remained ready/default and the historical child archived/nondefault. No production PostgreSQL connection was opened.
+
+No authentic creation receipt or exact disposable branch ID existed, so **no DELETE was authorized or attempted**. The lifecycle's conservative owner-reconciliation flag is preserved rather than relabelled PASS. Separately, the successful fresh inventory supports **DISPOSABLE RESOURCES REMAINING: 0 observed; CLEANUP: NOT_REQUIRED**, with no branch-owned disposable compute/databases/identities to remove. This absence check does not retry creation, grant deletion authority or complete live acceptance. There was no compute/database/role creation outside branch creation and no SQL connection anywhere in R2.
+
+### Evidence and repository verification
+
+Secret-free external evidence: `C:\Users\atikm\.codex\worktrees\pyramid-b4-evidence\b4b1-p3b-70353db8-e538-4da3-b1db-02ad846f1bea`.
+
+- `result.json`: unchanged committed lifecycle output, including its conservative unknown/owner-reconciliation classification.
+- `r2-prevalidation.json`: same-run UUID, expected HEAD/tooling, manifest and migration/source hashes, protected-file inventory and offline assertion counts.
+- `r2-observations.json`: same-run numeric request/response counts and projected protected-resource post-check; no raw provider payload.
+- `r2-verification.json`: post-run manifest/source/protected-file, evidence/sensitive-pattern and repository-scope checks.
+
+No connection URI was requested. No API credential, Authorization header, password, DSN, token, cookie, private key, provider session material or candidate record was persisted. Post-run provider/lifecycle/harness regressions passed again: **325 / 49 / 159** assertions, including synthetic redaction canaries. Manifest/source regeneration passed; **204 protected files** matched their pre-run hashes, all historical acceptance text was preserved, and whitespace/scope/evidence-sensitive-pattern checks passed with **zero findings**. The B4 boundary scan passed against existing H2 build artifacts: **322 files, one changed document, 96 browser assets, 34 environment consumers, zero findings**. Exact staged checks are repeated before commit. No new application build or live SQL suite is claimed.
+
+Only this canonical acceptance document changes. Application source, dependency files, Prisma schema/all migrations, manifest, H2 boundary/lifecycle, B1/B2 expectations and B3 remain unchanged. Conditional documentation commit: **`docs: record Neon live rehearsal result`**, pushed only to `phase/b4-production-readiness` after staged verification. Final Git identities belong in external release evidence and the report.
+
+### Live effects
+
+PROVIDER READ-ONLY CALLS: **5** (two lifecycle preflight, one committed creation reconciliation, two independent post-check).
+
+PROVIDER MUTATION CALLS: **1** (POST returned 412; DELETE 0).
+
+NEON DISPOSABLE BRANCHES CREATED: **0 observed**; NEON DISPOSABLE BRANCHES DELETED: **0**; NEON DISPOSABLE DATABASES CREATED: **0**; NEON DISPOSABLE ROLES CREATED: **0**; REMOTE MIGRATION APPLICATIONS: **0**; B1 ASSERTIONS: **0**; B2 ASSERTIONS: **0**; POOL ASSERTIONS: **0**.
+
+PRODUCTION DATABASE CONNECTIONS: **0**; PRODUCTION DATABASE MUTATIONS: **0**; PRODUCTION ROLE MUTATIONS: **0**; PRODUCTION MIGRATIONS: **0**; PRODUCTION DATA WRITES: **0**; REAL CANDIDATE DATA ACCESSED: **NO**; DISPOSABLE RESOURCES REMAINING: **0 observed by fresh complete inventory**.
+
+### Compatibility conclusion and next programme gate
+
+Disposable live Neon architecture compatibility is **not established**. The stop precedes SQL and does not demonstrate that the application database architecture is incompatible. Production historical-database migration readiness remains separately unestablished. No production migration, provisioning or data-disposition decision was made; the historical unknown-provenance rows were not inspected.
+
+The next appropriate gate is programme review of the HTTP 412 creation failure and its missing provider-specific reason, followed by a separately scoped read-only investigation/remediation decision if required. This R2 attempt is stopped; no retry or engineering phase is started. A future successful disposable rehearsal would still require a separate production migration/provisioning/data-disposition and recovery decision before B4B1-P4 or other provider acceptance. No plan change, restore, Hostinger/Auth/Drive/Resend/Turnstile acceptance, DNS change, deployment or B3 work occurred.
+
+PHASE B4B1-P3B-R2: OWNER ACTION REQUIRED; MANIFEST AUTHORIZATION: VERIFIED; H2 PROVIDER BOUNDARY: VERIFIED (offline security gates; creation returned 412); API CREDENTIAL: PRESENT_AND_ACCEPTED (metadata); DISPOSABLE BRANCH: NOT_CREATED; SCHEMA-ONLY BRANCH: NOT_RUN; B1 MIGRATIONS: NOT_RUN; B2 MIGRATIONS: NOT_RUN; B1 LIVE NEON: NOT_RUN; B2 LIVE NEON: NOT_RUN; DIRECT NEON TRANSPORT: NOT_RUN; POOLED NEON RUNTIME: NOT_RUN; LIVE NEON ARCHITECTURE COMPATIBILITY: FAIL (acceptance not established); FINAL CONTRACT: NOT_RUN; CLEANUP: NOT_REQUIRED (fresh absence observed; original lifecycle owner-reconciliation flag preserved); DISPOSABLE RESOURCES REMAINING: 0 observed; PRODUCTION DATABASE CONNECTIONS: 0; PRODUCTION DATABASE MUTATIONS: 0; PRODUCTION ROLE MUTATIONS: 0; PRODUCTION MIGRATIONS: 0; PRODUCTION DATA WRITES: 0; REAL CANDIDATE DATA ACCESSED: NO; MANIFEST UNCHANGED: YES; B3 WORKTREE TOUCHED: NO; B3 SECURITY GATE: UPSTREAM DISCLOSURE BLOCKED; PRODUCTION DEPLOYMENT: NO; NEXT PHASE: NOT STARTED.
